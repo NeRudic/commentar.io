@@ -1,9 +1,12 @@
 import sqlite3, {Database} from "sqlite3";
 import "dotenv/config";
+import { Injectable } from "@nestjs/common";
+import { runResponse } from "./db.types"
 
 const verbose = sqlite3.verbose;
 verbose();
 
+@Injectable()
 export class DB {
   private path: string;
   private db: Database | null;
@@ -13,7 +16,7 @@ export class DB {
     this.db = null;
   }
 
-  connect() {
+  connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.db = new sqlite3.Database(this.path, (err) => {
         if (err) {
@@ -29,42 +32,41 @@ export class DB {
   }
 
   // Для множественных запросов (CREATE TABLE, миграции и т.д.) — без параметров
-  exec(sql) {
-    return new Promise((res, rej) => {
-      this.db.exec(sql, (err) => {
+  exec(sql: string): Promise<void> {
+    return new Promise<void>((res, rej) => {
+      this.db!.exec(sql, (err) => {
         err ? rej(err) : res();
       });
     });
   }
 
-  // Для одиночных запросов с параметрами (INSERT, UPDATE, DELETE)
-  run(sql, params = []) {
+  run(sql: string, params: any = []): Promise<runResponse> {
     return new Promise((res, rej) => {
-      this.db.run(sql, params, function (err) {
+      this.db!.run(sql, params, function (err) {
         err ? rej(err) : res({ lastID: this.lastID, changes: this.changes });
       });
     });
   }
 
-  get(sql, params) {
+  get(sql: string, params?: any): Promise<any> {
     return new Promise((res, rej) => {
-      this.db.get(sql, params, (err, row) => {
+      this.db!.get(sql, params, (err, row) => {
         err ? rej(err) : res(row);
       });
     });
   }
 
-  all(sql, params = []) {
+  all(sql: string, params: any = []): Promise<any> {
     return new Promise((res, rej) => {
-      this.db.all(sql, params, (err, rows) => {
+      this.db!.all(sql, params, (err, rows) => {
         err ? rej(err) : res(rows);
       });
     });
   }
 
-  close() {
+  close(): Promise<string> {
     return new Promise((res, rej) => {
-      this.db.close((err) => {
+      this.db!.close((err) => {
         err ? rej(err) : res("Database was closed!");
       });
     });
