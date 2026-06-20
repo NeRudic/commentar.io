@@ -22,13 +22,15 @@ export class SanitizePipe implements PipeTransform {
    */
   constructor(private readonly fields?: string[]) {}
 
-  transform(value: any): any {
+  transform(value: unknown): unknown {
     if (typeof value === 'string') {
       return this.sanitize(value);
     }
 
     if (typeof value === 'object' && value !== null) {
-      const result = { ...value };
+      const result: Record<string, unknown> = {
+        ...(value as Record<string, unknown>),
+      };
       for (const key of Object.keys(result)) {
         if (typeof result[key] === 'string') {
           if (!this.fields || this.fields.includes(key)) {
