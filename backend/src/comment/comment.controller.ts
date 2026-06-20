@@ -1,15 +1,23 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from "@nestjs/common";
-import { CommentService } from "./comment.service";
-import { CreateCommentDto } from "./dto/create-comment.dto";
-import { CommentQueryDto } from "./dto/comment-query.dto";
-import { SanitizePipe } from "../common/sanitize.pipe";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+} from '@nestjs/common';
+import { CommentService } from './comment.service';
+import { CreateCommentDto } from './dto/create-comment.dto';
+import { CommentQueryDto } from './dto/comment-query.dto';
+import { SanitizePipe } from '../common/sanitize.pipe';
 
-@Controller("comments")
+@Controller('comments')
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
   @Post()
-  async create(@Body(new SanitizePipe(["text"])) dto: CreateCommentDto) {
+  async create(@Body(new SanitizePipe(['text'])) dto: CreateCommentDto) {
     return this.commentService.create(dto);
   }
 
@@ -18,8 +26,8 @@ export class CommentController {
     return this.commentService.findRoots(query.page!);
   }
 
-  @Get(":id/replies")
-  async findReplies(@Param("id", ParseIntPipe) id: number) {
+  @Get(':id/replies')
+  async findReplies(@Param('id', ParseIntPipe) id: number) {
     return this.commentService.findReplies(id);
   }
 }
