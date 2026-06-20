@@ -1,8 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { DB } from "../db/db.service";
 import { CommentWithUser } from "../db/db.types";
-
-const PAGE_SIZE = 25;
+import { PAGE_SIZE } from "./comment.config";
 
 export interface PaginatedComments {
   comments: CommentWithUser[];
