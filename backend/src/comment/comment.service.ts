@@ -1,13 +1,29 @@
 import { Injectable } from "@nestjs/common";
 import { DB } from "../db/db.service";
+import { CommentWithUser } from "../db/db.types";
 
 const PAGE_SIZE = 25;
+
+export interface PaginatedComments {
+  comments: CommentWithUser[];
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  total: number;
+}
+
+export interface CreateCommentInput {
+  email: string;
+  text: string;
+  parent_comment_id?: number;
+  file_path?: string;
+}
 
 @Injectable()
 export class CommentService {
   constructor(private readonly db: DB) {}
 
-  async create(dto: { email: string; text: string; parent_comment_id?: number; file_path?: string }) {
+  async create(dto: CreateCommentInput): Promise<CommentWithUser> {
     try {
       const result = await this.db.run(
         `INSERT INTO comment (text, parent_comment_id, user_email, file_path)
@@ -15,7 +31,7 @@ export class CommentService {
         [dto.text, dto.parent_comment_id ?? null, dto.email, dto.file_path ?? null],
       );
 
-      return this.db.get(
+      return this.db.get<CommentWithUser>(
         `SELECT c.*, u.user_name, u.email, u.home_page
          FROM comment c
          JOIN user u ON c.user_email = u.email
@@ -23,15 +39,16 @@ export class CommentService {
         [result.lastID],
       );
     } catch (error) {
-      throw new Error(`Failed to create comment: ${error.message}`);
+      console.error("CommentService.create error:", error);
+      throw error;
     }
   }
 
-  async findRoots(page: number) {
+  async findRoots(page: number): Promise<PaginatedComments> {
     try {
       const offset = (page - 1) * PAGE_SIZE;
 
-      const comments = await this.db.all(
+      const comments = await this.db.all<CommentWithUser>(
         `SELECT c.*, u.user_name, u.email, u.home_page
          FROM comment c
          JOIN user u ON c.user_email = u.email
@@ -41,7 +58,7 @@ export class CommentService {
         [PAGE_SIZE, offset],
       );
 
-      const { total } = await this.db.get(
+      const { total } = await this.db.get<{ total: number }>(
         "SELECT COUNT(*) as total FROM comment WHERE parent_comment_id IS NULL",
       );
 
@@ -53,13 +70,14 @@ export class CommentService {
         total,
       };
     } catch (error) {
-      throw new Error(`Failed to find root comments: ${error.message}`);
+      console.error("CommentService.findRoots error:", error);
+      throw error;
     }
   }
 
-  async findReplies(commentId: number) {
+  async findReplies(commentId: number): Promise<CommentWithUser[]> {
     try {
-      return this.db.all(
+      return this.db.all<CommentWithUser>(
         `SELECT c.*, u.user_name, u.email, u.home_page
          FROM comment c
          JOIN user u ON c.user_email = u.email
@@ -68,7 +86,8 @@ export class CommentService {
         [commentId],
       );
     } catch (error) {
-      throw new Error(`Failed to find replies: ${error.message}`);
+      console.error("CommentService.findReplies error:", error);
+      throw error;
     }
   }
 }

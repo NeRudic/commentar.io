@@ -48,17 +48,17 @@ export class DB {
     });
   }
 
-  get(sql: string, params?: any): Promise<any> {
+  get<T = unknown>(sql: string, params?: any): Promise<T> {
     return new Promise((res, rej) => {
-      this.db!.get(sql, params, (err, row) => {
+      this.db!.get(sql, params, (err, row: T) => {
         err ? rej(err) : res(row);
       });
     });
   }
 
-  all(sql: string, params: any = []): Promise<any> {
+  all<T = unknown>(sql: string, params: any = []): Promise<T[]> {
     return new Promise((res, rej) => {
-      this.db!.all(sql, params, (err, rows) => {
+      this.db!.all(sql, params, (err, rows: T[]) => {
         err ? rej(err) : res(rows);
       });
     });
