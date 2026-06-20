@@ -16,12 +16,6 @@ const DANGEROUS_PROTOCOL = /^(javascript|data|vbscript):/i;
 
 @Injectable()
 export class SanitizePipe implements PipeTransform {
-  /**
-   * @param fields - if provided, only these body keys are sanitized.
-   *                 If omitted, every string value in the body is sanitized.
-   */
-  constructor(private readonly fields?: string[]) {}
-
   transform(value: unknown): unknown {
     if (typeof value === 'string') {
       return this.sanitize(value);
@@ -33,9 +27,7 @@ export class SanitizePipe implements PipeTransform {
       };
       for (const key of Object.keys(result)) {
         if (typeof result[key] === 'string') {
-          if (!this.fields || this.fields.includes(key)) {
-            result[key] = this.sanitize(result[key]);
-          }
+          result[key] = this.sanitize(result[key]);
         }
       }
       return result;
