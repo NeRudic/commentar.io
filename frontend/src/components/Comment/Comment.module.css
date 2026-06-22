@@ -33,6 +33,10 @@
   flex-shrink: 0;
 }
 
+.topInputArea {
+  flex: 1;
+}
+
 .topField {
   flex: 1;
   background: none;
@@ -151,6 +155,10 @@
   align-items: center;
   gap: 8px;
   margin: 8px 0 8px 38px;
+}
+
+.replyInputArea {
+  flex: 1;
 }
 
 .replyField {

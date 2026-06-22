@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import styles from "./Comment.module.css";
+import CommentToolbar from "./CommentToolbar";
 
 export interface ReplyData {
   id: string;
@@ -23,10 +24,14 @@ function ReplyInput({
   onCancel: () => void;
 }) {
   const [text, setText] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
   return (
     <div className={styles.replyInput}>
-      <input
-        className={styles.replyField}
+      <div className={styles.replyInputArea}>
+        <CommentToolbar inputRef={inputRef} text={text} onChange={setText} />
+        <input
+          ref={inputRef}
+          className={styles.replyField}
         type="text"
         placeholder="Write a reply…"
         value={text}
@@ -40,6 +45,7 @@ function ReplyInput({
         }}
         autoFocus
       />
+      </div>
       <button
         className={styles.replyCancel}
         onClick={onCancel}
@@ -136,6 +142,7 @@ export default function Comment({
   const allFlat = flattenComments(comments);
   const commentCount = allFlat.length;
   const [topText, setTopText] = useState("");
+  const topInputRef = useRef<HTMLInputElement>(null);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
 
   return (
@@ -146,19 +153,23 @@ export default function Comment({
 
       <div className={styles.topInput}>
         <span className={styles.topAvatar}>Y</span>
-        <input
-          className={styles.topField}
-          type="text"
-          placeholder="Add a comment…"
-          value={topText}
-          onChange={(e) => setTopText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && topText.trim()) {
-              onAddReply("root", topText.trim());
-              setTopText("");
-            }
-          }}
-        />
+        <div className={styles.topInputArea}>
+          <CommentToolbar inputRef={topInputRef} text={topText} onChange={setTopText} />
+          <input
+            ref={topInputRef}
+            className={styles.topField}
+            type="text"
+            placeholder="Add a comment…"
+            value={topText}
+            onChange={(e) => setTopText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && topText.trim()) {
+                onAddReply("root", topText.trim());
+                setTopText("");
+              }
+            }}
+          />
+        </div>
         <button
           className={styles.topPostBtn}
           onClick={() => {

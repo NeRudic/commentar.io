@@ -57,6 +57,49 @@ export function Dots({ size = 24, ...props }: IconProps) {
   );
 }
 
+export function Bold({ size = 24, ...props }: IconProps) {
+  return (
+    <svg {...icon(size, props)} className={styles.illustration}>
+      <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z" className={styles.stroke} />
+      <path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z" className={styles.stroke} />
+    </svg>
+  );
+}
+
+export function Italic({ size = 24, ...props }: IconProps) {
+  return (
+    <svg {...icon(size, props)} className={styles.illustration}>
+      <line x1="19" y1="4" x2="10" y2="4" className={styles.stroke} />
+      <line x1="14" y1="20" x2="5" y2="20" className={styles.stroke} />
+      <line x1="15" y1="4" x2="9" y2="20" className={styles.stroke} />
+    </svg>
+  );
+}
+
+export function Code({ size = 24, ...props }: IconProps) {
+  return (
+    <svg {...icon(size, props)} className={styles.illustration}>
+      <polyline points="16 18 22 12 16 6" className={styles.stroke} />
+      <polyline points="8 6 2 12 8 18" className={styles.stroke} />
+    </svg>
+  );
+}
+
+export function Link({ size = 24, ...props }: IconProps) {
+  return (
+    <svg {...icon(size, props)} className={styles.illustration}>
+      <path
+        d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+        className={styles.stroke}
+      />
+      <path
+        d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+        className={styles.stroke}
+      />
+    </svg>
+  );
+}
+
 // --- Illustrations ---
 
 type IllustrationProps = IconProps & { label?: string; accentColor?: string };
