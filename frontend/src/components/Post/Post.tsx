@@ -14,6 +14,8 @@ export interface PostProps {
   time: string;
   illustration?: ReactNode;
   initialComments?: ReplyData[];
+  commentOpen?: boolean;
+  onCommentClick?: () => void;
 }
 
 export default function Post({
@@ -26,16 +28,17 @@ export default function Post({
   time,
   illustration = <AIIllustration size={468} />,
   initialComments = [],
+  commentOpen = false,
+  onCommentClick,
 }: PostProps) {
-  const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<ReplyData[]>(initialComments);
   const commentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (showComments) {
-      commentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (commentOpen) {
+      commentRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     }
-  }, [showComments]);
+  }, [commentOpen]);
 
   function countAll(list: ReplyData[]): number {
     let n = 0;
@@ -95,7 +98,7 @@ export default function Post({
         <button
           className={styles.actionBtn}
           aria-label="Comment"
-          onClick={() => setShowComments(!showComments)}
+          onClick={onCommentClick}
         >
           <CommentIcon size={24} />
         </button>
@@ -121,7 +124,7 @@ export default function Post({
 
       <div className={styles.time}>{time}</div>
 
-      {showComments && (
+      {commentOpen && (
         <div ref={commentRef}>
           <CommentSection
             comments={comments}
