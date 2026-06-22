@@ -1,22 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DB } from '../db/db.service';
-import { CommentWithUser } from '../db/db.types';
 import { PAGE_SIZE } from './comment.config';
-
-export interface PaginatedComments {
-  comments: CommentWithUser[];
-  page: number;
-  pageSize: number;
-  totalPages: number;
-  total: number;
-}
-
-export interface CreateCommentInput {
-  email: string;
-  text: string;
-  parent_comment_id?: number;
-  file_path?: string;
-}
+import type { CommentWithUser, PaginatedComments, CreateCommentRequest as CreateCommentInput } from '@shared/api/types';
 
 @Injectable()
 export class CommentService {

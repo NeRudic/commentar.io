@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DB } from '../db/db.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UserRow } from '../db/db.types';
+import type { UserRow } from '@shared/api/types';
 
 @Injectable()
 export class UserService {
