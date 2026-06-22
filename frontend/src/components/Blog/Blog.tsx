@@ -1,5 +1,5 @@
 import Post from "../Post/Post";
-import { AIIllustration, DiffusionIllustration, RLIllustration } from "../icons";
+import { AIIllustration, DiffusionIllustration, RLIllustration } from "../../assets/icons";
 import styles from "./Blog.module.css";
 
 const POSTS = [
