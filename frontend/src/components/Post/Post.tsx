@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState, useRef, useEffect, type ReactNode } from "react";
 import { Heart, Comment as CommentIcon, Share, Bookmark, Dots, AIIllustration } from "../icons";
 import CommentSection from "../Comment/Comment";
 import type { ReplyData } from "../Comment/Comment";
@@ -29,7 +29,13 @@ export default function Post({
 }: PostProps) {
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<ReplyData[]>(initialComments);
-  const allReplyIds = new Set<string>();
+  const commentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (showComments) {
+      commentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [showComments]);
 
   function countAll(list: ReplyData[]): number {
     let n = 0;
@@ -39,18 +45,6 @@ export default function Post({
     }
     return n;
   }
-
-  function walk(list: ReplyData[]): Array<{ id: string; replies: ReplyData[] }> {
-    const result: Array<{ id: string; replies: ReplyData[] }> = [];
-    for (const c of list) {
-      result.push(c);
-      allReplyIds.add(c.id);
-      result.push(...walk(c.replies));
-    }
-    return result;
-  }
-
-  walk(comments);
 
   function addComment(parentId: string, text: string) {
     const newComment: ReplyData = {
@@ -128,10 +122,12 @@ export default function Post({
       <div className={styles.time}>{time}</div>
 
       {showComments && (
-        <CommentSection
-          comments={comments}
-          onAddReply={addComment}
-        />
+        <div ref={commentRef}>
+          <CommentSection
+            comments={comments}
+            onAddReply={addComment}
+          />
+        </div>
       )}
     </article>
   );
