@@ -7,12 +7,25 @@
   overflow: hidden;
 }
 
+@media (min-width: 768px) {
+  .card {
+    max-width: 600px;
+    border-radius: 16px;
+  }
+}
+
 /* === Header === */
 .header {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
+}
+
+@media (min-width: 768px) {
+  .header {
+    padding: 16px 20px;
+  }
 }
 
 .avatar {
@@ -29,6 +42,14 @@
   flex-shrink: 0;
 }
 
+@media (min-width: 768px) {
+  .avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 16px;
+  }
+}
+
 .username {
   font-size: 13px;
   font-weight: 600;
@@ -36,9 +57,21 @@
   line-height: 1.2;
 }
 
+@media (min-width: 768px) {
+  .username {
+    font-size: 15px;
+  }
+}
+
 .location {
   font-size: 11px;
   color: var(--text-tertiary);
+}
+
+@media (min-width: 768px) {
+  .location {
+    font-size: 12px;
+  }
 }
 
 .spacer {
@@ -79,6 +112,13 @@
   padding: 8px 12px 0;
 }
 
+@media (min-width: 768px) {
+  .actions {
+    padding: 12px 16px 0;
+    gap: 8px;
+  }
+}
+
 .actionBtn {
   background: none;
   border: none;
@@ -110,6 +150,13 @@
   color: var(--text-primary);
 }
 
+@media (min-width: 768px) {
+  .likes {
+    padding: 8px 20px 0;
+    font-size: 15px;
+  }
+}
+
 /* === Caption === */
 .caption {
   padding: 6px 16px 0;
@@ -118,8 +165,12 @@
   color: var(--text-primary);
 }
 
-.caption .username {
-  margin-right: 6px;
+@media (min-width: 768px) {
+  .caption {
+    padding: 10px 20px 0;
+    font-size: 15px;
+    line-height: 1.6;
+  }
 }
 
 .captionText {
@@ -127,88 +178,18 @@
   white-space: pre-line;
 }
 
-/* === Comments === */
-.comments {
-  padding: 4px 16px 0;
-}
-
-.commentRow {
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--text-primary);
-}
-
-.commentUser {
-  font-weight: 600;
-  margin-right: 6px;
-}
-
-.viewAll {
-  font-size: 13px;
-  color: var(--text-tertiary);
-  padding: 4px 16px 0;
-  cursor: pointer;
-  background: none;
-  border: none;
-}
-
-.viewAll:hover {
-  color: var(--text-secondary);
-}
-
 /* === Time === */
 .time {
   font-size: 11px;
   color: var(--text-tertiary);
-  padding: 4px 16px 0;
+  padding: 8px 16px 16px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-/* === Add comment === */
-.addComment {
-  display: flex;
-  align-items: center;
-  border-top: 1px solid var(--border-color);
-  margin-top: 12px;
-  padding: 12px 16px;
-  gap: 8px;
-}
-
-.emojiBtn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-secondary);
-  font-size: 18px;
-  padding: 0;
-  line-height: 1;
-}
-
-.commentInput {
-  flex: 1;
-  background: none;
-  border: none;
-  outline: none;
-  font-size: 13px;
-  color: var(--text-primary);
-}
-
-.commentInput::placeholder {
-  color: var(--text-tertiary);
-}
-
-.postBtn {
-  background: none;
-  border: none;
-  color: var(--accent);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0;
-  transition: opacity 0.15s;
-}
-
-.postBtn:hover {
-  opacity: 0.7;
+@media (min-width: 768px) {
+  .time {
+    padding: 12px 20px 20px;
+    font-size: 12px;
+  }
 }

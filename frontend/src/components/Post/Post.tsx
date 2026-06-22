@@ -4,7 +4,6 @@ import styles from "./Post.module.css";
 export default function Post() {
   return (
     <article className={styles.card}>
-      {/* Header */}
       <header className={styles.header}>
         <div className={styles.avatar}>AI</div>
         <div>
@@ -17,12 +16,10 @@ export default function Post() {
         </button>
       </header>
 
-      {/* Illustration */}
       <div className={styles.image}>
         <AIIllustration size={468} />
       </div>
 
-      {/* Actions */}
       <div className={styles.actions}>
         <button className={`${styles.actionBtn} ${styles.likeBtn}`} aria-label="Like">
           <Heart size={24} />
@@ -38,10 +35,8 @@ export default function Post() {
         </button>
       </div>
 
-      {/* Likes */}
       <div className={styles.likes}>2,847 likes</div>
 
-      {/* Caption */}
       <div className={styles.caption}>
         <span className={styles.captionText}>
           <strong>neural_research</strong>{" "}
@@ -59,36 +54,7 @@ export default function Post() {
         </span>
       </div>
 
-      {/* Comments */}
-      <div className={styles.comments}>
-        <button className={styles.viewAll}>View all 42 comments</button>
-        <div className={styles.commentRow}>
-          <span className={styles.commentUser}>ai_engineer</span>
-          Multi-head attention is what makes this truly powerful. Great
-          explanation!
-        </div>
-        <div className={styles.commentRow}>
-          <span className={styles.commentUser}>ml_student</span>
-          Finally understood why transformers beat RNNs. The parallelization
-          aspect is key.
-        </div>
-      </div>
-
-      {/* Time */}
       <div className={styles.time}>2 hours ago</div>
-
-      {/* Add comment */}
-      <div className={styles.addComment}>
-        <button className={styles.emojiBtn} aria-label="Add emoji">
-          😊
-        </button>
-        <input
-          className={styles.commentInput}
-          type="text"
-          placeholder="Add a comment…"
-        />
-        <button className={styles.postBtn}>Post</button>
-      </div>
     </article>
   );
 }
