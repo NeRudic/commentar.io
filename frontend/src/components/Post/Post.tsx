@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Heart, Comment as CommentIcon, Share, Bookmark, Dots, AIIllustration } from "../icons";
-import Comment from "../Comment/Comment";
-import type { CommentItem } from "../Comment/Comment";
+import CommentSection from "../Comment/Comment";
+import type { ReplyData } from "../Comment/Comment";
 import styles from "./Post.module.css";
 
 export interface PostProps {
@@ -13,37 +13,8 @@ export interface PostProps {
   likes: string;
   time: string;
   illustration?: ReactNode;
+  initialComments?: ReplyData[];
 }
-
-const MOCK_COMMENTS: CommentItem[] = [
-  {
-    id: "c1",
-    user: "ai_engineer",
-    avatar: "AE",
-    text: "Multi-head attention is what makes this truly powerful. Great explanation!",
-    time: "2h",
-    likes: 12,
-    avatarColor: "#2563eb",
-  },
-  {
-    id: "c2",
-    user: "ml_student",
-    avatar: "MS",
-    text: "Finally understood why transformers beat RNNs. The parallelization aspect is key.",
-    time: "1h",
-    likes: 8,
-    avatarColor: "#7c3aed",
-  },
-  {
-    id: "c3",
-    user: "data_scientist",
-    avatar: "DS",
-    text: "Would love to see a follow-up on positional encoding!",
-    time: "45m",
-    likes: 5,
-    avatarColor: "#059669",
-  },
-];
 
 export default function Post({
   postId,
@@ -54,64 +25,114 @@ export default function Post({
   likes,
   time,
   illustration = <AIIllustration size={468} />,
+  initialComments = [],
 }: PostProps) {
-  const [commentOpen, setCommentOpen] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState<ReplyData[]>(initialComments);
+  const allReplyIds = new Set<string>();
+
+  function countAll(list: ReplyData[]): number {
+    let n = 0;
+    for (const c of list) {
+      n++;
+      n += countAll(c.replies);
+    }
+    return n;
+  }
+
+  function walk(list: ReplyData[]): Array<{ id: string; replies: ReplyData[] }> {
+    const result: Array<{ id: string; replies: ReplyData[] }> = [];
+    for (const c of list) {
+      result.push(c);
+      allReplyIds.add(c.id);
+      result.push(...walk(c.replies));
+    }
+    return result;
+  }
+
+  walk(comments);
+
+  function addComment(parentId: string, text: string) {
+    const newComment: ReplyData = {
+      id: `c-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      username: "you",
+      text,
+      time: "just now",
+      replies: [],
+    };
+
+    setComments((prev) => {
+      if (parentId === "root") return [newComment, ...prev];
+
+      function addRecursive(list: ReplyData[]): ReplyData[] {
+        return list.map((c) => {
+          if (c.id === parentId) {
+            return { ...c, replies: [...c.replies, newComment] };
+          }
+          return { ...c, replies: addRecursive(c.replies) };
+        });
+      }
+      return addRecursive(prev);
+    });
+  }
+
+  const commentCount = countAll(comments);
 
   return (
-    <>
-      <article className={styles.card} data-post-id={postId}>
-        <header className={styles.header}>
-          <div className={styles.avatar}>{avatar}</div>
-          <div>
-            <div className={styles.username}>{username}</div>
-            <div className={styles.location}>{location}</div>
-          </div>
-          <div className={styles.spacer} />
-          <button className={styles.moreBtn} aria-label="More options">
-            <Dots size={20} />
-          </button>
-        </header>
-
-        <div className={styles.image}>{illustration}</div>
-
-        <div className={styles.actions}>
-          <button className={`${styles.actionBtn} ${styles.likeBtn}`} aria-label="Like">
-            <Heart size={24} />
-          </button>
-          <button className={styles.actionBtn} aria-label="Comment" onClick={() => setCommentOpen(true)}>
-            <CommentIcon size={24} />
-          </button>
-          <button className={styles.actionBtn} aria-label="Share">
-            <Share size={24} />
-          </button>
-          <button className={`${styles.actionBtn} ${styles.saveBtn}`} aria-label="Save">
-            <Bookmark size={24} />
-          </button>
+    <article className={styles.card} data-post-id={postId}>
+      <header className={styles.header}>
+        <div className={styles.avatar}>{avatar}</div>
+        <div>
+          <div className={styles.username}>{username}</div>
+          <div className={styles.location}>{location}</div>
         </div>
+        <div className={styles.spacer} />
+        <button className={styles.moreBtn} aria-label="More options">
+          <Dots size={20} />
+        </button>
+      </header>
 
-        <div className={styles.likes}>{likes}</div>
+      <div className={styles.image}>{illustration}</div>
 
-        <div className={styles.caption}>
-          <span className={styles.captionText}>
-            <strong>{username}</strong>{" "}
-            {caption}
-          </span>
-        </div>
+      <div className={styles.actions}>
+        <button className={`${styles.actionBtn} ${styles.likeBtn}`} aria-label="Like">
+          <Heart size={24} />
+        </button>
+        <button
+          className={styles.actionBtn}
+          aria-label="Comment"
+          onClick={() => setShowComments(!showComments)}
+        >
+          <CommentIcon size={24} />
+        </button>
+        <button className={styles.actionBtn} aria-label="Share">
+          <Share size={24} />
+        </button>
+        <button className={`${styles.actionBtn} ${styles.saveBtn}`} aria-label="Save">
+          <Bookmark size={24} />
+        </button>
+      </div>
 
-        <div className={styles.time}>{time}</div>
-      </article>
+      <div className={styles.likes}>
+        {likes}
+        {commentCount > 0 && <span className={styles.commentCount}>, {commentCount} comment{commentCount !== 1 ? "s" : ""}</span>}
+      </div>
 
-      {commentOpen && (
-        <Comment
-          postId={postId}
-          postUser={username}
-          postAvatar={avatar}
-          postCaption={caption}
-          postTime={time}
-          comments={MOCK_COMMENTS}
-          onClose={() => setCommentOpen(false)}
+      <div className={styles.caption}>
+        <span className={styles.captionText}>
+          <strong>{username}</strong>{" "}
+          {caption}
+        </span>
+      </div>
+
+      <div className={styles.time}>{time}</div>
+
+      {showComments && (
+        <CommentSection
+          comments={comments}
+          onAddReply={addComment}
         />
       )}
-    </>
+    </article>
   );
 }
