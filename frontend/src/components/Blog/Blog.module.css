@@ -1,6 +1,7 @@
 .page {
   max-width: 468px;
   width: 100%;
+  margin: 0 auto;
 }
 
 @media (min-width: 768px) {
