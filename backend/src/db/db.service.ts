@@ -1,7 +1,7 @@
-import sqlite3, {Database} from "sqlite3";
-import "dotenv/config";
-import { Injectable } from "@nestjs/common";
-import { runResponse } from "./db.types"
+import sqlite3, { Database } from 'sqlite3';
+import 'dotenv/config';
+import { Injectable } from '@nestjs/common';
+import { runResponse } from './db.types';
 
 const verbose = sqlite3.verbose;
 verbose();
@@ -20,14 +20,14 @@ export class DB {
     return new Promise((resolve, reject) => {
       this.db = new sqlite3.Database(this.path, (err) => {
         if (err) {
-          console.error("Database connection error:", err.message);
+          console.error('Database connection error:', err.message);
           return reject(err);
         } else {
-          console.log("Database connected");
+          console.log('Database connected');
           resolve();
         }
       });
-      this.db.run("PRAGMA foreign_keys = ON;");
+      this.db.run('PRAGMA foreign_keys = ON;');
     });
   }
 
@@ -67,7 +67,7 @@ export class DB {
   close(): Promise<string> {
     return new Promise((res, rej) => {
       this.db!.close((err) => {
-        err ? rej(err) : res("Database was closed!");
+        err ? rej(err) : res('Database was closed!');
       });
     });
   }

@@ -1,7 +1,7 @@
-import { Module } from "@nestjs/common";
-import { DBModule } from "../db/db.module";
-import { CommentService } from "./comment.service";
-import { CommentController } from "./comment.controller";
+import { Module } from '@nestjs/common';
+import { DBModule } from '../db/db.module';
+import { CommentService } from './comment.service';
+import { CommentController } from './comment.controller';
 
 @Module({
   imports: [DBModule],

@@ -1,7 +1,7 @@
-import { Injectable } from "@nestjs/common";
-import { DB } from "../db/db.service";
-import { CommentWithUser } from "../db/db.types";
-import { PAGE_SIZE } from "./comment.config";
+import { Injectable } from '@nestjs/common';
+import { DB } from '../db/db.service';
+import { CommentWithUser } from '../db/db.types';
+import { PAGE_SIZE } from './comment.config';
 
 export interface PaginatedComments {
   comments: CommentWithUser[];
@@ -27,7 +27,12 @@ export class CommentService {
       const result = await this.db.run(
         `INSERT INTO comment (text, parent_comment_id, user_email, file_path)
          VALUES (?, ?, ?, ?)`,
-        [dto.text, dto.parent_comment_id ?? null, dto.email, dto.file_path ?? null],
+        [
+          dto.text,
+          dto.parent_comment_id ?? null,
+          dto.email,
+          dto.file_path ?? null,
+        ],
       );
 
       return this.db.get<CommentWithUser>(
@@ -38,7 +43,7 @@ export class CommentService {
         [result.lastID],
       );
     } catch (error) {
-      console.error("CommentService.create error:", error);
+      console.error('CommentService.create error:', error);
       throw error;
     }
   }
@@ -58,7 +63,7 @@ export class CommentService {
       );
 
       const { total } = await this.db.get<{ total: number }>(
-        "SELECT COUNT(*) as total FROM comment WHERE parent_comment_id IS NULL",
+        'SELECT COUNT(*) as total FROM comment WHERE parent_comment_id IS NULL',
       );
 
       return {
@@ -69,7 +74,7 @@ export class CommentService {
         total,
       };
     } catch (error) {
-      console.error("CommentService.findRoots error:", error);
+      console.error('CommentService.findRoots error:', error);
       throw error;
     }
   }
@@ -85,7 +90,7 @@ export class CommentService {
         [commentId],
       );
     } catch (error) {
-      console.error("CommentService.findReplies error:", error);
+      console.error('CommentService.findReplies error:', error);
       throw error;
     }
   }
