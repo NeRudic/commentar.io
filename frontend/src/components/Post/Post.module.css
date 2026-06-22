@@ -1,6 +1,7 @@
 .card {
   max-width: 468px;
   width: 100%;
+  margin: 0 auto;
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
   border-radius: 12px;
