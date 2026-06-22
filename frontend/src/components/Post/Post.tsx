@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, type ReactNode } from "react";
-import { Heart, Comment as CommentIcon, Share, Bookmark, Dots, AIIllustration } from "../../assets/icons";
+import { Heart, Comment as CommentIcon, Share, Bookmark, Dots, AIIllustration } from "../icons/icons";
 import CommentSection from "../Comment/Comment";
 import type { ReplyData } from "../Comment/Comment";
 import styles from "./Post.module.css";

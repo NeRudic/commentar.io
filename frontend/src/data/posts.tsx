@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { AIIllustration, DiffusionIllustration, RLIllustration } from "../assets/icons";
+import { AIIllustration, DiffusionIllustration, RLIllustration } from "../components/icons/icons";
 import type { ReplyData } from "../components/Comment/Comment";
 
 export interface PostData {
