@@ -1,6 +1,6 @@
-import Post from "./components/Post/Post";
+import Blog from "./components/Blog/Blog";
 import "./App.module.css";
 
 export default function App() {
-  return <Post />;
+  return <Blog />;
 }

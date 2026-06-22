@@ -1,14 +1,33 @@
+import type { ReactNode } from "react";
 import { Heart, Comment, Share, Bookmark, Dots, AIIllustration } from "../icons";
 import styles from "./Post.module.css";
 
-export default function Post() {
+export interface PostProps {
+  username: string;
+  location: string;
+  avatar: string;
+  caption: string;
+  likes: string;
+  time: string;
+  illustration?: ReactNode;
+}
+
+export default function Post({
+  username,
+  location,
+  avatar,
+  caption,
+  likes,
+  time,
+  illustration = <AIIllustration size={468} />,
+}: PostProps) {
   return (
     <article className={styles.card}>
       <header className={styles.header}>
-        <div className={styles.avatar}>AI</div>
+        <div className={styles.avatar}>{avatar}</div>
         <div>
-          <div className={styles.username}>neural_research</div>
-          <div className={styles.location}>San Francisco, CA</div>
+          <div className={styles.username}>{username}</div>
+          <div className={styles.location}>{location}</div>
         </div>
         <div className={styles.spacer} />
         <button className={styles.moreBtn} aria-label="More options">
@@ -16,9 +35,7 @@ export default function Post() {
         </button>
       </header>
 
-      <div className={styles.image}>
-        <AIIllustration size={468} />
-      </div>
+      <div className={styles.image}>{illustration}</div>
 
       <div className={styles.actions}>
         <button className={`${styles.actionBtn} ${styles.likeBtn}`} aria-label="Like">
@@ -35,26 +52,16 @@ export default function Post() {
         </button>
       </div>
 
-      <div className={styles.likes}>2,847 likes</div>
+      <div className={styles.likes}>{likes}</div>
 
       <div className={styles.caption}>
         <span className={styles.captionText}>
-          <strong>neural_research</strong>{" "}
-          🧠 The attention mechanism, introduced in 2017, revolutionized language
-          processing. Instead of reading sequentially, transformers analyze all
-          words at once, computing relevance scores between every pair of
-          tokens.
-          {"\n\n"}
-          This parallel processing lets models like GPT-4 capture dependencies
-          RNNs couldn't. Each attention head learns distinct patterns — syntax,
-          semantics, context.
-          {"\n\n"}
-          Self-attention lets each word weight every other word dynamically.
-          That's why modern LLMs grasp context so deeply.
+          <strong>{username}</strong>{" "}
+          {caption}
         </span>
       </div>
 
-      <div className={styles.time}>2 hours ago</div>
+      <div className={styles.time}>{time}</div>
     </article>
   );
 }

@@ -105,9 +105,50 @@ export function Dots({ size = 24, ...props }: IconProps) {
   );
 }
 
-export function AIIllustration({ size = 468, ...props }: IconProps) {
+type IllustrationProps = IconProps & { label?: string; accentColor?: string };
+
+export function AIIllustration({
+  size = 468,
+  label = "Neural Network Architecture",
+  accentColor = "#58a6ff",
+  ...props
+}: IllustrationProps) {
   const w = size;
   const h = Math.round(size * 0.75);
+  const nodes = [
+    [60, 60],
+    [180, 40],
+    [300, 50],
+    [420, 60],
+    [100, 160],
+    [240, 140],
+    [380, 160],
+    [60, 260],
+    [180, 270],
+    [300, 260],
+    [420, 270],
+    [160, 320],
+    [340, 310],
+  ];
+  const edges = [
+    [0, 1],
+    [1, 2],
+    [2, 3],
+    [0, 4],
+    [1, 5],
+    [2, 6],
+    [4, 7],
+    [5, 8],
+    [6, 9],
+    [7, 8],
+    [8, 9],
+    [4, 11],
+    [5, 12],
+    [9, 12],
+    [8, 11],
+    [10, 9],
+    [7, 3],
+  ];
   return (
     <svg
       width={w}
@@ -118,70 +159,21 @@ export function AIIllustration({ size = 468, ...props }: IconProps) {
       {...props}
     >
       <rect width={w} height={h} rx="8" fill="#0d1117" />
-      {[
-        [60, 60],
-        [180, 40],
-        [300, 50],
-        [420, 60],
-        [100, 160],
-        [240, 140],
-        [380, 160],
-        [60, 260],
-        [180, 270],
-        [300, 260],
-        [420, 270],
-        [160, 320],
-        [340, 310],
-      ].map(([cx, cy], i) => (
-        <circle key={i} cx={cx} cy={cy} r="6" fill="#58a6ff" opacity="0.9" />
+      {nodes.map(([cx, cy], i) => (
+        <circle key={i} cx={cx} cy={cy} r="6" fill={accentColor} opacity="0.9" />
       ))}
-      {[
-        [0, 1],
-        [1, 2],
-        [2, 3],
-        [0, 4],
-        [1, 5],
-        [2, 6],
-        [4, 7],
-        [5, 8],
-        [6, 9],
-        [7, 8],
-        [8, 9],
-        [4, 11],
-        [5, 12],
-        [9, 12],
-        [8, 11],
-        [10, 9],
-        [7, 3],
-      ].map(([a, b], i) => {
-        const coords = [
-          [60, 60],
-          [180, 40],
-          [300, 50],
-          [420, 60],
-          [100, 160],
-          [240, 140],
-          [380, 160],
-          [60, 260],
-          [180, 270],
-          [300, 260],
-          [420, 270],
-          [160, 320],
-          [340, 310],
-        ];
-        return (
-          <line
-            key={i}
-            x1={coords[a][0]}
-            y1={coords[a][1]}
-            x2={coords[b][0]}
-            y2={coords[b][1]}
-            stroke="#30363d"
-            strokeWidth="1"
-            opacity="0.5"
-          />
-        );
-      })}
+      {edges.map(([a, b], i) => (
+        <line
+          key={i}
+          x1={nodes[a][0]}
+          y1={nodes[a][1]}
+          x2={nodes[b][0]}
+          y2={nodes[b][1]}
+          stroke="#30363d"
+          strokeWidth="1"
+          opacity="0.5"
+        />
+      ))}
       <text
         x={w / 2}
         y={h / 2 + 80}
@@ -190,7 +182,128 @@ export function AIIllustration({ size = 468, ...props }: IconProps) {
         fontSize="13"
         fontFamily="monospace"
       >
-        Neural Network Architecture
+        {label}
+      </text>
+    </svg>
+  );
+}
+
+export function DiffusionIllustration({
+  size = 468,
+  label = "Diffusion Process",
+  accentColor = "#7c3aed",
+  ...props
+}: IllustrationProps) {
+  const w = size;
+  const h = Math.round(size * 0.75);
+  const cx = w / 2;
+  const cy = h / 2 - 20;
+  const steps = 5;
+  const maxR = 90;
+  return (
+    <svg
+      width={w}
+      height={h}
+      viewBox={`0 0 ${w} ${h}`}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <rect width={w} height={h} rx="8" fill="#0d1117" />
+      {Array.from({ length: steps }, (_, i) => {
+        const r = maxR - i * 18;
+        const opacity = 0.15 + i * 0.2;
+        return (
+          <circle
+            key={i}
+            cx={cx}
+            cy={cy}
+            r={r}
+            stroke={accentColor}
+            strokeWidth="1.5"
+            fill={accentColor}
+            fillOpacity={opacity}
+            opacity={0.8}
+          />
+        );
+      })}
+      <text x={cx - maxR - 10} y={cy + 6} fill="#8b949e" fontSize="11" fontFamily="monospace" textAnchor="end">
+        noise
+      </text>
+      <text x={cx + maxR + 10} y={cy + 6} fill="#8b949e" fontSize="11" fontFamily="monospace" textAnchor="start">
+        image
+      </text>
+      <text
+        x={cx}
+        y={h - 20}
+        textAnchor="middle"
+        fill="#8b949e"
+        fontSize="13"
+        fontFamily="monospace"
+      >
+        {label}
+      </text>
+    </svg>
+  );
+}
+
+export function RLIllustration({
+  size = 468,
+  label = "Reinforcement Learning",
+  accentColor = "#f59e0b",
+  ...props
+}: IllustrationProps) {
+  const w = size;
+  const h = Math.round(size * 0.75);
+  const ax = 80;
+  const ay = h / 2 - 10;
+  const ex = w - 80;
+  const ey = h / 2 - 10;
+  return (
+    <svg
+      width={w}
+      height={h}
+      viewBox={`0 0 ${w} ${h}`}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <rect width={w} height={h} rx="8" fill="#0d1117" />
+      <rect x={ax - 45} y={ay - 30} width="90" height="60" rx="12" stroke={accentColor} strokeWidth="2" fill={accentColor} fillOpacity="0.1" />
+      <text x={ax} y={ay + 5} textAnchor="middle" fill={accentColor} fontSize="12" fontFamily="monospace" fontWeight="600">
+        Agent
+      </text>
+      <rect x={ex - 55} y={ey - 30} width="110" height="60" rx="12" stroke="#10b981" strokeWidth="2" fill="#10b981" fillOpacity="0.1" />
+      <text x={ex} y={ey + 5} textAnchor="middle" fill="#10b981" fontSize="12" fontFamily="monospace" fontWeight="600">
+        Environment
+      </text>
+      {/* Action arrow top */}
+      <line x1={ax + 45} y1={ay - 12} x2={ex - 55} y2={ey - 12} stroke={accentColor} strokeWidth="2" markerEnd="url(#arrowA)" />
+      <text x={(ax + ex) / 2} y={ay - 22} textAnchor="middle" fill="#8b949e" fontSize="10" fontFamily="monospace">
+        action
+      </text>
+      {/* Reward arrow bottom */}
+      <line x1={ex - 55} y1={ey + 20} x2={ax + 45} y2={ay + 20} stroke="#10b981" strokeWidth="2" markerEnd="url(#arrowR)" />
+      <text x={(ax + ex) / 2} y={ey + 36} textAnchor="middle" fill="#8b949e" fontSize="10" fontFamily="monospace">
+        state, reward
+      </text>
+      <defs>
+        <marker id="arrowA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10" fill={accentColor} />
+        </marker>
+        <marker id="arrowR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10" fill="#10b981" />
+        </marker>
+      </defs>
+      <text
+        x={w / 2}
+        y={h - 20}
+        textAnchor="middle"
+        fill="#8b949e"
+        fontSize="13"
+        fontFamily="monospace"
+      >
+        {label}
       </text>
     </svg>
   );

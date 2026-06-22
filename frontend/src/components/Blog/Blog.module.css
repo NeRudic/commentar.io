@@ -1,0 +1,42 @@
+.page {
+  max-width: 468px;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .page {
+    max-width: 640px;
+  }
+}
+
+.header {
+  text-align: center;
+  padding: 16px 0 24px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
+
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .feed {
+    gap: 32px;
+  }
+}
