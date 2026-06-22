@@ -1,4 +1,4 @@
-import { useState, useId } from "react";
+import { useState } from "react";
 import styles from "./Comment.module.css";
 
 export interface ReplyData {
@@ -14,6 +14,7 @@ interface CommentProps {
   onAddReply: (parentId: string, text: string) => void;
   depth?: number;
 }
+
 function ReplyInput({
   onSubmit,
   onCancel,
@@ -54,13 +55,16 @@ function CommentItem({
   comment,
   onAddReply,
   depth,
+  replyingTo,
+  setReplyingTo,
 }: {
   comment: ReplyData;
   onAddReply: (parentId: string, text: string) => void;
   depth: number;
+  replyingTo: string | null;
+  setReplyingTo: (id: string | null) => void;
 }) {
-  const [replying, setReplying] = useState(false);
-  const id = useId();
+  const isReplying = replyingTo === comment.id;
 
   return (
     <div
@@ -76,7 +80,7 @@ function CommentItem({
             <span className={styles.commentTime}>{comment.time}</span>
             <button
               className={styles.replyBtn}
-              onClick={() => setReplying(!replying)}
+              onClick={() => setReplyingTo(isReplying ? null : comment.id)}
             >
               Reply
             </button>
@@ -84,14 +88,13 @@ function CommentItem({
         </div>
       </div>
 
-      {replying && (
+      {isReplying && (
         <ReplyInput
-          key={id + "-reply"}
           onSubmit={(text) => {
             onAddReply(comment.id, text);
-            setReplying(false);
+            setReplyingTo(null);
           }}
-          onCancel={() => setReplying(false)}
+          onCancel={() => setReplyingTo(null)}
         />
       )}
 
@@ -103,6 +106,8 @@ function CommentItem({
               comment={reply}
               onAddReply={onAddReply}
               depth={depth + 1}
+              replyingTo={replyingTo}
+              setReplyingTo={setReplyingTo}
             />
           ))}
         </div>
@@ -131,6 +136,7 @@ export default function Comment({
   const allFlat = flattenComments(comments);
   const commentCount = allFlat.length;
   const [topText, setTopText] = useState("");
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
 
   return (
     <div className={styles.commentSection}>
@@ -138,11 +144,8 @@ export default function Comment({
         <span>Comments ({commentCount})</span>
       </div>
 
-      {/* Top-level input */}
       <div className={styles.topInput}>
-        <span className={styles.topAvatar}>
-          Y
-        </span>
+        <span className={styles.topAvatar}>Y</span>
         <input
           className={styles.topField}
           type="text"
@@ -169,7 +172,6 @@ export default function Comment({
         </button>
       </div>
 
-      {/* Comment list */}
       <div className={styles.commentList}>
         {comments.map((comment) => (
           <CommentItem
@@ -177,6 +179,8 @@ export default function Comment({
             comment={comment}
             onAddReply={onAddReply}
             depth={depth}
+            replyingTo={replyingTo}
+            setReplyingTo={setReplyingTo}
           />
         ))}
       </div>
