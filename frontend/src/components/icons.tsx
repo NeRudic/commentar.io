@@ -118,7 +118,6 @@ export function AIIllustration({ size = 468, ...props }: IconProps) {
       {...props}
     >
       <rect width={w} height={h} rx="8" fill="#0d1117" />
-      {/* Nodes */}
       {[
         [60, 60],
         [180, 40],
@@ -136,7 +135,6 @@ export function AIIllustration({ size = 468, ...props }: IconProps) {
       ].map(([cx, cy], i) => (
         <circle key={i} cx={cx} cy={cy} r="6" fill="#58a6ff" opacity="0.9" />
       ))}
-      {/* Connections */}
       {[
         [0, 1],
         [1, 2],
@@ -184,7 +182,6 @@ export function AIIllustration({ size = 468, ...props }: IconProps) {
           />
         );
       })}
-      {/* Text */}
       <text
         x={w / 2}
         y={h / 2 + 80}

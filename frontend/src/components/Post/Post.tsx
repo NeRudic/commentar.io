@@ -1,4 +1,4 @@
-import { Heart, Comment, Share, Bookmark, Dots, AIIllustration } from "./icons";
+import { Heart, Comment, Share, Bookmark, Dots, AIIllustration } from "../icons";
 import styles from "./Post.module.css";
 
 export default function Post() {
