@@ -135,7 +135,7 @@ export function AIIllustration({
           stroke="#30363d" strokeWidth="1" opacity="0.5"
         />
       ))}
-      <IllustrationLabel x={w / 2} y={h / 2 + 80}>{label}</IllustrationLabel>
+      <IllustrationLabel x={w / 2} y={h - 20}>{label}</IllustrationLabel>
     </Illustration>
   );
 }
