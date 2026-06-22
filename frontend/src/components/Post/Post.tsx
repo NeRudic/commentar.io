@@ -3,6 +3,7 @@ import { Heart, Comment, Share, Bookmark, Dots, AIIllustration } from "../icons"
 import styles from "./Post.module.css";
 
 export interface PostProps {
+  postId: string;
   username: string;
   location: string;
   avatar: string;
@@ -13,6 +14,7 @@ export interface PostProps {
 }
 
 export default function Post({
+  postId,
   username,
   location,
   avatar,
@@ -22,7 +24,7 @@ export default function Post({
   illustration = <AIIllustration size={468} />,
 }: PostProps) {
   return (
-    <article className={styles.card}>
+    <article className={styles.card} data-post-id={postId}>
       <header className={styles.header}>
         <div className={styles.avatar}>{avatar}</div>
         <div>
