@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { Heart, Share, Bookmark, Dots, AIIllustration } from "../icons/icons";
+import { Heart, Comment as CommentIcon, Share, Bookmark, Dots, AIIllustration } from "../icons/icons";
 import styles from "./Post.module.css";
 
 export interface PostProps {
@@ -42,6 +42,9 @@ export default function Post({
       <div className={styles.actions}>
         <button className={`${styles.actionBtn} ${styles.likeBtn}`} aria-label="Like">
           <Heart size={24} />
+        </button>
+        <button className={styles.actionBtn} aria-label="Comment">
+          <CommentIcon size={24} />
         </button>
         <button className={styles.actionBtn} aria-label="Share">
           <Share size={24} />
