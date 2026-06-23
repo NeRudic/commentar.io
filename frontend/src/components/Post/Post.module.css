@@ -151,12 +151,6 @@
   color: var(--text-primary);
 }
 
-.commentCount {
-  font-weight: 400;
-  color: var(--text-tertiary);
-  margin-left: 4px;
-}
-
 @media (min-width: 768px) {
   .likes {
     padding: 8px 20px 0;
