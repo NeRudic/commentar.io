@@ -8,8 +8,9 @@ CREATE TABLE IF NOT EXISTS user (
 
 CREATE TABLE IF NOT EXISTS comment (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  text TEXT NOT NULL,
+  post_id INTEGER NOT NULL,
   parent_comment_id INTEGER,
+  text TEXT NOT NULL,
   user_email TEXT NOT NULL,
   file_path TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -19,7 +20,7 @@ CREATE TABLE IF NOT EXISTS comment (
     REFERENCES user(email) ON DELETE CASCADE
 );
 
-CREATE INDEX IF NOT EXISTS idx_comment_parent ON comment(parent_comment_id);
+CREATE INDEX IF NOT EXISTS idx_parent_comments ON comment(parent_comment_id);
 CREATE INDEX IF NOT EXISTS idx_comment_email ON comment(user_email);
-CREATE INDEX IF NOT EXISTS idx_user_email ON user(email);
+CREATE INDEX IF NOT EXISTS idx_comment_post_id ON comment(post_id);
 `;
