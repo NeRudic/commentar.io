@@ -7,6 +7,16 @@ export interface UserRow {
   home_page: string | null;
 }
 
+export interface CommentRow {
+  id: number;
+  post_id: number;
+  parent_comment_id: number | null;
+  text: string;
+  user_email: string;
+  file_path: string | null;
+  created_at: string;
+}
+
 // ---- Requests ----
 
 export interface CreateUserRequest {
