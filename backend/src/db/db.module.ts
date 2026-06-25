@@ -7,8 +7,8 @@ import { initSQL } from './db.config';
     {
       provide: DB,
       useFactory: async () => {
-        const db = new DB('db.sqlite');
-        await db.connect();
+        const db = new DB();
+        await db.connect('db.sqlite');
         await db.exec(initSQL);
         return db;
       },
