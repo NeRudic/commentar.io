@@ -1,18 +1,105 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { DB } from 'src/db/db.service';
-import { CommentRow } from '@shared/api/types';
+import { CommentRowDTO } from './dto/comment-row.dto';
+import { CreateCommentDTO } from './dto/create-comment.dto';
+import { runResponse } from 'src/db/db.types';
+import { CommentRepliesDTO } from './dto/comment-replies.dto';
+import { RootCommentsDTO } from './dto/root-comments.dto';
+import { DeleteCommentDTO } from './dto/delete-comment.dto';
 
 @Injectable()
 export class CommentService {
   constructor(private readonly database: DB) {}
 
-  async getRootComments(post_id: number): Promise<CommentRow[]> {
-    const result: Array<CommentRow> = await this.database.all(
-      `SELECT * FROM comment
+  /*
+   * Create comment
+   */
+  async createComment(data: CreateCommentDTO): Promise<runResponse> {
+    try {
+      const { post_id, parent_comment_id, text, user_email, file_path } = data;
+
+      await this.database.run(`BEGIN TRANSACTION`);
+
+      const result = await this.database.run(
+        `
+      INSERT INTO comment (post_id, parent_comment_id, text, user_email, file_path)
+      VALUES (?, ?, ?, ?, ?)
+      `,
+        [post_id, parent_comment_id, text, user_email, file_path],
+      );
+
+      await this.database.run(`COMMIT`);
+
+      return result;
+    } catch (err) {
+      await this.database.run(`ROLLBACK`);
+
+      throw new InternalServerErrorException(
+        `Failed to create comment. Error message: ${err}`,
+      );
+    }
+  }
+
+  /*
+   * Get root comments
+   */
+  async getRootComments(post_id: RootCommentsDTO): Promise<CommentRowDTO[]> {
+    try {
+      const comments: CommentRowDTO[] = await this.database.all(
+        `
+      SELECT * FROM comment
       WHERE post_id = ?
-      AND parent_comment_id IS NULL`,
-      [post_id],
-    );
-    return result;
+      AND parent_comment_id IS NULL
+      `,
+        [post_id],
+      );
+      return comments;
+    } catch (err) {
+      throw new InternalServerErrorException(
+        `Failed to get comment. Error message: ${err}`,
+      );
+    }
+  }
+
+  /*
+   * Get relpies comment
+   */
+  async getReplies(
+    parent_comment_id: CommentRepliesDTO,
+  ): Promise<CommentRowDTO[]> {
+    try {
+      const comments: CommentRowDTO[] = await this.database.all(
+        `
+      SELECT * FROM comment
+      WHERE parent_comment_id = ?
+      `,
+        [parent_comment_id],
+      );
+      return comments;
+    } catch (err) {
+      throw new InternalServerErrorException(
+        `Failed to get comment. Error message: ${err}`,
+      );
+    }
+  }
+
+  /*
+   * Delete comment
+   */
+  async deleteComment(id: DeleteCommentDTO): Promise<boolean> {
+    try {
+      const result = await this.database.run(
+        `
+        DELETE FROM comment WHERE id = ?
+        `,
+        [id],
+      );
+
+      return result.changes > 0;
+    } catch (err) {
+      throw new InternalServerErrorException(
+        `Failed to delete comment. Error message: ${err}`,
+      );
+    }
   }
 }
