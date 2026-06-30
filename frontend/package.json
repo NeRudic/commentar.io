@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@tanstack/react-form": "^1.33.0",
+    "@tanstack/valibot-form-adapter": "^0.42.1",
     "axios": "^1.18.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
