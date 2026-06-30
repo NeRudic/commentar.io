@@ -1,7 +1,6 @@
-import { useForm } from '@tanstack/react-form';
+import { useForm } from 'react-hook-form';
 import createComment from '../../services/createComment';
-import FormField from '../FormField/FormField';
-import type { FormApiLike } from '../FormField/FormField';
+import type { CreateCommentRequest } from '../../types';
 
 interface CommentFormProps {
   postId: number;
@@ -14,8 +13,14 @@ export default function CommentForm({
   onClose,
   onSuccess,
 }: CommentFormProps) {
+  void onClose;
+  void onSuccess;
 
-  const form = useForm({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<CreateCommentRequest>({
     defaultValues: {
       post_id: postId,
       parent_comment_id: null,
@@ -25,29 +30,43 @@ export default function CommentForm({
       home_page: '',
       file_path: null,
     },
-    onSubmit: async ({ value }) => {
-      await createComment(value)
-    },
   });
 
-  return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        form.handleSubmit();
-      }}
-    >
-      <form.Subscribe selector={(state) => state.isSubmitting}>
-        {(isSubmitting) => (
-          <>
-            <FormField form={form as FormApiLike} name="user_name" label="Имя" />
+  const onSubmit = async (data: CreateCommentRequest) => {
+    await createComment(data);
+  };
 
-            <button type="submit" disabled={isSubmitting}>
-              Отправить
-            </button>
-          </>
-        )}
-      </form.Subscribe>
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <input type="hidden" {...register('post_id')} />
+
+      <label>
+        Имя
+        <input {...register('user_name')} />
+        {errors.user_name && <span>{errors.user_name.message}</span>}
+      </label>
+
+      <label>
+        Email
+        <input {...register('user_email')} />
+        {errors.user_email && <span>{errors.user_email.message}</span>}
+      </label>
+
+      <label>
+        Сайт
+        <input {...register('home_page')} />
+        {errors.home_page && <span>{errors.home_page.message}</span>}
+      </label>
+
+      <label>
+        Комментарий
+        <textarea {...register('text')} />
+        {errors.text && <span>{errors.text.message}</span>}
+      </label>
+
+      <button type="submit" disabled={isSubmitting}>
+        Отправить
+      </button>
     </form>
   );
 }
