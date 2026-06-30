@@ -47,6 +47,15 @@ export function Bookmark({ size = 24, filled, ...props }: IconProps & { filled?:
   );
 }
 
+export function Close({ size = 24, ...props }: IconProps) {
+  return (
+    <svg {...icon(size, props)} className={styles.illustration}>
+      <line x1="18" y1="6" x2="6" y2="18" className={styles.stroke} />
+      <line x1="6" y1="6" x2="18" y2="18" className={styles.stroke} />
+    </svg>
+  );
+}
+
 export function Dots({ size = 24, ...props }: IconProps) {
   return (
     <svg {...icon(size, props)} className={styles.fill}>
