@@ -1,6 +1,6 @@
 # DECISIONS.md
 
-## 2026-06-22 — Shared API types at root, fetch-based services
+## 2026-06-22 — Shared API types at root, fetch-based services (ПЕРЕСМОТРЕНО)
 
 **Решение:** Общие типы бэкенд-контрактов вынесены в корневой `shared/api/types/`.
 Фронтенд-сервисы созданы на нативном `fetch` (без axios или другой HTTP-библиотеки).
@@ -12,4 +12,14 @@
 
 **Как подключено:**
 - Алиас `@shared` настроен в `vite.config.ts` (resolve.alias) и `tsconfig.app.json` (paths).
-- Сервисы расположены в `frontend/src/services/`, импортируют через `import type { ... } from '@shared/api/types'`.
+- Сервисы импортируют через `import type { ... } from '@shared/api/types'`.
+
+## 2026-06-30 — Отказ от shared-типов, переход на axios
+
+**Решение:** Типы перенесены локально в `frontend/src/types/` (разделены на `comment.ts`, `user.ts`, `captcha.ts` с barrel-реэкспортом через `index.ts`).
+Сервисы переписаны с `fetch` на `axios` (`^1.18.1`).
+
+**Почему:**
+- Shared-типы оказались неудобны при расхождении бэкенд/фронтенд-представлений (JOIN-поля).
+- `axios` — удобнее API, автоматический JSON-парсинг, перехватчики.
+- Локальные типы проще поддерживать итеративно, без синхронизации между пакетами.

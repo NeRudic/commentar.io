@@ -8,7 +8,7 @@ No root `package.json` — each package is independent:
 |---------|-----------|------|
 | backend | `backend/` | NestJS 11, TS 5.7, sqlite3, class-validator |
 | frontend | `frontend/` | React 19, Vite 8, TS 6.0, CSS Modules |
-| shared types | `shared/` | API contracts, re-exported via `@shared` alias |
+| shared types | `shared/` | Устарели, типы теперь локально в `frontend/src/types/` |
 
 ## Commands (all run from package subdirectory)
 
@@ -35,22 +35,21 @@ npm run lint          # eslint
 - Tables auto-created via `db.config.ts:initSQL` on app bootstrap in `db.module.ts`.
 - No ORM — raw `sqlite3` queries wrapped in `DB` service (`db.service.ts`).
 
-### Module registration gotcha
-`CommentModule` (`backend/src/comment/comment.module.ts`) exists but is **NOT imported** in `AppModule`. The `/comments` endpoints will 404 unless it's added to `app.module.ts` imports.
+### Module registration
+`CommentModule` и `CaptchaModule` импортированы в `AppModule`.
 
 ### Global pipes (order matters)
 In `main.ts`: `SanitizePipe` runs first, then `ValidationPipe({ transform: true })`.
 - `SanitizePipe` strips all HTML except `<strong>`, `<i>`, `<code>`.
 - DTOs use `class-validator` + `class-transformer` (`@Type`, `@Transform`) for coercion.
 
-### Shared types
-- Source: `shared/api/types/index.ts`
-- Backend tsconfig path: `@shared/*` → `../shared/*`
-- Frontend: vite alias `@shared` → `../shared` + tsconfig path in `tsconfig.app.json`
-- Frontend uses `verbatimModuleSyntax: true` — import types with `import type { ... }`.
+### Frontend types
+- Локальные типы в `frontend/src/types/` (разделены на `comment.ts`, `user.ts`, `captcha.ts`, barrel-реэкспорт через `index.ts`).
+- `CommentRow` включает JOIN-поля `user_name` и `home_page`.
+- Бэкенд импортирует свои DTO из `class-validator`, общие `shared/api/types/` устарели.
 
 ### Frontend services
-Despite DECISIONS.md claiming native `fetch`, the codebase actually uses **axios** (`frontend/package.json`, `services/getComments.ts`). DECISIONS.md is outdated.
+Сервисы используют **axios** (`frontend/package.json`).
 
 ## Conventions
 - **Commits**: Conventional Commits (`feat:`, `fix:`, `refactor:`).

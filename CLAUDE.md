@@ -4,7 +4,7 @@
 
 - **Backend:** NestJS 11 + SQLite3 + class-validator
 - **Frontend:** React 19 + Vite 8 + TypeScript 6 + CSS Modules
-- **Shared types:** `shared/api/types/` (импортируются через алиас `@shared`)
+- **Frontend types:** локально в `frontend/src/types/`
 
 ## Project structure
 
@@ -19,15 +19,15 @@ comentar.io/
 │   └── src/
 │       ├── components/   # React-компоненты (CSS Modules)
 │       ├── data/         # Мок-данные (заглушка)
-│       └── services/     # Fetch-сервисы для бэкенда
+│       ├── services/     # Axios-сервисы для бэкенда
+│       └── types/        # Локальные типы (comment, user, captcha)
 └── shared/
-    └── api/types/        # Общие контракты API
+    └── api/types/        # Устарели, не используются
 ```
 
 ## Key conventions
 
 - **Стили:** CSS Modules (`.module.css`)
 - **Формы:** @tanstack/react-form + valibot
-- **Алиас:** `@shared` → корневой `shared/`
 - **Проверка:** ESLint (frontend), class-validator (backend)
 - **Коммиты:** Conventional Commits
