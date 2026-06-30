@@ -47,7 +47,9 @@ export class CommentService {
     try {
       const comments: CommentRowDTO[] = await this.database.all(
         `
-      SELECT * FROM comment
+      SELECT comment.*, u.user_name, u.home_page
+      FROM comment
+      JOIN user AS u ON comment.user_email = u.email
       WHERE post_id = ?
       AND parent_comment_id IS NULL
       `,
@@ -70,7 +72,9 @@ export class CommentService {
     try {
       const comments: CommentRowDTO[] = await this.database.all(
         `
-      SELECT * FROM comment
+      SELECT comment.*, u.user_name, u.home_page
+      FROM comment
+      JOIN user AS u ON comment.user_email = u.email
       WHERE parent_comment_id = ?
       `,
         [parent_comment_id],
