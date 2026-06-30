@@ -55,7 +55,7 @@ In `main.ts`: `SanitizePipe` runs first, then `ValidationPipe({ transform: true 
 - **Commits**: Conventional Commits (`feat:`, `fix:`, `refactor:`).
 - **No `Co-Authored-By` / `Signed-off-by`** trailers in commits.
 - **CSS**: CSS Modules (`*.module.css`).
-- **Forms**: @tanstack/react-form + valibot.
+- **Forms**: react-hook-form + valibot (validation).
 - **Prettier**: single quotes, trailing commas, 80 width, 2-space tabs.
 - **ESLint prettier rule** uses `endOfLine: "auto"` (Windows-safe).
 - **No comments** in code unless explicitly requested.

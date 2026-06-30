@@ -23,3 +23,17 @@
 - Shared-типы оказались неудобны при расхождении бэкенд/фронтенд-представлений (JOIN-поля).
 - `axios` — удобнее API, автоматический JSON-парсинг, перехватчики.
 - Локальные типы проще поддерживать итеративно, без синхронизации между пакетами.
+
+## 2026-06-30 — Отказ от @tanstack/react-form, переход на react-hook-form
+
+**Решение:** Замена `@tanstack/react-form` (^1.33.0) на `react-hook-form` для CommentForm.
+
+**Почему:**
+- `@tanstack/react-form` v1.33 имеет 22 generic-параметра, что делает невозможным написание переиспользуемых обёрток без `any`.
+- Бойлерплейт: `form.Field` + `form.Subscribe` создают ~15 строк на каждое поле против 1 строки `register()` в RHF.
+- RHF — зрелая библиотека, 1 дженерик (`useForm<T>()`), встроенные `isSubmitting`, `errors`, `register`.
+
+**Что изменилось:**
+- `@tanstack/react-form` и `@tanstack/valibot-form-adapter` удалены.
+- `FormField` компонент-обёртка удалён — `register()` самодостаточен.
+- Валидация (valibot) будет подключаться через `@hookform/resolvers/valibot` или вручную в `register` options.

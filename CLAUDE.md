@@ -28,6 +28,6 @@ comentar.io/
 ## Key conventions
 
 - **Стили:** CSS Modules (`.module.css`)
-- **Формы:** @tanstack/react-form + valibot
+- **Формы:** react-hook-form + valibot
 - **Проверка:** ESLint (frontend), class-validator (backend)
 - **Коммиты:** Conventional Commits

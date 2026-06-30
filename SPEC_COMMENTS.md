@@ -12,7 +12,7 @@
 
 ### Phase 1 — CommentForm
 
-Форма на `@tanstack/react-form` + `valibot`.
+Форма на `react-hook-form` + `valibot` (валидация).
 
 Пропсы: `postId`, `onClose`, `onSuccess`.
 
@@ -82,6 +82,6 @@ frontend/src/components/Post/Post.tsx    # модал + CommentList
 - `PostProps.postId` — `string`, API ждёт `number` → `Number(postId)`
 - Файл — `<input type="file" disabled>`, бэкенд-загрузки пока нет
 - CAPTCHA stateless через JWT с `expiresIn: 5m`, секрет из `.env`
-- Формы на `@tanstack/react-form` + `valibot` (уже в проекте)
+- Формы на `react-hook-form` + `valibot` (уже в проекте)
 - Для оптимистичного UI: `POST /comments` должен возвращать полный `CommentRowDTO` (с `user_name`, `home_page` через JOIN), а не `{ lastID, changes }`
 - Shared-типы (`shared/api/types/`) — не актуальны, типы определяются локально
