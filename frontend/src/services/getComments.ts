@@ -1,6 +1,6 @@
 import { BASE_URL } from "./index";
 import axios from "axios";
-import type { CommentRow } from "@shared";
+import type { CommentRow } from "../types";
 
 export default async function getComments(
   postId: number,
