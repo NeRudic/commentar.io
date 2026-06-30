@@ -1,6 +1,8 @@
 import { useForm } from 'react-hook-form';
 import createComment from '../../services/createComment';
-import type { CreateCommentRequest } from '../../types';
+import type { Captcha, CreateCommentRequest } from '../../types';
+import { useState } from 'react';
+import { getCaptcha } from '../../services/captcha';
 
 interface CommentFormProps {
   postId: number;
@@ -15,6 +17,10 @@ export default function CommentForm({
 }: CommentFormProps) {
   void onClose;
   void onSuccess;
+
+  const [captcha, setCaptcha] = useState<Captcha>();
+
+
 
   const {
     register,
@@ -63,6 +69,10 @@ export default function CommentForm({
         <textarea {...register('text')} />
         {errors.text && <span>{errors.text.message}</span>}
       </label>
+
+      <div className="captcha">
+
+      </div>
 
       <button type="submit" disabled={isSubmitting}>
         Отправить

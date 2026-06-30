@@ -12,7 +12,7 @@ export async function verifyCaptcha(
   clientAnswer: string,
 ): Promise<CaptchaVerifyResponse> {
   const { data } = await axios.post<CaptchaVerifyResponse>(
-    BASE_URL + "/captcha",
+    BASE_URL + "/captcha/verify",
     { token, clientAnswer },
   );
   return data;
