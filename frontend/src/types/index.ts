@@ -1,17 +1,3 @@
-export interface CommentRow {
-  id: number;
-  post_id: number;
-  parent_comment_id: number | null;
-  text: string;
-  user_email: string;
-  file_path: string | null;
-  created_at: string;
-}
-
-export interface CreateCommentRequest {
-  post_id: number;
-  parent_comment_id?: number | null;
-  text: string;
-  user_email: string;
-  file_path?: string | null;
-}
+export type { CommentRow, CreateCommentRequest } from "./comment";
+export type { UserRow, CreateUserRequest } from "./user";
+export type { Captcha, CaptchaVerifyResponse } from "./captcha";
