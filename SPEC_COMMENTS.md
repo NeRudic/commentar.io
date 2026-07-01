@@ -32,13 +32,21 @@
 - [ ] CSS-модуль
 - [ ] Валидация через valibot
 
-### Phase 1.5 — File Upload (отдельный модуль)
+### Phase 1.5 — File Upload (отдельный модуль) ✅
 
 Эндпоинт: `POST /file-upload/verify` (multipart/form-data, поле `file`).
 
-Принимает файл → валидирует → сжимает изображения → сохраняет в `uploads/` → возвращает путь.
+Флоу: клиент загружает файл → сервис валидирует → сжимает изображения → сохраняет в `uploads/` → возвращает путь. Затем путь передаётся в `POST /comments`.
 
 **Зависимость:** `sharp` (libvips, асинхронный, не блокирует main thread).
+
+**Архитектура:**
+- `file-upload.config.ts` — все константы (`ALLOWED_TYPES`, `MAX_FILE_SIZE`, `MAX_WIDTH/HEIGHT`, `TXT_MAX_SIZE`, `RANDOM_RANGE`, `MIME_TO_EXT`, `UPLOADS_DIR`)
+- `file-upload.module.ts` — `OnModuleInit` создаёт `uploads/` при старте приложения (а не при первом запросе)
+- `file-upload.controller.ts` — `FileInterceptor` с `memoryStorage`, грубый лимит 10 МБ
+- `file-upload.service.ts` — проверка MIME-типов (с `BadRequestException`), валидация txt, ресайз через `sharp`
+
+**Хранение:** `memoryStorage` — файл в RAM (`file.buffer`), пишется на диск только после успешной валидации. Без `diskStorage` нет нужды в `unlink`/`rename`/cleanup.
 
 **Логика валидации:**
 
@@ -49,27 +57,35 @@
 
 **Стратегия сжатия:**
 ```js
-sharp(input).resize(320, 240, { fit: 'inside', withoutEnlargement: true }).toFile(output)
+sharp(buffer).resize(320, 240, { fit: 'inside', withoutEnlargement: true }).toFile(output)
 ```
 - `fit: 'inside'` — вписывает в bounding box, сохраняя пропорции
 - `withoutEnlargement: true` — не увеличивает изображения меньше лимита
 
-**Именование:** `{timestamp}-{random}.{ext}`
+**Именование:** `{timestamp}-{random}.{ext}`, random из диапазона `1_000_000`.
 
 **Ответ:**
 ```json
 { "path": "/uploads/1735708800-482739123.png" }
 ```
 
-**Раздача статики:** в `main.ts` через `app.useStaticAssets('uploads', { prefix: '/uploads' })`
+**Раздача статики:** в `main.ts` через `app.useStaticAssets(join(cwd, UPLOADS_DIR), { prefix: '/uploads' })`, где `UPLOADS_DIR` импортирован из конфига.
 
 **Файлы:**
 ```
 backend/src/file-upload/
+├── file-upload.config.ts
 ├── file-upload.module.ts
-├── file-upload.controller.ts    # POST /file-upload/verify
-└── file-upload.service.ts       # валидация + resize
+├── file-upload.controller.ts
+└── file-upload.service.ts
 ```
+
+**Статус:**
+- [x] Модуль, контроллер, сервис, конфиг
+- [x] memoryStorage + валидация в сервисе
+- [x] OnModuleInit для создания uploads/
+- [x] main.ts — useStaticAssets с константой из конфига
+- [x] create-comment.dto.ts — @IsUrl → @IsString для file_path
 
 ---
 
@@ -106,9 +122,6 @@ backend/src/file-upload/
 ### Создать (оставшиеся)
 
 ```
-backend/src/file-upload/file-upload.module.ts
-backend/src/file-upload/file-upload.controller.ts
-backend/src/file-upload/file-upload.service.ts
 frontend/src/components/CommentForm/CommentForm.module.css
 frontend/src/components/Comment/Comment.tsx
 frontend/src/components/Comment/Comment.module.css
@@ -119,13 +132,22 @@ frontend/src/components/CommentList/CommentList.module.css
 ### Изменить
 
 ```
-backend/src/main.ts                           # useStaticAssets для /uploads
-backend/src/app.module.ts                     # импорт FileUploadModule
 backend/src/comment/comment.service.ts        # createComment → возвращать CommentRowDTO (SELECT + JOIN)
 backend/src/comment/comment.controller.ts     # тип возврата createComment → CommentRowDTO
-backend/src/comment/dto/create-comment.dto.ts # @IsUrl → @IsString для file_path
 frontend/src/components/CommentForm/CommentForm.tsx # интеграция upload-эндпоинта
 frontend/src/components/Post/Post.tsx         # модал + CommentList
+```
+
+### Сделано ✅
+
+```
+backend/src/file-upload/file-upload.config.ts
+backend/src/file-upload/file-upload.module.ts
+backend/src/file-upload/file-upload.controller.ts
+backend/src/file-upload/file-upload.service.ts
+backend/src/main.ts                           # useStaticAssets + UPLOADS_DIR из конфига
+backend/src/app.module.ts                     # импорт FileUploadModule
+backend/src/comment/dto/create-comment.dto.ts # @IsUrl → @IsString для file_path
 ```
 
 ---
@@ -133,12 +155,13 @@ frontend/src/components/Post/Post.tsx         # модал + CommentList
 ## Примечания
 
 - `PostProps.postId` — `string`, API ждёт `number` → `Number(postId)`
-- Загрузка файлов: клиент отправляет `POST /file-upload/verify` (multipart), получает `{ path }`, затем передаёт путь в `createComment`
-- `file_path` в DTO больше не валидируется как URL — это относительный путь `/uploads/...`
+- Загрузка файлов: `memoryStorage` → валидация (`BadRequestException`) → запись на диск → `{ path }` → путь в `createComment`
+- `file_path` в DTO больше не валидируется как URL — это относительный путь `/uploads/...`, проверяется через `@IsString()`
+- MIME-типы проверяются в сервисе (а не в `fileFilter` контроллера), чтобы отдавать `400 Bad Request` вместо `500`
 - Изображения сжимаются через `sharp` (libvips — нативные потоки, не блокирует event loop)
-- Загруженные файлы раздаются статически из `uploads/` через `app.useStaticAssets`
+- Константы (`MAX_WIDTH`, `MAX_FILE_SIZE`, и т.д.) вынесены в `file-upload.config.ts`, импортируются в `main.ts` и сервис
+- Директория `uploads/` создаётся в `FileUploadModule.onModuleInit()`, а не в сервисе при обработке запроса
 - CAPTCHA stateless через JWT с `expiresIn: 5m`, секрет из `.env`
 - Формы на `react-hook-form` + `valibot` (уже в проекте)
 - Для оптимистичного UI: `POST /comments` должен возвращать полный `CommentRowDTO` (с `user_name`, `home_page` через JOIN), а не `{ lastID, changes }`
 - Shared-типы (`shared/api/types/`) — не актуальны, типы определяются локально
-- Зависимости: `sharp` (установить в backend)
