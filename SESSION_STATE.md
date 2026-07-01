@@ -1,19 +1,36 @@
 # SESSION_STATE.md
 
-## Где остановились (30.06.2026, ночь)
+## Где остановились (01.07.2026)
 
-**CommentForm** — скелет на `react-hook-form`, поля формы есть, CAPTCHA заготовлена (state + импорты). Не хватает логики.
+**CommentForm** — CAPTCHA и file input с клиентской валидацией готовы. Осталось: интеграция с upload-эндпоинтом, CSS, валидация через valibot, `createUser` в сабмите.
 
-## Что дальше (утро 01.07)
+**File Upload** — модуль готов (`POST /file-upload/verify`).
+
+## Что сделано
+
+### CommentForm
+- [x] CAPTCHA: запрос при mount, вопрос + инпут, верификация при сабмите, ошибка + перезапрос
+- [x] File input: `accept`, клиентская валидация (тип, размер txt ≤ 100 КБ)
+- [ ] Интеграция с `POST /file-upload/verify`: загрузить файл → получить `{ path }` → в createComment
+- [ ] CSS-модуль `CommentForm.module.css`
+- [ ] Валидация полей через valibot + react-hook-form
+- [ ] `createUser` перед `createComment` в сабмите
+
+### File Upload (бэкенд) ✅
+- [x] `file-upload.config.ts` — все константы
+- [x] `file-upload.module.ts` — OnModuleInit создаёт `uploads/`
+- [x] `file-upload.controller.ts` — POST /file-upload/verify, memoryStorage, лимит 10 МБ
+- [x] `file-upload.service.ts` — проверка MIME (400), валидация txt, ресайз через sharp (320×240, fit: inside)
+- [x] `main.ts` — useStaticAssets для /uploads
+- [x] `create-comment.dto.ts` — @IsUrl → @IsString для file_path
+
+## Что дальше
 
 ### 1. CommentForm — доделать
-- `useEffect(() => { getCaptcha().then(setCaptcha) }, [])` — запрос капчи при mount
-- Отображение вопроса: `Сколько будет {captcha?.a} + {captcha?.b}?` + `<input {...register('captcha_answer')} />`
-- Сабмит: `verifyCaptcha → createUser → createComment → onSuccess / onClose`
-- При неверной капче — запросить новую, показать ошибку
-- `<input type="file" disabled>` для файла
-- CSS-модуль `CommentForm.module.css`
-- Валидация (valibot через react-hook-form)
+- Интеграция upload-эндпоинта (file → upload → path → createComment)
+- `createUser` в сабмите
+- CSS-модуль
+- Валидация через valibot
 
 ### 2. Comment.tsx — рекурсивный компонент
 - Пропсы: `comment: CommentRow`, `depth: number`
@@ -22,7 +39,7 @@
 - depth < 4: кнопка «Показать ответы» → `GET /comments/:id/replies`
 - depth >= 4: ссылка на родителя
 - Кнопка «Ответить» → встроенная CommentForm
-- Оптимистичный UI для реплаев (React.memo + stable key)
+- Оптимистичный UI (React.memo + stable key)
 
 ### 3. CommentList.tsx
 - `GET /comments/:post_id` → массив `<Comment depth=0>`
@@ -34,8 +51,3 @@
 
 ### 5. Backend fix
 - `comment.service.ts`: `createComment` должен возвращать `CommentRowDTO` (SELECT + JOIN), не `runResponse`
-
-## Ключевые решения (в DECISIONS.md)
-- Перешли с @tanstack/react-form на react-hook-form (22 дженерика → 1)
-- FormField обёртка удалена — `register()` самодостаточен
-- CAPTCHA URL исправлен: `/captcha` → `/captcha/verify`
