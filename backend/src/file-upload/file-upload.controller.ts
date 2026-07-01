@@ -5,10 +5,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
-import * as fs from 'fs';
+import { memoryStorage } from 'multer';
 import { FileUploadService } from './file-upload.service';
+
+const ALLOWED_TYPES = ['text/plain', 'image/jpeg', 'image/gif', 'image/png'];
 
 @Controller('file-upload')
 export class FileUploadController {
@@ -17,24 +17,15 @@ export class FileUploadController {
   @Post('verify')
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: diskStorage({
-        destination: (_req, _file, cb) => {
-          const uploadPath = join(process.cwd(), 'uploads');
-
-          if (!fs.existsSync(uploadPath)) {
-            fs.mkdirSync(uploadPath, { recursive: true });
-          }
-
-          cb(null, uploadPath);
-        },
-        filename: (_req, file, cb) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          cb(null, uniqueSuffix + extname(file.originalname));
-        },
-      }),
-
+      storage: memoryStorage(),
       limits: { fileSize: 10 * 1024 * 1024 },
+      fileFilter: (_req, file, cb) => {
+        if (ALLOWED_TYPES.includes(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(new Error('Недопустимый тип файла'), false);
+        }
+      },
     }),
   )
   async verify(@UploadedFile() file: Express.Multer.File) {
