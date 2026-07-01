@@ -1,8 +1,8 @@
 import { useForm } from 'react-hook-form';
 import createComment from '../../services/createComment';
 import type { Captcha, CreateCommentRequest } from '../../types';
-import { useState } from 'react';
-import { getCaptcha } from '../../services/captcha';
+import { useEffect, useState } from 'react';
+import { getCaptcha, verifyCaptcha } from '../../services/captcha';
 
 interface CommentFormProps {
   postId: number;
@@ -16,11 +16,51 @@ export default function CommentForm({
   onSuccess,
 }: CommentFormProps) {
   void onClose;
-  void onSuccess;
 
-  const [captcha, setCaptcha] = useState<Captcha>();
+  const [captcha, setCaptcha] = useState<Captcha | null>(null);
+  const [captchaAnswer, setCaptchaAnswer] = useState('');
+  const [captchaError, setCaptchaError] = useState<string | null>(null);
 
+  const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
 
+  const ALLOWED_TYPES = ['text/plain', 'image/jpeg', 'image/gif', 'image/png'];
+  const ALLOWED_EXTENSIONS = '.txt,.jpg,.jpeg,.gif,.png';
+  const TXT_MAX_SIZE = 100 * 1024;
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0];
+    if (!selected) {
+      setFile(null);
+      setFileError(null);
+      return;
+    }
+
+    if (!ALLOWED_TYPES.includes(selected.type)) {
+      setFileError('Недопустимый тип файла. Разрешены: txt, jpg, gif, png');
+      setFile(null);
+      return;
+    }
+
+    if (selected.type === 'text/plain' && selected.size > TXT_MAX_SIZE) {
+      setFileError('Размер txt-файла не должен превышать 100 КБ');
+      setFile(null);
+      return;
+    }
+
+    setFile(selected);
+    setFileError(null);
+  };
+
+  const refreshCaptcha = () => {
+    setCaptchaAnswer('');
+    setCaptchaError(null);
+    getCaptcha().then(setCaptcha);
+  };
+
+  useEffect(() => {
+    getCaptcha().then(setCaptcha);
+  }, [])
 
   const {
     register,
@@ -39,7 +79,17 @@ export default function CommentForm({
   });
 
   const onSubmit = async (data: CreateCommentRequest) => {
+    if (!captcha) return;
+
+    const { valid } = await verifyCaptcha(captcha.token, captchaAnswer);
+    if (!valid) {
+      setCaptchaError('Неверный ответ');
+      refreshCaptcha();
+      return;
+    }
+
     await createComment(data);
+    onSuccess?.();
   };
 
   return (
@@ -70,9 +120,30 @@ export default function CommentForm({
         {errors.text && <span>{errors.text.message}</span>}
       </label>
 
-      <div className="captcha">
+      <label>
+        Файл
+        <input
+          type="file"
+          accept={ALLOWED_EXTENSIONS}
+          onChange={handleFileChange}
+        />
+        {file && <span>{file.name}</span>}
+        {fileError && <span>{fileError}</span>}
+      </label>
 
-      </div>
+      {captcha && (
+        <div className="captcha">
+          <span>
+            Сколько будет {captcha.a} + {captcha.b}?
+          </span>
+          <input
+            type="text"
+            value={captchaAnswer}
+            onChange={(e) => setCaptchaAnswer(e.target.value)}
+          />
+          {captchaError && <span>{captchaError}</span>}
+        </div>
+      )}
 
       <button type="submit" disabled={isSubmitting}>
         Отправить
