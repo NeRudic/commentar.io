@@ -28,6 +28,13 @@ export class CommentService {
         [post_id, parent_comment_id, text, user_email, file_path],
       );
 
+      if (file_path) {
+        await this.database.run(
+          `UPDATE file SET status = 'published' WHERE path = ?`,
+          [file_path],
+        );
+      }
+
       await this.database.run(`COMMIT`);
 
       return result;

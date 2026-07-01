@@ -20,6 +20,14 @@ CREATE TABLE IF NOT EXISTS comment (
     REFERENCES user(email) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS file (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  path TEXT NOT NULL UNIQUE,
+  status TEXT NOT NULL DEFAULT 'pending'
+    CHECK(status IN ('pending', 'published')),
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE INDEX IF NOT EXISTS idx_parent_comments ON comment(parent_comment_id);
 CREATE INDEX IF NOT EXISTS idx_comment_email ON comment(user_email);
 CREATE INDEX IF NOT EXISTS idx_comment_post_id ON comment(post_id);
