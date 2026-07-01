@@ -2,7 +2,6 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { DB } from 'src/db/db.service';
 import { CommentRowDTO } from './dto/comment-row.dto';
 import { CreateCommentDTO } from './dto/create-comment.dto';
-import { runResponse } from 'src/db/db.types';
 import { CommentRepliesDTO } from './dto/comment-replies.dto';
 import { RootCommentsDTO } from './dto/root-comments.dto';
 import { DeleteCommentDTO } from './dto/delete-comment.dto';
@@ -14,7 +13,7 @@ export class CommentService {
   /*
    * Create comment
    */
-  async createComment(data: CreateCommentDTO): Promise<runResponse> {
+  async createComment(data: CreateCommentDTO): Promise<CommentRowDTO> {
     try {
       const { post_id, parent_comment_id, text, user_email, file_path } = data;
 
@@ -37,7 +36,17 @@ export class CommentService {
 
       await this.database.run(`COMMIT`);
 
-      return result;
+      const row = await this.database.get<CommentRowDTO>(
+        `
+      SELECT comment.*, u.user_name, u.home_page
+      FROM comment
+      JOIN user AS u ON comment.user_email = u.email
+      WHERE comment.id = ?
+      `,
+        [result.lastID],
+      );
+
+      return row;
     } catch (err) {
       await this.database.run(`ROLLBACK`);
 

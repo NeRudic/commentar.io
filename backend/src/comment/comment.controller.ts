@@ -19,7 +19,9 @@ export class CommentController {
   constructor(private readonly services: CommentService) {}
 
   @Post()
-  async createComment(@Body() comment_data: CreateCommentDTO) {
+  async createComment(
+    @Body() comment_data: CreateCommentDTO,
+  ): Promise<CommentRowDTO> {
     const result = await this.services.createComment(comment_data);
 
     return result;
