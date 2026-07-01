@@ -7,7 +7,6 @@ import { promises as fs } from 'fs';
 import { join } from 'path';
 import sharp from 'sharp';
 import { DB } from 'src/db/db.service';
-import { FileRow } from 'src/db/db.types';
 import {
   FILE_UPLOAD_CONFIG,
   MIME_TO_EXT,
@@ -85,12 +84,12 @@ export class FileUploadService {
     }
 
     try {
-      const result = await this.database.get<FileRow>(
-        `INSERT INTO file (path) VALUES (?) RETURNING *`,
+      const result = await this.database.run(
+        `INSERT INTO file (path) VALUES (?)`,
         [publicPath],
       );
 
-      return { file_id: result.id, path: publicPath };
+      return { file_id: result.lastID, path: publicPath };
     } catch {
       await fs.unlink(filePath);
       throw new InternalServerErrorException(
