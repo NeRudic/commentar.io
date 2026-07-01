@@ -31,4 +31,6 @@ CREATE TABLE IF NOT EXISTS file (
 CREATE INDEX IF NOT EXISTS idx_parent_comments ON comment(parent_comment_id);
 CREATE INDEX IF NOT EXISTS idx_comment_email ON comment(user_email);
 CREATE INDEX IF NOT EXISTS idx_comment_post_id ON comment(post_id);
+CREATE INDEX IF NOT EXISTS idx_file_status ON file(status);
+CREATE INDEX IF NOT EXISTS idx_file_created_at ON file(created_at);
 `;
