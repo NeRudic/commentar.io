@@ -1,0 +1,145 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.input {
+  padding: 8px 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input:focus {
+  border-color: var(--accent);
+}
+
+.textarea {
+  padding: 8px 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  resize: vertical;
+  min-height: 80px;
+  transition: border-color 0.15s;
+}
+
+.textarea:focus {
+  border-color: var(--accent);
+}
+
+.error {
+  font-size: 12px;
+  color: #f85149;
+}
+
+.fileName {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.captchaSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.captchaQuestion {
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.captchaInput {
+  padding: 6px 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 14px;
+  width: 60px;
+  text-align: center;
+  outline: none;
+}
+
+.captchaInput:focus {
+  border-color: var(--accent);
+}
+
+.verifyBtn {
+  padding: 6px 12px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.verifyBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.verifySuccess {
+  font-size: 16px;
+  color: #3fb950;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.submitBtn {
+  padding: 10px 24px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.cancelBtn {
+  padding: 10px 24px;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.cancelBtn:hover {
+  color: var(--text-primary);
+}
