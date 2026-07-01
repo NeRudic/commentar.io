@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { SanitizePipe } from './common/sanitize.pipe';
+import { UPLOADS_DIR } from './file-upload/file-upload.config';
 import { join } from 'path';
 
 async function bootstrap() {
@@ -11,7 +12,7 @@ async function bootstrap() {
     new SanitizePipe(),
     new ValidationPipe({ transform: true }),
   );
-  app.useStaticAssets(join(process.cwd(), 'uploads'), {
+  app.useStaticAssets(join(process.cwd(), UPLOADS_DIR), {
     prefix: '/uploads',
   });
   await app.listen(process.env.PORT ?? 3000);

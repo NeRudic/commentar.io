@@ -7,8 +7,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { FileUploadService } from './file-upload.service';
-
-const ALLOWED_TYPES = ['text/plain', 'image/jpeg', 'image/gif', 'image/png'];
+import { FILE_UPLOAD_CONFIG } from './file-upload.config';
 
 @Controller('file-upload')
 export class FileUploadController {
@@ -18,14 +17,7 @@ export class FileUploadController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
-      limits: { fileSize: 10 * 1024 * 1024 },
-      fileFilter: (_req, file, cb) => {
-        if (ALLOWED_TYPES.includes(file.mimetype)) {
-          cb(null, true);
-        } else {
-          cb(new Error('Недопустимый тип файла'), false);
-        }
-      },
+      limits: { fileSize: FILE_UPLOAD_CONFIG.MAX_FILE_SIZE },
     }),
   )
   async verify(@UploadedFile() file: Express.Multer.File) {

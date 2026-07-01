@@ -6,18 +6,11 @@ import {
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import sharp from 'sharp';
-
-const TXT_MAX_SIZE = 100 * 1024;
-const MAX_WIDTH = 320;
-const MAX_HEIGHT = 240;
-const UPLOADS_DIR = join(process.cwd(), 'uploads');
-
-const MIME_TO_EXT: Record<string, string> = {
-  'text/plain': '.txt',
-  'image/jpeg': '.jpg',
-  'image/gif': '.gif',
-  'image/png': '.png',
-};
+import {
+  FILE_UPLOAD_CONFIG,
+  MIME_TO_EXT,
+  UPLOADS_DIR,
+} from './file-upload.config';
 
 export interface ProcessResult {
   path: string;
@@ -26,8 +19,18 @@ export interface ProcessResult {
 @Injectable()
 export class FileUploadService {
   async processFile(file: Express.Multer.File): Promise<ProcessResult> {
+    if (
+      !FILE_UPLOAD_CONFIG.ALLOWED_TYPES.includes(
+        file.mimetype as (typeof FILE_UPLOAD_CONFIG.ALLOWED_TYPES)[number],
+      )
+    ) {
+      throw new BadRequestException(
+        'Недопустимый тип файла. Разрешены: txt, jpg, gif, png',
+      );
+    }
+
     if (file.mimetype === 'text/plain') {
-      if (file.size > TXT_MAX_SIZE) {
+      if (file.size > FILE_UPLOAD_CONFIG.TXT_MAX_SIZE) {
         throw new BadRequestException(
           'Размер txt-файла не должен превышать 100 КБ',
         );
@@ -35,11 +38,13 @@ export class FileUploadService {
     }
 
     const ext = MIME_TO_EXT[file.mimetype];
-    const filename = Date.now() + '-' + Math.round(Math.random() * 1e9) + ext;
-    const filePath = join(UPLOADS_DIR, filename);
+    const filename =
+      Date.now() +
+      '-' +
+      Math.round(Math.random() * FILE_UPLOAD_CONFIG.RANDOM_RANGE) +
+      ext;
+    const filePath = join(process.cwd(), UPLOADS_DIR, filename);
     const publicPath = '/uploads/' + filename;
-
-    await fs.mkdir(UPLOADS_DIR, { recursive: true });
 
     if (file.mimetype === 'text/plain') {
       await fs.writeFile(filePath, file.buffer);
@@ -53,10 +58,11 @@ export class FileUploadService {
       if (
         metadata.width &&
         metadata.height &&
-        (metadata.width > MAX_WIDTH || metadata.height > MAX_HEIGHT)
+        (metadata.width > FILE_UPLOAD_CONFIG.MAX_WIDTH ||
+          metadata.height > FILE_UPLOAD_CONFIG.MAX_HEIGHT)
       ) {
         await image
-          .resize(MAX_WIDTH, MAX_HEIGHT, {
+          .resize(FILE_UPLOAD_CONFIG.MAX_WIDTH, FILE_UPLOAD_CONFIG.MAX_HEIGHT, {
             fit: 'inside',
             withoutEnlargement: true,
           })
