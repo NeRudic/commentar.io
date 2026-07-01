@@ -5,7 +5,6 @@ import {
   IsOptional,
   IsPositive,
   IsString,
-  IsUrl,
   MinLength,
 } from 'class-validator';
 
@@ -39,6 +38,5 @@ export class CreateCommentDTO {
   )
   @IsOptional()
   @IsString()
-  @IsUrl()
   file_path: string | null;
 }
