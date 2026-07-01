@@ -3,7 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import * as fs from 'fs';
+import { promises as fs } from 'fs';
 import sharp from 'sharp';
 
 const ALLOWED_TYPES = ['text/plain', 'image/jpeg', 'image/gif', 'image/png'];
@@ -19,7 +19,7 @@ export interface ProcessResult {
 export class FileUploadService {
   async processFile(file: Express.Multer.File): Promise<ProcessResult> {
     if (!ALLOWED_TYPES.includes(file.mimetype)) {
-      fs.unlinkSync(file.path);
+      await fs.unlink(file.path);
       throw new BadRequestException(
         'Недопустимый тип файла. Разрешены: txt, jpg, gif, png',
       );
@@ -27,7 +27,7 @@ export class FileUploadService {
 
     if (file.mimetype === 'text/plain') {
       if (file.size > TXT_MAX_SIZE) {
-        fs.unlinkSync(file.path);
+        await fs.unlink(file.path);
         throw new BadRequestException(
           'Размер txt-файла не должен превышать 100 КБ',
         );
@@ -51,15 +51,13 @@ export class FileUploadService {
           })
           .toFile(file.path + '_resized');
 
-        fs.unlinkSync(file.path);
-        fs.renameSync(file.path + '_resized', file.path);
+        await fs.unlink(file.path);
+        await fs.rename(file.path + '_resized', file.path);
       }
 
       return { path: '/uploads/' + file.filename };
     } catch (err) {
-      if (fs.existsSync(file.path)) {
-        fs.unlinkSync(file.path);
-      }
+      await fs.unlink(file.path).catch(() => {});
       throw new InternalServerErrorException(
         `Ошибка обработки изображения: ${err}`,
       );
