@@ -1,10 +1,11 @@
-# SPEC: Comment Form + CAPTCHA + Comments Display
+# SPEC: Comment Form + CAPTCHA + Comments Display + File Upload
 
 ## Цель
 
 1. Кнопка «комментировать» на посте → модал с формой
-2. Поля формы: User Name, Email, HomePage (url), CAPTCHA, текст, файл (заглушка)
-3. Существующие комментарии отображаются под постом
+2. Поля формы: User Name, Email, HomePage (url), CAPTCHA, текст, файл
+3. Загрузка файлов: отдельный эндпоинт с валидацией и сжатием изображений
+4. Существующие комментарии отображаются под постом
 
 ---
 
@@ -20,9 +21,55 @@
 
 Сабмит: verifyCaptcha → createUser → createComment → onSuccess.
 
-Поля: user_name, email, home_page, text, captcha (вопрос + инпут), file (disabled).
+Поля: user_name, email, home_page, text, captcha (вопрос + инпут), file.
 
 Файлы: `CommentForm/CommentForm.tsx`, `CommentForm/CommentForm.module.css`.
+
+**Статус:**
+- [x] CAPTCHA (вопрос, инпут, верификация при сабмите, перезапрос при ошибке)
+- [x] File input (accept, клиентская валидация типа и размера txt)
+- [ ] Интеграция с эндпоинтом загрузки (upload, затем createComment с file_path)
+- [ ] CSS-модуль
+- [ ] Валидация через valibot
+
+### Phase 1.5 — File Upload (отдельный модуль)
+
+Эндпоинт: `POST /file-upload/verify` (multipart/form-data, поле `file`).
+
+Принимает файл → валидирует → сжимает изображения → сохраняет в `uploads/` → возвращает путь.
+
+**Зависимость:** `sharp` (libvips, асинхронный, не блокирует main thread).
+
+**Логика валидации:**
+
+| Тип | Проверка |
+|-----|----------|
+| `text/plain` | размер ≤ 100 КБ |
+| `image/jpeg`, `image/gif`, `image/png` | ресайз до ≤ 320×240 с сохранением пропорций |
+
+**Стратегия сжатия:**
+```js
+sharp(input).resize(320, 240, { fit: 'inside', withoutEnlargement: true }).toFile(output)
+```
+- `fit: 'inside'` — вписывает в bounding box, сохраняя пропорции
+- `withoutEnlargement: true` — не увеличивает изображения меньше лимита
+
+**Именование:** `{timestamp}-{random}.{ext}`
+
+**Ответ:**
+```json
+{ "path": "/uploads/1735708800-482739123.png" }
+```
+
+**Раздача статики:** в `main.ts` через `app.useStaticAssets('uploads', { prefix: '/uploads' })`
+
+**Файлы:**
+```
+backend/src/file-upload/
+├── file-upload.module.ts
+├── file-upload.controller.ts    # POST /file-upload/verify
+└── file-upload.service.ts       # валидация + resize
+```
 
 ---
 
@@ -59,7 +106,9 @@
 ### Создать (оставшиеся)
 
 ```
-frontend/src/components/CommentForm/CommentForm.tsx
+backend/src/file-upload/file-upload.module.ts
+backend/src/file-upload/file-upload.controller.ts
+backend/src/file-upload/file-upload.service.ts
 frontend/src/components/CommentForm/CommentForm.module.css
 frontend/src/components/Comment/Comment.tsx
 frontend/src/components/Comment/Comment.module.css
@@ -70,9 +119,13 @@ frontend/src/components/CommentList/CommentList.module.css
 ### Изменить
 
 ```
-backend/src/comment/comment.service.ts   # createComment → возвращать CommentRowDTO (SELECT + JOIN)
-backend/src/comment/comment.controller.ts # тип возврата createComment → CommentRowDTO
-frontend/src/components/Post/Post.tsx    # модал + CommentList
+backend/src/main.ts                           # useStaticAssets для /uploads
+backend/src/app.module.ts                     # импорт FileUploadModule
+backend/src/comment/comment.service.ts        # createComment → возвращать CommentRowDTO (SELECT + JOIN)
+backend/src/comment/comment.controller.ts     # тип возврата createComment → CommentRowDTO
+backend/src/comment/dto/create-comment.dto.ts # @IsUrl → @IsString для file_path
+frontend/src/components/CommentForm/CommentForm.tsx # интеграция upload-эндпоинта
+frontend/src/components/Post/Post.tsx         # модал + CommentList
 ```
 
 ---
@@ -80,8 +133,12 @@ frontend/src/components/Post/Post.tsx    # модал + CommentList
 ## Примечания
 
 - `PostProps.postId` — `string`, API ждёт `number` → `Number(postId)`
-- Файл — `<input type="file" disabled>`, бэкенд-загрузки пока нет
+- Загрузка файлов: клиент отправляет `POST /file-upload/verify` (multipart), получает `{ path }`, затем передаёт путь в `createComment`
+- `file_path` в DTO больше не валидируется как URL — это относительный путь `/uploads/...`
+- Изображения сжимаются через `sharp` (libvips — нативные потоки, не блокирует event loop)
+- Загруженные файлы раздаются статически из `uploads/` через `app.useStaticAssets`
 - CAPTCHA stateless через JWT с `expiresIn: 5m`, секрет из `.env`
 - Формы на `react-hook-form` + `valibot` (уже в проекте)
 - Для оптимистичного UI: `POST /comments` должен возвращать полный `CommentRowDTO` (с `user_name`, `home_page` через JOIN), а не `{ lastID, changes }`
 - Shared-типы (`shared/api/types/`) — не актуальны, типы определяются локально
+- Зависимости: `sharp` (установить в backend)
