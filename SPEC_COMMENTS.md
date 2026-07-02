@@ -1,163 +1,62 @@
-# SPEC: Comment Form + CAPTCHA + Comments Display + File Upload
+# SPEC: SPA-приложение «Комментарии»
 
-## Цель
+## Требования
 
-1. Кнопка «комментировать» на посте → модал с формой
-2. Поля формы: User Name, Email, HomePage (url), CAPTCHA, текст, файл
-3. Загрузка файлов: отдельный эндпоинт с валидацией и сжатием изображений
-4. Существующие комментарии отображаются под постом
+### Форма добавления записи
 
----
+- [x] **1. User Name** — цифры и буквы латинского алфавита, обязательное поле
+- [x] **2. E-mail** — формат email, обязательное поле
+- [x] **3. Home page** — формат URL, необязательное поле
+- [ ] **4. CAPTCHA** — цифры и буквы латинского алфавита, изображение, обязательное поле\*
+- [x] **5. Text** — текст сообщения, все HTML-теги запрещены кроме разрешённых, обязательное поле
 
-## Порядок выполнения
+> \* — Хук `useCaptcha` (`fetch`/`verify`/`reload`) готов, но не подключён к `CommentForm`.
 
-### Phase 1 — CommentForm
+### Комментарии и отображение
 
-Форма на `react-hook-form` + `valibot` (валидация).
+- [ ] **6. Ответы на комментарии** — лимит глубины 4 уровня
+- [ ] **7. Сортировка корневых комментариев** — таблица с сортировкой по User Name, E-mail, дате добавления (по возрастанию и убыванию)
+- [ ] **8. Пагинация** — по 25 сообщений на странице
+- [x] **9. Защита от XSS и SQL-инъекций** — `sanitize.pipe.ts` на бэкенде, `DOMPurify` на фронтенде, параметризованные SQL-запросы
+- [ ] **10. Сортировка по умолчанию** — LIFO (последние сверху)
+- [x] **11. Дизайн с CSS** — CSS Modules в каждом компоненте
 
-Пропсы: `postId`, `onClose`, `onSuccess`.
+### Файлы
 
-При mount: запросить CAPTCHA.
+- [x] **12. Загрузка файлов** — изображение или текстовый файл к сообщению
+- [x] **13. Изображения** — ресайз до 320×240 с сохранением пропорций, форматы JPG/GIF/PNG
+- [x] **14. Текстовые файлы** — не более 100 КБ, формат TXT
+- [ ] **15. Просмотр файлов (lightbox)** — визуальные эффекты при просмотре загруженных файлов
 
-Сабмит: verifyCaptcha → createUser → createComment → onSuccess.
+### HTML-теги
 
-Поля: user_name, email, home_page, text, captcha (вопрос + инпут), file.
+- [x] **16. Разрешённые теги** — `<a href="" title="">`, `<code>`, `<i>`, `<strong>`
+- [ ] **17. Валидация XHTML** — проверка закрытия тегов, код должен быть валидным XHTML
+- [x] **18. Валидация на клиенте и сервере** — `valibot` (клиент), `class-validator` + `SanitizePipe` (сервер)
 
-Файлы: `CommentForm/CommentForm.tsx`, `CommentForm/CommentForm.module.css`.
+### UX
 
-**Статус:**
-- [x] CAPTCHA хук (`useCaptcha`) — fetch/verify/reload, не интегрирован в форму
-- [x] File input (accept, клиентская валидация типа и размера txt)
-- [x] Интеграция с эндпоинтом загрузки (upload, затем createComment с file_path)
-- [x] Переиспользуемый `Button` компонент (минимальный враппер, `className`-проп)
-- [x] `TextEditor` с тулбаром (`[i]`, `[strong]`, `[code]`, `[a]`) и превью
-- [x] DOMPurify — очистка HTML в превью (`utils/sanitize.ts`)
-- [x] CSS-модуль
-- [x] Валидация через valibot
-
-### Phase 1.5 — File Upload (отдельный модуль) ✅
-
-Эндпоинт: `POST /file-upload/verify` (multipart/form-data, поле `file`).
-
-Флоу: клиент загружает файл → сервис валидирует → сжимает изображения → сохраняет в `uploads/` → возвращает путь. Затем путь передаётся в `POST /comments`.
-
-**Зависимость:** `sharp` (libvips, асинхронный, не блокирует main thread).
-
-**Архитектура:**
-- `file-upload.config.ts` — все константы (`ALLOWED_TYPES`, `MAX_FILE_SIZE`, `MAX_WIDTH/HEIGHT`, `TXT_MAX_SIZE`, `RANDOM_RANGE`, `MIME_TO_EXT`, `UPLOADS_DIR`)
-- `file-upload.module.ts` — `OnModuleInit` создаёт `uploads/` при старте приложения (а не при первом запросе)
-- `file-upload.controller.ts` — `FileInterceptor` с `memoryStorage`, грубый лимит 10 МБ
-- `file-upload.service.ts` — проверка MIME-типов (с `BadRequestException`), валидация txt, ресайз через `sharp`
-
-**Хранение:** `memoryStorage` — файл в RAM (`file.buffer`), пишется на диск только после успешной валидации. Без `diskStorage` нет нужды в `unlink`/`rename`/cleanup.
-
-**Логика валидации:**
-
-| Тип | Проверка |
-|-----|----------|
-| `text/plain` | размер ≤ 100 КБ |
-| `image/jpeg`, `image/gif`, `image/png` | ресайз до ≤ 320×240 с сохранением пропорций |
-
-**Стратегия сжатия:**
-```js
-sharp(buffer).resize(320, 240, { fit: 'inside', withoutEnlargement: true }).toFile(output)
-```
-- `fit: 'inside'` — вписывает в bounding box, сохраняя пропорции
-- `withoutEnlargement: true` — не увеличивает изображения меньше лимита
-
-**Именование:** `{timestamp}-{random}.{ext}`, random из диапазона `1_000_000`.
-
-**Ответ:**
-```json
-{ "path": "/uploads/1735708800-482739123.png" }
-```
-
-**Раздача статики:** в `main.ts` через `app.useStaticAssets(join(cwd, UPLOADS_DIR), { prefix: '/uploads' })`, где `UPLOADS_DIR` импортирован из конфига.
-
-**Файлы:**
-```
-backend/src/file-upload/
-├── file-upload.config.ts
-├── file-upload.module.ts
-├── file-upload.controller.ts
-└── file-upload.service.ts
-```
-
-**Статус:**
-- [x] Модуль, контроллер, сервис, конфиг
-- [x] memoryStorage + валидация в сервисе
-- [x] OnModuleInit для создания uploads/
-- [x] main.ts — useStaticAssets с константой из конфига
-- [x] create-comment.dto.ts — @IsUrl → @IsString для file_path
+- [x] **19. Предпросмотр сообщения** — без перезагрузки страницы (режим Preview в `TextEditor`)
+- [x] **20. Панель с кнопками** — `[i]`, `[strong]`, `[code]`, `[a]` в тулбаре `TextEditor`
+- [ ] **21. Визуальные эффекты** — анимации, переходы (частично: CSS transitions)
 
 ---
 
-### Phase 2 — Компоненты отображения
+## Статус
 
-**CommentList:** контейнер для поста. Фетчит корневые комментарии (`GET /comments/:post_id`). Рендерит массив `<Comment>` с `depth=0`.
-
-**Comment (React.memo):** рекурсивный, принимает `comment: CommentRow` и `depth: number`.
-
-- Рендерит: аватар, имя (ссылка если home_page), текст, дата, файл
-- Отступ через `marginLeft: depth * 24px`
-- При `depth < 4`: кнопка «Показать ответы» → фетчит `GET /comments/:id/replies` → сохраняет в локальный стейт → рекурсивно рендерит `<Comment depth+1>`
-- При `depth >= 4`: вместо рекурсии — ссылка на родительский комментарий
-- Кнопка «Ответить» → показывает CommentForm внутри себя
-- Оптимистичный UI при создании реплая: новый комментарий добавляется в локальный стейт сразу, затем заменяется ответом сервера. При ошибке сервера — удаляется с показом ошибки. Дочерние `<Comment>` не перерендериваются (`React.memo` + стабильные `key`).
-
-Файлы: `Comment/Comment.tsx`, `Comment/Comment.module.css`, `CommentList/CommentList.tsx`, `CommentList/CommentList.module.css`.
-
----
-
-### Phase 3 — Интеграция в Post
-
-- Добавить `useState` для `isModalOpen` в `Post.tsx`
-- `onClick` на кнопку комментария → открыть модал
-- Условный рендер `<Modal>` с `<CommentForm>`
-- Отрендерить `<CommentList postId={postId} />` под постом
-
-Файлы: `Post/Post.tsx` (изменить).
-
----
-
-## Сводка файлов
-
-### Создать
-
-```
-frontend/src/components/Button/Button.tsx
-frontend/src/components/Button/Button.module.css
-frontend/src/components/TextEditor/TextEditor.tsx
-frontend/src/components/TextEditor/TextEditor.module.css
-frontend/src/components/Comment/Comment.module.css
-frontend/src/components/CommentList/CommentList.tsx
-frontend/src/components/CommentList/CommentList.module.css
-frontend/src/utils/sanitize.ts
-```
-
-### Изменить
-
-```
-frontend/src/components/Comment/Comment.tsx   # реализовать вместо стаба
-frontend/src/components/Post/Post.tsx          # модал + CommentList
-```
+| Статус | Количество |
+|--------|------------|
+| Готово | 13 |
+| Не готово | 8 |
 
 ---
 
 ## Примечания
 
-- `PostProps.postId` — `string`, API ждёт `number` → `Number(postId)`
-- Загрузка файлов: `memoryStorage` → валидация (`BadRequestException`) → запись на диск → `{ path }` → путь в `createComment`
-- `file_path` в DTO больше не валидируется как URL — это относительный путь `/uploads/...`, проверяется через `@IsString()`
-- MIME-типы проверяются в сервисе (а не в `fileFilter` контроллера), чтобы отдавать `400 Bad Request` вместо `500`
-- Изображения сжимаются через `sharp` (libvips — нативные потоки, не блокирует event loop)
-- Константы (`MAX_WIDTH`, `MAX_FILE_SIZE`, и т.д.) вынесены в `file-upload.config.ts`, импортируются в `main.ts` и сервис
-- Директория `uploads/` создаётся в `FileUploadModule.onModuleInit()`, а не в сервисе при обработке запроса
-- CAPTCHA stateless через JWT с `expiresIn: 5m`, секрет из `.env`. Хук `useCaptcha` вынесен отдельно, в форму пока не подключён
-- Формы на `react-hook-form` + `valibot` (уже в проекте)
-- Для оптимистичного UI: `POST /comments` должен возвращать полный `CommentRowDTO` (с `user_name`, `home_page` через JOIN), а не `{ lastID, changes }`
-- Shared-типы (`shared/api/types/`) — не актуальны, типы определяются локально
-- `TextEditor` — собственный `textareaRef`, связь с RHF через колбэк `onValueChange`, без `register()` на DOM-элементе
-- Разрешённые HTML-теги в комментариях: `<a href="" title="">`, `<code>`, `<i>`, `<strong>`. Формат хранения — XHTML, вывод — HTML
-- DOMPurify (`utils/sanitize.ts`) — очистка только для превью в TextEditor. Бэкенд чистит через `sanitize.pipe.ts` (обновлён: добавлен `<a>` с `href`/`title`)
-- `Button` — переиспользуемый враппер `<button type="button">`, принимает `className`. Базовые стили-ресеты (`cursor`, `border: none`, `background: none`), стилизация — в родительских CSS-модулях
+- Типы определяются локально в `frontend/src/types/`, `shared/api/types/` — устарели
+- Backend: `sqlite3`, без ORM, raw-запросы через `DB` service
+- Загрузка файлов: `memoryStorage` → валидация → сохранение на диск. `sharp` для ресайза
+- CAPTCHA: stateless через JWT (`expiresIn: 5m`), хук `useCaptcha` вынесен отдельно
+- `TextEditor`: связь с формой через колбэк `onValueChange`, без `register()` на DOM-элементе. Формат хранения — XHTML
+- `Button`: переиспользуемый враппер `<button type="button">`, стилизация в родительских CSS-модулях
+- Теги `<a>` с атрибутами `href`/`title` разрешены на бэкенде (`sanitize.pipe.ts`) и фронтенде (`utils/sanitize.ts`)
