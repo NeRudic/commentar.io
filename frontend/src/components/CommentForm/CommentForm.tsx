@@ -8,6 +8,7 @@ import { formSchema } from '../../schemas/commentForm.schema';
 import type { CommentFormValues } from '../../schemas/commentForm.schema';
 import { ALLOWED_TYPES, ALLOWED_EXTENSIONS, TXT_MAX_SIZE } from '../../config/file.config';
 import Button from '../Button/Button';
+import TextEditor from '../TextEditor/TextEditor';
 import styles from './CommentForm.module.css';
 
 interface CommentFormProps {
@@ -44,6 +45,8 @@ export default function CommentForm({
       file_path: null,
     },
   });
+
+  const { name: textFieldName } = register('text');
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
@@ -137,7 +140,12 @@ export default function CommentForm({
 
       <div className={styles.field}>
         <label className={styles.label}>Комментарий</label>
-        <textarea className={styles.textarea} {...register('text')} />
+        <TextEditor
+          name={textFieldName}
+          onValueChange={(v) =>
+            setValue('text', v, { shouldValidate: true })
+          }
+        />
         {errors.text && (
           <span className={styles.error}>{errors.text.message}</span>
         )}
