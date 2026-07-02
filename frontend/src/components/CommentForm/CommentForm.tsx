@@ -7,6 +7,7 @@ import uploadFile from '../../services/uploadFile';
 import { formSchema } from '../../schemas/commentForm.schema';
 import type { CommentFormValues } from '../../schemas/commentForm.schema';
 import { ALLOWED_TYPES, ALLOWED_EXTENSIONS, TXT_MAX_SIZE } from '../../config/file.config';
+import Button from '../Button/Button';
 import styles from './CommentForm.module.css';
 
 interface CommentFormProps {
@@ -156,20 +157,16 @@ export default function CommentForm({
       </div>
 
       <div className={styles.actions}>
-        <button
-          type="button"
-          className={styles.cancelBtn}
-          onClick={onClose}
-        >
+        <Button className={styles.cancelBtn} onClick={onClose}>
           Отмена
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
           className={styles.submitBtn}
           disabled={isSubmitting}
         >
           Отправить
-        </button>
+        </Button>
       </div>
     </form>
   );
