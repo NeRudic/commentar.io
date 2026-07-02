@@ -26,9 +26,12 @@
 Файлы: `CommentForm/CommentForm.tsx`, `CommentForm/CommentForm.module.css`.
 
 **Статус:**
-- [x] CAPTCHA (вопрос, инпут, верификация при сабмите, перезапрос при ошибке)
+- [x] CAPTCHA хук (`useCaptcha`) — fetch/verify/reload, не интегрирован в форму
 - [x] File input (accept, клиентская валидация типа и размера txt)
 - [x] Интеграция с эндпоинтом загрузки (upload, затем createComment с file_path)
+- [x] Переиспользуемый `Button` компонент (минимальный враппер, `className`-проп)
+- [x] `TextEditor` с тулбаром (`[i]`, `[strong]`, `[code]`, `[a]`) и превью
+- [x] DOMPurify — очистка HTML в превью (`utils/sanitize.ts`)
 - [x] CSS-модуль
 - [x] Валидация через valibot
 
@@ -122,9 +125,14 @@ backend/src/file-upload/
 ### Создать
 
 ```
+frontend/src/components/Button/Button.tsx
+frontend/src/components/Button/Button.module.css
+frontend/src/components/TextEditor/TextEditor.tsx
+frontend/src/components/TextEditor/TextEditor.module.css
 frontend/src/components/Comment/Comment.module.css
 frontend/src/components/CommentList/CommentList.tsx
 frontend/src/components/CommentList/CommentList.module.css
+frontend/src/utils/sanitize.ts
 ```
 
 ### Изменить
@@ -145,7 +153,11 @@ frontend/src/components/Post/Post.tsx          # модал + CommentList
 - Изображения сжимаются через `sharp` (libvips — нативные потоки, не блокирует event loop)
 - Константы (`MAX_WIDTH`, `MAX_FILE_SIZE`, и т.д.) вынесены в `file-upload.config.ts`, импортируются в `main.ts` и сервис
 - Директория `uploads/` создаётся в `FileUploadModule.onModuleInit()`, а не в сервисе при обработке запроса
-- CAPTCHA stateless через JWT с `expiresIn: 5m`, секрет из `.env`
+- CAPTCHA stateless через JWT с `expiresIn: 5m`, секрет из `.env`. Хук `useCaptcha` вынесен отдельно, в форму пока не подключён
 - Формы на `react-hook-form` + `valibot` (уже в проекте)
 - Для оптимистичного UI: `POST /comments` должен возвращать полный `CommentRowDTO` (с `user_name`, `home_page` через JOIN), а не `{ lastID, changes }`
 - Shared-типы (`shared/api/types/`) — не актуальны, типы определяются локально
+- `TextEditor` — собственный `textareaRef`, связь с RHF через колбэк `onValueChange`, без `register()` на DOM-элементе
+- Разрешённые HTML-теги в комментариях: `<a href="" title="">`, `<code>`, `<i>`, `<strong>`. Формат хранения — XHTML, вывод — HTML
+- DOMPurify (`utils/sanitize.ts`) — очистка только для превью в TextEditor. Бэкенд чистит через `sanitize.pipe.ts` (обновлён: добавлен `<a>` с `href`/`title`)
+- `Button` — переиспользуемый враппер `<button type="button">`, принимает `className`. Базовые стили-ресеты (`cursor`, `border: none`, `background: none`), стилизация — в родительских CSS-модулях
