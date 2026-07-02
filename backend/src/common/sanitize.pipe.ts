@@ -1,11 +1,11 @@
-import { Injectable, PipeTransform, ArgumentMetadata } from '@nestjs/common';
+import { Injectable, PipeTransform } from '@nestjs/common';
 import sanitizeHtml from 'sanitize-html';
 
 const ALLOWED_TAGS = ['strong', 'i', 'code', 'a'];
 
 @Injectable()
 export class SanitizePipe implements PipeTransform {
-  transform(value: unknown, _metadata: ArgumentMetadata) {
+  transform(value: unknown) {
     if (typeof value === 'string') {
       return sanitizeHtml(value, {
         allowedTags: ALLOWED_TAGS,
@@ -17,7 +17,10 @@ export class SanitizePipe implements PipeTransform {
         if (typeof (value as Record<string, unknown>)[key] === 'string') {
           (value as Record<string, unknown>)[key] = sanitizeHtml(
             (value as Record<string, unknown>)[key] as string,
-            { allowedTags: ALLOWED_TAGS, allowedAttributes: { a: ['href', 'title'] } },
+            {
+              allowedTags: ALLOWED_TAGS,
+              allowedAttributes: { a: ['href', 'title'] },
+            },
           );
         }
       }
