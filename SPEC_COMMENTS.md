@@ -28,9 +28,9 @@
 **Статус:**
 - [x] CAPTCHA (вопрос, инпут, верификация при сабмите, перезапрос при ошибке)
 - [x] File input (accept, клиентская валидация типа и размера txt)
-- [ ] Интеграция с эндпоинтом загрузки (upload, затем createComment с file_path)
-- [ ] CSS-модуль
-- [ ] Валидация через valibot
+- [x] Интеграция с эндпоинтом загрузки (upload, затем createComment с file_path)
+- [x] CSS-модуль
+- [x] Валидация через valibot
 
 ### Phase 1.5 — File Upload (отдельный модуль) ✅
 
@@ -119,11 +119,9 @@ backend/src/file-upload/
 
 ## Сводка файлов
 
-### Создать (оставшиеся)
+### Создать
 
 ```
-frontend/src/components/CommentForm/CommentForm.module.css
-frontend/src/components/Comment/Comment.tsx
 frontend/src/components/Comment/Comment.module.css
 frontend/src/components/CommentList/CommentList.tsx
 frontend/src/components/CommentList/CommentList.module.css
@@ -132,22 +130,8 @@ frontend/src/components/CommentList/CommentList.module.css
 ### Изменить
 
 ```
-backend/src/comment/comment.service.ts        # createComment → возвращать CommentRowDTO (SELECT + JOIN)
-backend/src/comment/comment.controller.ts     # тип возврата createComment → CommentRowDTO
-frontend/src/components/CommentForm/CommentForm.tsx # интеграция upload-эндпоинта
-frontend/src/components/Post/Post.tsx         # модал + CommentList
-```
-
-### Сделано ✅
-
-```
-backend/src/file-upload/file-upload.config.ts
-backend/src/file-upload/file-upload.module.ts
-backend/src/file-upload/file-upload.controller.ts
-backend/src/file-upload/file-upload.service.ts
-backend/src/main.ts                           # useStaticAssets + UPLOADS_DIR из конфига
-backend/src/app.module.ts                     # импорт FileUploadModule
-backend/src/comment/dto/create-comment.dto.ts # @IsUrl → @IsString для file_path
+frontend/src/components/Comment/Comment.tsx   # реализовать вместо стаба
+frontend/src/components/Post/Post.tsx          # модал + CommentList
 ```
 
 ---
