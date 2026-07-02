@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { Injectable } from '@nestjs/common';
-import * as jwt from 'jsonwebtoken';
+import { sign, verify, TokenExpiredError } from 'jsonwebtoken';
 import * as crypto from 'crypto';
 
 export interface CaptchaResponse {
@@ -9,24 +9,25 @@ export interface CaptchaResponse {
   b: number;
 }
 
+export interface CaptchaVerifyResult {
+  valid: boolean;
+  expired?: boolean;
+  newCaptcha?: CaptchaResponse;
+}
+
 @Injectable()
 export class CaptchaService {
-  constructor() {}
-
   secret(): string {
-    return (
-      process.env.CAPTCHA_SECRET ??
-      (() => {
-        throw new Error('Property CAPTCHA_SECRET is not defined in .env');
-      })()
-    );
+    if (!process.env.CAPTCHA_SECRET)
+      throw new Error('Property CAPTCHA_SECRET is not defined in .env');
+    return process.env.CAPTCHA_SECRET;
   }
 
   generate(): CaptchaResponse {
     const a = crypto.randomInt(1, 20);
     const b = crypto.randomInt(1, 20);
     return {
-      token: jwt.sign({ answer: `${a + b}` }, this.secret(), {
+      token: sign({ answer: `${a + b}` }, this.secret(), {
         expiresIn: '5m',
       }),
       a,
@@ -34,11 +35,14 @@ export class CaptchaService {
     };
   }
 
-  verify(token: string, clientAnswer: string): { valid: boolean } {
+  verify(token: string, clientAnswer: string): CaptchaVerifyResult {
     try {
-      const payload = jwt.verify(token, this.secret()) as { answer: string };
+      const payload = verify(token, this.secret()) as { answer: string };
       return { valid: payload.answer === clientAnswer };
-    } catch {
+    } catch (err) {
+      if (err instanceof TokenExpiredError) {
+        return { valid: false, expired: true, newCaptcha: this.generate() };
+      }
       return { valid: false };
     }
   }
