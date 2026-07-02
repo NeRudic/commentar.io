@@ -1,34 +1,50 @@
 import { useForm } from 'react-hook-form';
+import { valibotResolver } from '@hookform/resolvers/valibot';
+import { useState } from 'react';
 import createComment from '../../services/createComment';
-import type { Captcha, CreateCommentRequest } from '../../types';
-import { useEffect, useState } from 'react';
-import { getCaptcha, verifyCaptcha } from '../../services/captcha';
+import createUser from '../../services/createUser';
+import uploadFile from '../../services/uploadFile';
+import { formSchema } from '../../schemas/commentForm.schema';
+import type { CommentFormValues } from '../../schemas/commentForm.schema';
+import { ALLOWED_TYPES, ALLOWED_EXTENSIONS, TXT_MAX_SIZE } from '../../config/file.config';
+import styles from './CommentForm.module.css';
 
 interface CommentFormProps {
   postId: number;
+  parentCommentId?: number | null;
   onClose: () => void;
   onSuccess?: () => void;
 }
 
 export default function CommentForm({
   postId,
+  parentCommentId = null,
   onClose,
   onSuccess,
 }: CommentFormProps) {
-  void onClose;
-
-  const [captcha, setCaptcha] = useState<Captcha | null>(null);
-  const [captchaAnswer, setCaptchaAnswer] = useState('');
-  const [captchaError, setCaptchaError] = useState<string | null>(null);
-
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [fileUploading, setFileUploading] = useState(false);
 
-  const ALLOWED_TYPES = ['text/plain', 'image/jpeg', 'image/gif', 'image/png'];
-  const ALLOWED_EXTENSIONS = '.txt,.jpg,.jpeg,.gif,.png';
-  const TXT_MAX_SIZE = 100 * 1024;
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<CommentFormValues>({
+    resolver: valibotResolver(formSchema),
+    defaultValues: {
+      post_id: postId,
+      parent_comment_id: parentCommentId,
+      text: '',
+      user_name: '',
+      email: '',
+      home_page: null,
+      file_path: null,
+    },
+  });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
     if (!selected) {
       setFile(null);
@@ -36,7 +52,7 @@ export default function CommentForm({
       return;
     }
 
-    if (!ALLOWED_TYPES.includes(selected.type)) {
+    if (!(ALLOWED_TYPES as readonly string[]).includes(selected.type)) {
       setFileError('Недопустимый тип файла. Разрешены: txt, jpg, gif, png');
       setFile(null);
       return;
@@ -50,104 +66,111 @@ export default function CommentForm({
 
     setFile(selected);
     setFileError(null);
-  };
+    setFileUploading(true);
 
-  const refreshCaptcha = () => {
-    setCaptchaAnswer('');
-    setCaptchaError(null);
-    getCaptcha().then(setCaptcha);
-  };
-
-  useEffect(() => {
-    getCaptcha().then(setCaptcha);
-  }, [])
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<CreateCommentRequest>({
-    defaultValues: {
-      post_id: postId,
-      parent_comment_id: null,
-      text: '',
-      user_name: '',
-      user_email: '',
-      home_page: '',
-      file_path: null,
-    },
-  });
-
-  const onSubmit = async (data: CreateCommentRequest) => {
-    if (!captcha) return;
-
-    const { valid } = await verifyCaptcha(captcha.token, captchaAnswer);
-    if (!valid) {
-      setCaptchaError('Неверный ответ');
-      refreshCaptcha();
-      return;
+    try {
+      const { path } = await uploadFile(selected);
+      setValue('file_path', path);
+    } catch {
+      setFileError('Ошибка загрузки файла');
+      setFile(null);
+      setValue('file_path', null);
+    } finally {
+      setFileUploading(false);
     }
+  };
 
-    await createComment(data);
+  const onSubmit = async (data: CommentFormValues) => {
+    await createUser({
+      user_name: data.user_name,
+      email: data.email,
+      home_page: data.home_page || undefined,
+    });
+
+    await createComment({
+      post_id: data.post_id,
+      parent_comment_id: data.parent_comment_id,
+      text: data.text,
+      user_email: data.email,
+      file_path: data.file_path,
+    });
+
     onSuccess?.();
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <input type="hidden" {...register('post_id')} />
+    <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
+      <input
+        type="hidden"
+        {...register('post_id', { valueAsNumber: true })}
+      />
 
-      <label>
-        Имя
-        <input {...register('user_name')} />
-        {errors.user_name && <span>{errors.user_name.message}</span>}
-      </label>
+      <div className={styles.field}>
+        <label className={styles.label}>Имя</label>
+        <input className={styles.input} {...register('user_name')} />
+        {errors.user_name && (
+          <span className={styles.error}>{errors.user_name.message}</span>
+        )}
+      </div>
 
-      <label>
-        Email
-        <input {...register('user_email')} />
-        {errors.user_email && <span>{errors.user_email.message}</span>}
-      </label>
+      <div className={styles.field}>
+        <label className={styles.label}>Email</label>
+        <input className={styles.input} {...register('email')} />
+        {errors.email && (
+          <span className={styles.error}>{errors.email.message}</span>
+        )}
+      </div>
 
-      <label>
-        Сайт
-        <input {...register('home_page')} />
-        {errors.home_page && <span>{errors.home_page.message}</span>}
-      </label>
+      <div className={styles.field}>
+        <label className={styles.label}>Сайт</label>
+        <input
+          className={styles.input}
+          {...register('home_page', {
+            setValueAs: (v: string) => (v === '' ? null : v),
+          })}
+        />
+        {errors.home_page && (
+          <span className={styles.error}>{errors.home_page.message}</span>
+        )}
+      </div>
 
-      <label>
-        Комментарий
-        <textarea {...register('text')} />
-        {errors.text && <span>{errors.text.message}</span>}
-      </label>
+      <div className={styles.field}>
+        <label className={styles.label}>Комментарий</label>
+        <textarea className={styles.textarea} {...register('text')} />
+        {errors.text && (
+          <span className={styles.error}>{errors.text.message}</span>
+        )}
+      </div>
 
-      <label>
-        Файл
+      <div className={styles.field}>
+        <label className={styles.label}>Файл</label>
         <input
           type="file"
           accept={ALLOWED_EXTENSIONS}
           onChange={handleFileChange}
+          disabled={fileUploading}
         />
-        {file && <span>{file.name}</span>}
-        {fileError && <span>{fileError}</span>}
-      </label>
+        {fileUploading && <span>Загрузка...</span>}
+        {file && <span className={styles.fileName}>{file.name}</span>}
+        {fileError && <span className={styles.error}>{fileError}</span>}
+      </div>
 
-      {captcha && (
-        <div className="captcha">
-          <span>
-            Сколько будет {captcha.a} + {captcha.b}?
-          </span>
-          <input
-            type="text"
-            value={captchaAnswer}
-            onChange={(e) => setCaptchaAnswer(e.target.value)}
-          />
-          {captchaError && <span>{captchaError}</span>}
-        </div>
-      )}
-
-      <button type="submit" disabled={isSubmitting}>
-        Отправить
-      </button>
+      <div className={styles.actions}>
+        <button
+          type="button"
+          className={styles.cancelBtn}
+          onClick={onClose}
+        >
+          Отмена
+        </button>
+        <button
+          type="submit"
+          className={styles.submitBtn}
+          disabled={isSubmitting}
+        >
+          Отправить
+        </button>
+      </div>
     </form>
   );
 }
