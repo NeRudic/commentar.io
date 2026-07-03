@@ -6,4 +6,6 @@ export interface Captcha {
 
 export interface CaptchaVerifyResponse {
   valid: boolean;
+  expired?: boolean;
+  newCaptcha?: Captcha;
 }

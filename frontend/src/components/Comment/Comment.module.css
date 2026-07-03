@@ -1,0 +1,66 @@
+.comment {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.comment:last-child {
+  border-bottom: none;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.username {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.username:hover {
+  text-decoration: underline;
+}
+
+.date {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.text {
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.text a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.text code {
+  background: var(--bg-input);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.file {
+  margin-top: 6px;
+}
+
+.image {
+  max-width: 320px;
+  max-height: 240px;
+  border-radius: 4px;
+}
+
+.fileLink {
+  font-size: 12px;
+  color: var(--accent);
+  text-decoration: underline;
+}

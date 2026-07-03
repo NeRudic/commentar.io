@@ -1,5 +1,10 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { DB } from 'src/db/db.service';
+import { CaptchaService } from 'src/captcha/captcha.service';
 import { CommentRowDTO } from './dto/comment-row.dto';
 import { CreateCommentDTO } from './dto/create-comment.dto';
 import { CommentRepliesDTO } from './dto/comment-replies.dto';
@@ -8,18 +13,41 @@ import { DeleteCommentDTO } from './dto/delete-comment.dto';
 
 @Injectable()
 export class CommentService {
-  constructor(private readonly database: DB) {}
+  constructor(
+    private readonly database: DB,
+    private readonly captcha: CaptchaService,
+  ) {}
 
   /*
    * Create comment
    */
   async createComment(data: CreateCommentDTO): Promise<CommentRowDTO> {
-    try {
-      const { post_id, parent_comment_id, text, user_email, file_path } = data;
+    const {
+      post_id,
+      parent_comment_id,
+      text,
+      user_email,
+      file_path,
+      captcha_token,
+      captcha_answer,
+    } = data;
 
+    const { valid, expired } = this.captcha.verify(
+      captcha_token,
+      captcha_answer,
+    );
+    if (!valid) {
+      throw new BadRequestException(
+        expired ? 'Время капчи истекло. Решите новую капчу.' : 'Неверная капча',
+      );
+    }
+
+    let result: { lastID: number };
+
+    try {
       await this.database.run(`BEGIN TRANSACTION`);
 
-      const result = await this.database.run(
+      result = await this.database.run(
         `
       INSERT INTO comment (post_id, parent_comment_id, text, user_email, file_path)
       VALUES (?, ?, ?, ?, ?)
@@ -35,18 +63,6 @@ export class CommentService {
       }
 
       await this.database.run(`COMMIT`);
-
-      const row = await this.database.get<CommentRowDTO>(
-        `
-      SELECT comment.*, u.user_name, u.home_page
-      FROM comment
-      JOIN user AS u ON comment.user_email = u.email
-      WHERE comment.id = ?
-      `,
-        [result.lastID],
-      );
-
-      return row;
     } catch (err) {
       await this.database.run(`ROLLBACK`);
 
@@ -54,6 +70,24 @@ export class CommentService {
         `Failed to create comment. Error message: ${err}`,
       );
     }
+
+    const row = await this.database.get<CommentRowDTO>(
+      `
+    SELECT comment.*, u.user_name, u.home_page
+    FROM comment
+    JOIN user AS u ON comment.user_email = u.email
+    WHERE comment.id = ?
+    `,
+      [result.lastID],
+    );
+
+    if (!row) {
+      throw new InternalServerErrorException(
+        'Comment created but not found in database',
+      );
+    }
+
+    return row;
   }
 
   /*

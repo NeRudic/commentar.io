@@ -16,4 +16,6 @@ export interface CreateCommentRequest {
   user_email: string;
   text: string;
   file_path: string | null;
+  captcha_token: string;
+  captcha_answer: string;
 }

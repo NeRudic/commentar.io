@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { AIIllustration, DiffusionIllustration, RLIllustration } from "../components/icons/icons";
 
 export interface PostData {
+  id: number;
   postId: string;
   username: string;
   location: string;
@@ -14,6 +15,7 @@ export interface PostData {
 
 const POSTS: PostData[] = [
   {
+    id: 1,
     postId: "post-001",
     username: "neural_research",
     location: "San Francisco, CA",
@@ -25,6 +27,7 @@ const POSTS: PostData[] = [
       "🧠 The attention mechanism, introduced in 2017, revolutionized language processing. Instead of reading sequentially, transformers analyze all words at once, computing relevance scores between every pair of tokens.\n\nThis parallel processing lets models like GPT-4 capture dependencies RNNs couldn't. Each attention head learns distinct patterns — syntax, semantics, context.\n\nSelf-attention lets each word weight every other word dynamically. That's why modern LLMs grasp context so deeply.",
   },
   {
+    id: 2,
     postId: "post-002",
     username: "diffusion_lab",
     location: "London, UK",
@@ -36,6 +39,7 @@ const POSTS: PostData[] = [
       "🖼️ Diffusion models generate images by reversing a noise-adding process. Starting from pure Gaussian noise, the model gradually denoises step by step — like sculpting a statue from a block of marble.\n\nThe key insight: teach a model to predict the noise added at each step. Once trained, it can turn random noise into coherent images by subtracting predicted noise iteratively.\n\nStable Diffusion, DALL-E 3, and Midjourney all use variants of this approach. The math is elegant: it's all about estimating the score function of the data distribution.",
   },
   {
+    id: 3,
     postId: "post-003",
     username: "rl_explorer",
     location: "Berlin, Germany",

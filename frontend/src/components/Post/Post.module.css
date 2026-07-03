@@ -194,3 +194,28 @@
     font-size: 12px;
   }
 }
+
+/* === Comments === */
+.viewComments {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 16px 0;
+  font-size: 13px;
+  color: var(--text-tertiary);
+  text-align: left;
+}
+
+.viewComments:hover {
+  color: var(--text-secondary);
+}
+
+.commentsSection {
+  padding: 8px 16px 0;
+}
+
+@media (min-width: 768px) {
+  .commentsSection {
+    padding: 12px 20px 0;
+  }
+}
