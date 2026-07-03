@@ -1,12 +1,11 @@
 import { useForm } from 'react-hook-form';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useState } from 'react';
-import createComment from '../../services/createComment';
-import createUser from '../../services/createUser';
-import uploadFile from '../../services/uploadFile';
+import { createComment, createUser, uploadFile } from '../../services';
 import { formSchema } from '../../schemas/commentForm.schema';
 import type { CommentFormValues } from '../../schemas/commentForm.schema';
 import { ALLOWED_TYPES, ALLOWED_EXTENSIONS, TXT_MAX_SIZE } from '../../config/file.config';
+import { useCaptcha } from '../../hooks/useCaptcha';
 import Button from '../Button/Button';
 import TextEditor from '../TextEditor/TextEditor';
 import styles from './CommentForm.module.css';
@@ -27,6 +26,7 @@ export default function CommentForm({
   const [file, setFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [fileUploading, setFileUploading] = useState(false);
+  const [captchaAnswer, setCaptchaAnswer] = useState('');
 
   const {
     register,
@@ -45,6 +45,8 @@ export default function CommentForm({
       file_path: null,
     },
   });
+
+  const captcha = useCaptcha();
 
   const { name: textFieldName } = register('text');
 
@@ -85,6 +87,8 @@ export default function CommentForm({
   };
 
   const onSubmit = async (data: CommentFormValues) => {
+    if (!captcha.captcha) return;
+
     await createUser({
       user_name: data.user_name,
       email: data.email,
@@ -97,6 +101,8 @@ export default function CommentForm({
       text: data.text,
       user_email: data.email,
       file_path: data.file_path,
+      captcha_token: captcha.captcha.token,
+      captcha_answer: captchaAnswer,
     });
 
     onSuccess?.();
@@ -164,6 +170,49 @@ export default function CommentForm({
         {fileError && <span className={styles.error}>{fileError}</span>}
       </div>
 
+      <div className={styles.field}>
+        <label className={styles.label}>Капча</label>
+        {captcha.systemError && (
+          <span className={styles.error}>{captcha.systemError}</span>
+        )}
+        {captcha.captcha && !captcha.systemError && (
+          <div className={styles.captchaSection}>
+            <span className={styles.captchaQuestion}>
+              {captcha.captcha.a} + {captcha.captcha.b} = ?
+            </span>
+            <input
+              className={styles.captchaInput}
+              type="text"
+              value={captchaAnswer}
+              onChange={(e) => {
+                setCaptchaAnswer(e.target.value.replace(/[^0-9-]/g, ''));
+              }}
+              disabled={captcha.verifyResult === true}
+            />
+            {captcha.verifyResult ? (
+              <span className={styles.verifySuccess}>&#10003;</span>
+            ) : (
+              <Button
+                className={styles.verifyBtn}
+                onClick={() => captcha.verify(captchaAnswer)}
+                disabled={captcha.isVerifying || !captchaAnswer.trim()}
+              >
+                {captcha.isVerifying ? '...' : 'Проверить'}
+              </Button>
+            )}
+            <Button
+              className={styles.verifyBtn}
+              onClick={() => {
+                setCaptchaAnswer('');
+                captcha.reloadCaptcha();
+              }}
+            >
+              &#8634;
+            </Button>
+          </div>
+        )}
+      </div>
+
       <div className={styles.actions}>
         <Button className={styles.cancelBtn} onClick={onClose}>
           Отмена
@@ -171,7 +220,7 @@ export default function CommentForm({
         <Button
           type="submit"
           className={styles.submitBtn}
-          disabled={isSubmitting}
+          disabled={isSubmitting || captcha.verifyResult !== true}
         >
           Отправить
         </Button>

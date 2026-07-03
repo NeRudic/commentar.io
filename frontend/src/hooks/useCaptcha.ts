@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-
-import { getCaptcha, verifyCaptcha } from "../services/captcha";
+import { getCaptcha, verifyCaptcha } from "../services";
 import type { Captcha } from "../types";
 
 interface UseCaptchaReturn {
@@ -52,12 +51,21 @@ export function useCaptcha(): UseCaptchaReturn {
       setSystemError(null);
 
       try {
-        const { valid } = await verifyCaptcha(captcha.token, answer);
+        const { valid, expired, newCaptcha } = await verifyCaptcha(
+          captcha.token,
+          answer,
+        );
 
         setVerifyResult(valid);
 
         if (!valid) {
-          await reloadCaptcha();
+          if (expired && newCaptcha) {
+            setCaptcha(newCaptcha);
+            setVerifyResult(null);
+            setSystemError("Время капчи истекло. Решите новую.");
+          } else {
+            await reloadCaptcha();
+          }
         }
 
         return valid;
