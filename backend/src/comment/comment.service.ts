@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { DB } from 'src/db/db.service';
+import { DB } from '../db/db.service';
 import { CommentRowDTO } from './dto/comment-row.dto';
 import { CreateCommentDTO } from './dto/create-comment.dto';
 import { CommentRepliesDTO } from './dto/comment-replies.dto';
@@ -19,7 +19,7 @@ export class CommentService {
     let result: { lastID: number };
 
     try {
-      await this.database.run(`BEGIN TRANSACTION`);
+      await this.database.run(`BEGIN IMMEDIATE`);
 
       result = await this.database.run(
         `
@@ -67,7 +67,9 @@ export class CommentService {
   /*
    * Get root comments
    */
-  async getRootComments(post_id: RootCommentsDTO): Promise<CommentRowDTO[]> {
+  async getRootComments({
+    post_id,
+  }: RootCommentsDTO): Promise<CommentRowDTO[]> {
     try {
       const comments: CommentRowDTO[] = await this.database.all(
         `
@@ -90,9 +92,9 @@ export class CommentService {
   /*
    * Get relpies comment
    */
-  async getReplies(
-    parent_comment_id: CommentRepliesDTO,
-  ): Promise<CommentRowDTO[]> {
+  async getReplies({
+    parent_comment_id,
+  }: CommentRepliesDTO): Promise<CommentRowDTO[]> {
     try {
       const comments: CommentRowDTO[] = await this.database.all(
         `
@@ -114,7 +116,7 @@ export class CommentService {
   /*
    * Delete comment
    */
-  async deleteComment(id: DeleteCommentDTO): Promise<boolean> {
+  async deleteComment({ id }: DeleteCommentDTO): Promise<boolean> {
     try {
       const result = await this.database.run(
         `

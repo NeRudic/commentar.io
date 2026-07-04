@@ -25,7 +25,12 @@ export class DB {
           res();
         }
       });
+      // sqlite3 Требует явно включать поддержку Foreign Keys
       this.db.run('PRAGMA foreign_keys = ON;');
+      // Читатели не будут блокировать писателей и наоборот
+      this.db.run('PRAGMA journal_mode = WAL;');
+      // Если база будет занята, когда прилетит запрос, в течение 5 сек. база будет ретраить его
+      this.db.run('PRAGMA busy_timeout = 5000;');
     });
   }
 
