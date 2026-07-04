@@ -39,12 +39,4 @@ export class CreateCommentDTO {
   @IsOptional()
   @IsString()
   file_path: string | null;
-
-  @IsString()
-  @MinLength(1)
-  captcha_token: string;
-
-  @IsString()
-  @MinLength(1)
-  captcha_answer: string;
 }
