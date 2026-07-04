@@ -8,12 +8,12 @@ export async function getCaptcha(): Promise<Captcha> {
 }
 
 export async function verifyCaptcha(
-  token: string,
-  clientAnswer: string,
+  captcha_token: string,
+  captcha_answer: string,
 ): Promise<CaptchaVerifyResponse> {
   const { data } = await axios.post<CaptchaVerifyResponse>(
     BASE_URL + "/captcha/verify",
-    { token, clientAnswer },
+    { captcha_token, captcha_answer },
   );
   return data;
 }

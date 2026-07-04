@@ -1,7 +1,8 @@
 import 'dotenv/config';
 import { Injectable } from '@nestjs/common';
-import { sign, verify, TokenExpiredError } from 'jsonwebtoken';
+import { sign, verify as verifyToken } from 'jsonwebtoken';
 import * as crypto from 'crypto';
+import { CaptchaVerifyDTO } from './dto/captcha.verify.dto';
 
 export interface CaptchaResponse {
   token: string;
@@ -10,9 +11,9 @@ export interface CaptchaResponse {
 }
 
 export interface CaptchaVerifyResult {
-  valid: boolean;
   expired?: boolean;
-  newCaptcha?: CaptchaResponse;
+  new_captcha?: CaptchaResponse;
+  error_message?: string;
 }
 
 @Injectable()
@@ -24,8 +25,8 @@ export class CaptchaService {
   }
 
   generate(): CaptchaResponse {
-    const a = crypto.randomInt(1, 20);
-    const b = crypto.randomInt(1, 20);
+    const [a, b] = [crypto.randomInt(1, 50), crypto.randomInt(1, 50)];
+
     return {
       token: sign({ answer: `${a + b}` }, this.secret(), {
         expiresIn: '5m',
@@ -35,15 +36,14 @@ export class CaptchaService {
     };
   }
 
-  verify(token: string, clientAnswer: string): CaptchaVerifyResult {
-    try {
-      const payload = verify(token, this.secret()) as { answer: string };
-      return { valid: payload.answer === clientAnswer };
-    } catch (err) {
-      if (err instanceof TokenExpiredError) {
-        return { valid: false, expired: true, newCaptcha: this.generate() };
-      }
-      return { valid: false };
-    }
+  verify({ captcha_token, captcha_answer }: CaptchaVerifyDTO): boolean | void {
+    const payload = verifyToken(captcha_token, this.secret()) as {
+      answer: string;
+    };
+
+    if (payload.answer !== captcha_answer)
+      throw new Error('Неправильный ответ');
+
+    return true;
   }
 }

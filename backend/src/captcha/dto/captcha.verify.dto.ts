@@ -1,10 +1,10 @@
 import { IsString, MinLength } from 'class-validator';
 
 export class CaptchaVerifyDTO {
-  @IsString()
-  token: string;
+  @MinLength(1)
+  captcha_token: string;
 
   @IsString()
   @MinLength(1)
-  clientAnswer: string;
+  captcha_answer: string;
 }

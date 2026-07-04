@@ -1,10 +1,5 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { DB } from 'src/db/db.service';
-import { CaptchaService } from 'src/captcha/captcha.service';
 import { CommentRowDTO } from './dto/comment-row.dto';
 import { CreateCommentDTO } from './dto/create-comment.dto';
 import { CommentRepliesDTO } from './dto/comment-replies.dto';
@@ -13,34 +8,13 @@ import { DeleteCommentDTO } from './dto/delete-comment.dto';
 
 @Injectable()
 export class CommentService {
-  constructor(
-    private readonly database: DB,
-    private readonly captcha: CaptchaService,
-  ) {}
+  constructor(private readonly database: DB) {}
 
   /*
    * Create comment
    */
   async createComment(data: CreateCommentDTO): Promise<CommentRowDTO> {
-    const {
-      post_id,
-      parent_comment_id,
-      text,
-      user_email,
-      file_path,
-      captcha_token,
-      captcha_answer,
-    } = data;
-
-    const { valid, expired } = this.captcha.verify(
-      captcha_token,
-      captcha_answer,
-    );
-    if (!valid) {
-      throw new BadRequestException(
-        expired ? 'Время капчи истекло. Решите новую капчу.' : 'Неверная капча',
-      );
-    }
+    const { post_id, parent_comment_id, text, user_email, file_path } = data;
 
     let result: { lastID: number };
 

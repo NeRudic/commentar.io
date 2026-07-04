@@ -11,9 +11,9 @@ export class CaptchaController {
     return this.services.generate();
   }
 
+  // Не используется напрямую
   @Post('verify')
   verifyCaptcha(@Body() data: CaptchaVerifyDTO) {
-    const { token, clientAnswer } = data;
-    return this.services.verify(token, clientAnswer);
+    return this.services.verify(data);
   }
 }
