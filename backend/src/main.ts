@@ -5,6 +5,7 @@ import { AppModule } from './app.module';
 import { SanitizePipe } from './common/sanitize.pipe';
 import { UPLOADS_DIR } from './file-upload/file-upload.config';
 import { join } from 'path';
+import 'reflect-metadata';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
