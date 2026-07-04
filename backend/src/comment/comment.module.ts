@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { CommentController } from './comment.controller';
 import { CommentService } from './comment.service';
-import { DBModule } from 'src/db/db.module';
-import { CaptchaModule } from 'src/captcha/captcha.module';
+import { DBModule } from '../db/db.module';
+import { CaptchaModule } from '../captcha/captcha.module';
 import { CaptchaMiddleware } from '../common/middleware/captcha.middleware';
 
 @Module({

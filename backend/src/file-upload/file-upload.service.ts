@@ -6,7 +6,7 @@ import {
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import sharp from 'sharp';
-import { DB } from 'src/db/db.service';
+import { DB } from '../db/db.service';
 import {
   FILE_UPLOAD_CONFIG,
   MIME_TO_EXT,

@@ -5,9 +5,9 @@ import {
 } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { TokenExpiredError } from 'jsonwebtoken';
-import { CaptchaService } from 'src/captcha/captcha.service';
-import { CaptchaVerifyDTO } from 'src/captcha/dto/captcha.verify.dto';
-import { CreateCommentDTO } from 'src/comment/dto/create-comment.dto';
+import { CaptchaService } from '../../captcha/captcha.service';
+import { CaptchaVerifyDTO } from '../../captcha/dto/captcha.verify.dto';
+import { CreateCommentDTO } from '../../comment/dto/create-comment.dto';
 
 @Injectable()
 export class CaptchaMiddleware implements NestMiddleware {

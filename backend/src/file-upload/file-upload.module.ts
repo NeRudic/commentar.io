@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { join } from 'path';
 import { FileUploadController } from './file-upload.controller';
 import { FileUploadService } from './file-upload.service';
-import { DBModule } from 'src/db/db.module';
+import { DBModule } from '../db/db.module';
 import { UPLOADS_DIR } from './file-upload.config';
 
 @Module({
