@@ -4,6 +4,7 @@ import { UserModule } from './user/user.module';
 import { CommentModule } from './comment/comment.module';
 import { CaptchaModule } from './captcha/captcha.module';
 import { FileUploadModule } from './file-upload/file-upload.module';
+import { OrchestratorModule } from './orchestrator/orchestrator.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { FileUploadModule } from './file-upload/file-upload.module';
     CommentModule,
     CaptchaModule,
     FileUploadModule,
+    OrchestratorModule,
   ],
 })
 export class AppModule {}

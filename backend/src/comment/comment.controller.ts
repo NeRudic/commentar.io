@@ -1,15 +1,12 @@
 import {
-  Body,
   Controller,
   Delete,
   Get,
   NotFoundException,
   Param,
-  Post,
 } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CommentRowDTO } from './dto/comment-row.dto';
-import { CreateCommentDTO } from './dto/create-comment.dto';
 import { CommentRepliesDTO } from './dto/comment-replies.dto';
 import { RootCommentsDTO } from './dto/root-comments.dto';
 import { DeleteCommentDTO } from './dto/delete-comment.dto';
@@ -17,15 +14,6 @@ import { DeleteCommentDTO } from './dto/delete-comment.dto';
 @Controller('comments')
 export class CommentController {
   constructor(private readonly services: CommentService) {}
-
-  @Post()
-  async createComment(
-    @Body() comment_data: CreateCommentDTO,
-  ): Promise<CommentRowDTO> {
-    const result = await this.services.createComment(comment_data);
-
-    return result;
-  }
 
   @Get(':post_id')
   async getRootComments(
