@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { DB } from '../db/db.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDTO } from './dto/create-user.dto';
 import type { UserRow } from '@shared/api/types';
 
 @Injectable()
 export class UserService {
   constructor(private readonly db: DB) {}
 
-  async findOrCreate(dto: CreateUserDto): Promise<UserRow> {
+  async findOrCreate(dto: CreateUserDTO): Promise<UserRow> {
     try {
       const existing = await this.db.get<UserRow>(
         'SELECT * FROM user WHERE email = ?',
