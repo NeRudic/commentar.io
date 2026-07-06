@@ -8,7 +8,7 @@ import {
   AIIllustration,
 } from '../icons/icons';
 import { getComments } from '../../services';
-import type { CommentRow } from '../../types';
+import type { CommentRow, CreateCommentResponse } from '../../types';
 import Modal from '../Modal/Modal';
 import CommentForm from '../CommentForm/CommentForm';
 import Comment from '../Comment/Comment';
@@ -55,10 +55,14 @@ export default function Post({
     void fetchComments();
   }, [fetchComments]);
 
-  const handleFormSuccess = useCallback(() => {
+  const handleFormSuccess = useCallback((result?: CreateCommentResponse) => {
     setIsFormOpen(false);
     setShowComments(true);
-    void fetchComments();
+    if (result?.siblings) {
+      setComments(result.siblings);
+    } else {
+      void fetchComments();
+    }
   }, [fetchComments]);
 
   const hasComments = comments.length > 0;

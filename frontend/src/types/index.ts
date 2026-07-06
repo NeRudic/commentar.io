@@ -1,4 +1,4 @@
-export type { CommentRow, CreateCommentRequest } from "./comment";
+export type { CommentRow, CreateCommentRequest, CreateCommentResponse } from "./comment";
 export type { UserRow, CreateUserRequest } from "./user";
 export type { Captcha, CaptchaVerifyResponse } from "./captcha";
 export type { FileUploadResponse } from "./file";

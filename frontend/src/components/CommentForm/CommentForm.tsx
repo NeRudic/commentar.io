@@ -1,9 +1,10 @@
 import { useForm } from 'react-hook-form';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useState } from 'react';
-import { createComment, createUser, uploadFile } from '../../services';
+import { createComment, uploadFile } from '../../services';
 import { formSchema } from '../../schemas/commentForm.schema';
 import type { CommentFormValues } from '../../schemas/commentForm.schema';
+import type { CreateCommentResponse } from '../../types';
 import { ALLOWED_TYPES, ALLOWED_EXTENSIONS, TXT_MAX_SIZE } from '../../config/file.config';
 import { useCaptcha } from '../../hooks/useCaptcha';
 import Button from '../Button/Button';
@@ -14,7 +15,7 @@ interface CommentFormProps {
   postId: number;
   parentCommentId?: number | null;
   onClose: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (result?: CreateCommentResponse) => void;
 }
 
 export default function CommentForm({
@@ -89,23 +90,19 @@ export default function CommentForm({
   const onSubmit = async (data: CommentFormValues) => {
     if (!captcha.captcha) return;
 
-    await createUser({
-      user_name: data.user_name,
-      email: data.email,
-      home_page: data.home_page || undefined,
-    });
-
-    await createComment({
+    const result = await createComment({
       post_id: data.post_id,
       parent_comment_id: data.parent_comment_id,
-      text: data.text,
+      user_name: data.user_name,
       user_email: data.email,
+      home_page: data.home_page ?? null,
+      text: data.text,
       file_path: data.file_path,
       captcha_token: captcha.captcha.token,
       captcha_answer: captchaAnswer,
     });
 
-    onSuccess?.();
+    onSuccess?.(result);
   };
 
   return (
