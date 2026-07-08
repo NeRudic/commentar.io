@@ -37,3 +37,19 @@
 - `@tanstack/react-form` и `@tanstack/valibot-form-adapter` удалены.
 - `FormField` компонент-обёртка удалён — `register()` самодостаточен.
 - Валидация (valibot) будет подключаться через `@hookform/resolvers/valibot` или вручную в `register` options.
+
+## 2026-07-08 — Полное удаление shared/api/types
+
+**Решение:** Удалена директория `shared/` и все алиасы `@shared` из tsconfig/vite.
+`svelte/UserRow` перенесён в `backend/src/user/user.types.ts`.
+
+**Почему:**
+- Frontend давно использует локальные типы (`frontend/src/types/`).
+- Backend использует DTO с `class-validator`, единственный потребитель shared — `UserRow` в `UserService`.
+- Алиасы `@shared` в tsconfig/vite были мёртвым конфигом.
+
+**Что изменилось:**
+- Создан `backend/src/user/user.types.ts` с `UserRow`.
+- `user.service.ts` импортирует `UserRow` локально.
+- Удалены алиасы `@shared` из `backend/tsconfig.json`, `frontend/tsconfig.app.json`, `frontend/vite.config.ts`.
+- Директория `shared/` удалена.
