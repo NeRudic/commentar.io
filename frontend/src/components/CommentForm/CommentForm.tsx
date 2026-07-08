@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { createComment, uploadFile, getCaptcha } from '../../services';
 import { formSchema } from '../../schemas/commentForm.schema';
 import type { CommentFormValues } from '../../schemas/commentForm.schema';
-import type { CreateCommentResponse, Captcha } from '../../types';
+import type { CreateCommentResponse, Captcha, CaptchaErrorResponse } from '../../types';
 import { ALLOWED_TYPES, ALLOWED_EXTENSIONS, TXT_MAX_SIZE } from '../../config/file.config';
 import Button from '../Button/Button';
 import TextEditor from '../TextEditor/TextEditor';
@@ -42,7 +42,7 @@ export default function CommentForm({
       parent_comment_id: parentCommentId,
       text: '',
       user_name: '',
-      email: '',
+      user_email: '',
       home_page: null,
       file_path: null,
     },
@@ -97,24 +97,16 @@ export default function CommentForm({
 
     try {
       const result = await createComment({
-        post_id: data.post_id,
-        parent_comment_id: data.parent_comment_id,
-        user_name: data.user_name,
-        user_email: data.email,
-        home_page: data.home_page ?? null,
-        text: data.text,
-        file_path: data.file_path,
+        ...data,
         captcha_token: captcha.token,
         captcha_answer: captchaAnswer,
       });
 
       onSuccess?.(result);
     } catch (err) {
-      const resp = (err as { response?: { data?: Record<string, unknown> } })
-        .response;
-      const captchaErr = resp?.data?.captcha_error as
-        | { expired: boolean; new_captcha: Captcha; error_message: string }
-        | undefined;
+      const captchaErr = (
+        err as { response?: { data?: { captcha_error?: CaptchaErrorResponse } } }
+      )?.response?.data?.captcha_error;
 
       if (captchaErr) {
         setCaptchaError(captchaErr.error_message);
@@ -143,9 +135,9 @@ export default function CommentForm({
 
       <div className={styles.field}>
         <label className={styles.label}>Email</label>
-        <input className={styles.input} {...register('email')} />
-        {errors.email && (
-          <span className={styles.error}>{errors.email.message}</span>
+        <input className={styles.input} {...register('user_email')} />
+        {errors.user_email && (
+          <span className={styles.error}>{errors.user_email.message}</span>
         )}
       </div>
 

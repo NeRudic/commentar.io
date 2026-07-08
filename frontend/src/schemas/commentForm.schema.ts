@@ -4,7 +4,7 @@ export const formSchema = v.object({
   post_id: v.number(),
   parent_comment_id: v.nullable(v.number()),
   user_name: v.pipe(v.string(), v.nonEmpty("Имя обязательно")),
-  email: v.pipe(
+  user_email: v.pipe(
     v.string(),
     v.nonEmpty("Email обязателен"),
     v.email("Некорректный email"),
