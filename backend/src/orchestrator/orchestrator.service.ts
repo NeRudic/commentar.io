@@ -34,7 +34,7 @@ export class OrchestratorService {
 
       await this.userService.findOrCreate({
         user_name,
-        email: user_email,
+        user_email,
         home_page: home_page ?? undefined,
       });
 

@@ -11,14 +11,14 @@ export class UserService {
     try {
       const existing = await this.db.get<UserRow>(
         'SELECT * FROM user WHERE email = ?',
-        [dto.email],
+        [dto.user_email],
       );
 
       if (existing) return existing;
 
       const result = await this.db.run(
         'INSERT INTO user (user_name, email, home_page) VALUES (?, ?, ?)',
-        [dto.user_name, dto.email, dto.home_page ?? null],
+        [dto.user_name, dto.user_email, dto.home_page ?? null],
       );
 
       return this.db.get<UserRow>('SELECT * FROM user WHERE id = ?', [

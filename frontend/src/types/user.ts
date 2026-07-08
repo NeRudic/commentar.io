@@ -7,6 +7,6 @@ export interface UserRow {
 
 export interface CreateUserRequest {
   user_name: string;
-  email: string;
+  user_email: string;
   home_page?: string;
 }
