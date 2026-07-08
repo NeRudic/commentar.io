@@ -4,8 +4,8 @@ export interface Captcha {
   b: number;
 }
 
-export interface CaptchaVerifyResponse {
-  valid: boolean;
-  expired?: boolean;
-  newCaptcha?: Captcha;
+export interface CaptchaErrorResponse {
+  expired: boolean;
+  new_captcha: Captcha;
+  error_message: string;
 }
