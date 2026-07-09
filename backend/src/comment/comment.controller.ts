@@ -24,7 +24,7 @@ export class CommentController {
     return comments;
   }
 
-  @Get(':parent_id/replies')
+  @Get(':parent_comment_id/replies')
   async getReplies(
     @Param() parent_comment_id: CommentRepliesDTO,
   ): Promise<CommentRowDTO[]> {
