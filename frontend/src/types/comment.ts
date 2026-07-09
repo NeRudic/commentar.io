@@ -8,6 +8,7 @@ export interface CommentRow {
   home_page: string | null;
   file_path: string | null;
   created_at: string;
+  reply_count: number;
 }
 
 export interface CreateCommentRequest {

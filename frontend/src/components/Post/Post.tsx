@@ -1,4 +1,4 @@
-import { type ReactNode, useState, useEffect, useCallback } from 'react';
+import { type ReactNode, useState } from 'react';
 import {
   Heart,
   Comment as CommentIcon,
@@ -7,11 +7,7 @@ import {
   Dots,
   AIIllustration,
 } from '../icons/icons';
-import { getComments } from '../../services';
-import type { CommentRow, CreateCommentResponse } from '../../types';
-import Modal from '../Modal/Modal';
-import CommentForm from '../CommentForm/CommentForm';
-import Comment from '../Comment/Comment';
+import CommentSection from '../CommentSection/CommentSection';
 import styles from './Post.module.css';
 
 export interface PostProps {
@@ -37,35 +33,7 @@ export default function Post({
   time,
   illustration = <AIIllustration size={468} />,
 }: PostProps) {
-  const [comments, setComments] = useState<CommentRow[]>([]);
   const [showComments, setShowComments] = useState(false);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-
-  const fetchComments = useCallback(async () => {
-    try {
-      const data = await getComments(id);
-      setComments(data);
-    } catch {
-      setComments([]);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void fetchComments();
-  }, [fetchComments]);
-
-  const handleFormSuccess = useCallback((result?: CreateCommentResponse) => {
-    setIsFormOpen(false);
-    setShowComments(true);
-    if (result?.siblings) {
-      setComments(result.siblings);
-    } else {
-      void fetchComments();
-    }
-  }, [fetchComments]);
-
-  const hasComments = comments.length > 0;
 
   return (
     <article className={styles.card} data-post-id={postId}>
@@ -93,7 +61,7 @@ export default function Post({
         <button
           className={styles.actionBtn}
           aria-label="Comment"
-          onClick={() => setIsFormOpen(true)}
+          onClick={() => setShowComments((prev) => !prev)}
         >
           <CommentIcon size={24} />
         </button>
@@ -116,39 +84,9 @@ export default function Post({
         </span>
       </div>
 
-      {hasComments && !showComments && (
-        <button
-          className={styles.viewComments}
-          onClick={() => setShowComments(true)}
-        >
-          View all {comments.length} comments
-        </button>
-      )}
-
-      {showComments && comments.length > 0 && (
-        <div className={styles.commentsSection}>
-          {comments.map((comment) => (
-            <Comment
-              key={comment.id}
-              user_name={comment.user_name}
-              home_page={comment.home_page}
-              text={comment.text}
-              file_path={comment.file_path}
-              created_at={comment.created_at}
-            />
-          ))}
-        </div>
-      )}
+      {showComments && <CommentSection postId={id} />}
 
       <div className={styles.time}>{time}</div>
-
-      <Modal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)}>
-        <CommentForm
-          postId={id}
-          onClose={() => setIsFormOpen(false)}
-          onSuccess={handleFormSuccess}
-        />
-      </Modal>
     </article>
   );
 }

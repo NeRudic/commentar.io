@@ -64,3 +64,27 @@
   color: var(--accent);
   text-decoration: underline;
 }
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.actionBtn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0;
+}
+
+.actionBtn:hover {
+  color: var(--text-primary);
+}
+
+.loading {
+  font-size: 12px;
+  color: var(--text-secondary);
+}

@@ -2,14 +2,11 @@ import { BASE_URL } from "./index";
 import axios from "axios";
 import type { CommentRow } from "../types";
 
-export default async function getRootComments(
-  postId: number,
-  limit = 25,
-  offset = 0,
+export default async function getReplies(
+  parentCommentId: number,
 ): Promise<CommentRow[]> {
   const { data } = await axios.get<CommentRow[]>(
-    `${BASE_URL}/comments/${postId}`,
-    { params: { limit, offset } },
+    `${BASE_URL}/comments/${parentCommentId}/replies`,
   );
   return data;
 }

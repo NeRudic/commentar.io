@@ -1,0 +1,46 @@
+.section {
+  margin-top: 8px;
+}
+
+.viewComments {
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0;
+}
+
+.viewComments:hover {
+  color: var(--text-primary);
+}
+
+.commentsList {
+  padding: 4px 0;
+}
+
+.showMore {
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.showMore:hover {
+  color: var(--text-primary);
+}
+
+.addComment {
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 0 0;
+}
+
+.addComment:hover {
+  color: var(--text-primary);
+}
