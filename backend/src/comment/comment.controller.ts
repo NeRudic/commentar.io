@@ -4,6 +4,7 @@ import {
   Get,
   NotFoundException,
   Param,
+  Query,
 } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CommentRowDTO } from './dto/comment-row.dto';
@@ -17,10 +18,12 @@ export class CommentController {
 
   @Get(':post_id')
   async getRootComments(
-    @Param() post_id: RootCommentsDTO,
+    @Param() params: RootCommentsDTO,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
   ): Promise<CommentRowDTO[]> {
     const comments: Array<CommentRowDTO> =
-      await this.services.getRootComments(post_id);
+      await this.services.getRootComments(params, limit, offset);
     return comments;
   }
 

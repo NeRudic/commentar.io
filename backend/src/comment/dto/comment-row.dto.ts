@@ -33,4 +33,9 @@ export class CommentRowDTO extends CreateCommentDTO {
   @IsString()
   @IsUrl()
   home_page: string | null;
+
+  @Type(() => Number)
+  @IsInt()
+  @IsOptional()
+  reply_count?: number;
 }

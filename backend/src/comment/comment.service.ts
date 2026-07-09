@@ -67,19 +67,27 @@ export class CommentService {
   /*
    * Get root comments
    */
-  async getRootComments({
-    post_id,
-  }: RootCommentsDTO): Promise<CommentRowDTO[]> {
+  async getRootComments(
+    { post_id }: RootCommentsDTO,
+    limit?: string,
+    offset?: string,
+  ): Promise<CommentRowDTO[]> {
+    const limitVal = limit ? parseInt(limit, 10) : 25;
+    const offsetVal = offset ? parseInt(offset, 10) : 0;
+
     try {
       const comments: CommentRowDTO[] = await this.database.all(
         `
-      SELECT comment.*, u.user_name, u.home_page
+      SELECT comment.*, u.user_name, u.home_page,
+        (SELECT COUNT(*) FROM comment AS c2 WHERE c2.parent_comment_id = comment.id) AS reply_count
       FROM comment
       JOIN user AS u ON comment.user_email = u.email
       WHERE post_id = ?
       AND parent_comment_id IS NULL
+      ORDER BY comment.created_at DESC
+      LIMIT ? OFFSET ?
       `,
-        [post_id],
+        [post_id, limitVal, offsetVal],
       );
       return comments;
     } catch (err) {
@@ -98,7 +106,8 @@ export class CommentService {
     try {
       const comments: CommentRowDTO[] = await this.database.all(
         `
-      SELECT comment.*, u.user_name, u.home_page
+      SELECT comment.*, u.user_name, u.home_page,
+        (SELECT COUNT(*) FROM comment AS c2 WHERE c2.parent_comment_id = comment.id) AS reply_count
       FROM comment
       JOIN user AS u ON comment.user_email = u.email
       WHERE parent_comment_id = ?
