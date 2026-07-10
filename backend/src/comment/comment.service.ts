@@ -100,9 +100,14 @@ export class CommentService {
   /*
    * Get relpies comment
    */
-  async getReplies({
-    parent_comment_id,
-  }: CommentRepliesDTO): Promise<CommentRowDTO[]> {
+  async getReplies(
+    { parent_comment_id }: CommentRepliesDTO,
+    limit?: string,
+    offset?: string,
+  ): Promise<CommentRowDTO[]> {
+    const limitVal = limit ? parseInt(limit, 10) : 25;
+    const offsetVal = offset ? parseInt(offset, 10) : 0;
+
     try {
       const comments: CommentRowDTO[] = await this.database.all(
         `
@@ -111,8 +116,9 @@ export class CommentService {
       FROM comment
       JOIN user AS u ON comment.user_email = u.email
       WHERE parent_comment_id = ?
+      LIMIT ? OFFSET ?
       `,
-        [parent_comment_id],
+        [parent_comment_id, limitVal, offsetVal],
       );
       return comments;
     } catch (err) {

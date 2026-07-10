@@ -22,17 +22,22 @@ export class CommentController {
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
   ): Promise<CommentRowDTO[]> {
-    const comments: Array<CommentRowDTO> =
-      await this.services.getRootComments(params, limit, offset);
+    const comments: Array<CommentRowDTO> = await this.services.getRootComments(
+      params,
+      limit,
+      offset,
+    );
     return comments;
   }
 
   @Get(':parent_comment_id/replies')
   async getReplies(
-    @Param() parent_comment_id: CommentRepliesDTO,
+    @Param() params: CommentRepliesDTO,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
   ): Promise<CommentRowDTO[]> {
     const comments: Array<CommentRowDTO> =
-      await this.services.getReplies(parent_comment_id);
+      await this.services.getReplies(params, limit, offset);
     return comments;
   }
 
