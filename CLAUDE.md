@@ -14,15 +14,17 @@ comentar.io/
 │   └── src/
 │       ├── db/           # SQLite, типы строк, конфиг таблиц
 │       ├── user/         # POST /users
-│       └── comment/      # CRUD комментариев
+│       ├── comment/      # CRUD комментариев
+│       ├── captcha/      # Математическая капча (JWT)
+│       ├── file-upload/  # Загрузка файлов (txt/jpg/gif/png)
+│       └── orchestrator/ # Транзакция user+comment
 ├── frontend/             # React SPA
 │   └── src/
 │       ├── components/   # React-компоненты (CSS Modules)
 │       ├── data/         # Мок-данные (заглушка)
 │       ├── services/     # Axios-сервисы для бэкенда
 │       └── types/        # Локальные типы (comment, user, captcha)
-└── shared/
-    └── api/types/        # Устарели, не используются
+└── docs/                 # Документация
 ```
 
 ## Key conventions
