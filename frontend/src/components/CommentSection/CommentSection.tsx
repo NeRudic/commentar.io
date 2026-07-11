@@ -14,11 +14,9 @@ interface CommentSectionProps {
 export default function CommentSection({ postId }: CommentSectionProps) {
   const [rootComments, setRootComments] = useState<CommentRow[]>([]);
   const [showComments, setShowComments] = useState(false);
-  const [replyTo, setReplyTo] = useState<number | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [refreshToken, setRefreshToken] = useState(0);
 
   const fetchRootComments = useCallback(
     async (limit: number, offset: number) => {
@@ -48,29 +46,18 @@ export default function CommentSection({ postId }: CommentSectionProps) {
     setLoadingMore(false);
   }, [fetchRootComments, rootComments.length]);
 
-  const handleReply = useCallback((commentId: number) => {
-    setReplyTo(commentId);
-    setIsFormOpen(true);
-  }, []);
-
   const handleFormSuccess = useCallback(
     (result?: CreateCommentResponse) => {
       setIsFormOpen(false);
-      setReplyTo(null);
       if (result?.siblings) {
-        if (replyTo === null) {
-          setRootComments(result.siblings);
-          setShowComments(true);
-        } else {
-          setRefreshToken((t) => t + 1);
-        }
+        setRootComments(result.siblings);
+        setShowComments(true);
       }
     },
-    [replyTo],
+    [],
   );
 
   const handleNewComment = useCallback(() => {
-    setReplyTo(null);
     setIsFormOpen(true);
   }, []);
 
@@ -92,8 +79,9 @@ export default function CommentSection({ postId }: CommentSectionProps) {
         <div className={styles.commentsList}>
           {rootComments.map((comment) => (
             <Comment
-              key={comment.id}
-              id={comment.id}
+              key={comment.comment_id}
+              comment_id={comment.comment_id}
+              post_id={comment.post_id}
               user_name={comment.user_name}
               home_page={comment.home_page}
               text={comment.text}
@@ -101,8 +89,6 @@ export default function CommentSection({ postId }: CommentSectionProps) {
               created_at={comment.created_at}
               reply_count={comment.reply_count}
               depth={0}
-              onReply={handleReply}
-              refreshToken={refreshToken}
             />
           ))}
           {hasMore && (
@@ -126,17 +112,10 @@ export default function CommentSection({ postId }: CommentSectionProps) {
         Add comment
       </button>
 
-      <Modal isOpen={isFormOpen} onClose={() => {
-        setIsFormOpen(false);
-        setReplyTo(null);
-      }}>
+      <Modal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)}>
         <CommentForm
           postId={postId}
-          parentCommentId={replyTo}
-          onClose={() => {
-            setIsFormOpen(false);
-            setReplyTo(null);
-          }}
+          onClose={() => setIsFormOpen(false)}
           onSuccess={handleFormSuccess}
         />
       </Modal>

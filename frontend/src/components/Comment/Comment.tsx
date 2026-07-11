@@ -1,12 +1,15 @@
-import { memo, useState, useCallback, useEffect } from 'react';
+import { memo, useState, useCallback } from 'react';
 import { BASE_URL, getReplies } from '../../services';
 import { sanitize } from '../../utils/sanitize';
 import { MAX_DEPTH } from '../../config/comment.config';
-import type { CommentRow } from '../../types';
+import type { CommentRow, CreateCommentResponse } from '../../types';
+import Modal from '../Modal/Modal';
+import CommentForm from '../CommentForm/CommentForm';
 import styles from './Comment.module.css';
 
 interface CommentProps {
-  id: number;
+  comment_id: number;
+  post_id: number;
   user_name: string;
   home_page: string | null;
   text: string;
@@ -14,12 +17,11 @@ interface CommentProps {
   created_at: string;
   reply_count: number;
   depth: number;
-  onReply: (id: number) => void;
-  refreshToken: number;
 }
 
 const Comment = memo(function Comment({
-  id,
+  comment_id,
+  post_id,
   user_name,
   home_page,
   text,
@@ -27,12 +29,12 @@ const Comment = memo(function Comment({
   created_at,
   reply_count,
   depth,
-  onReply,
-  refreshToken,
 }: CommentProps) {
+
   const [replies, setReplies] = useState<CommentRow[]>([]);
   const [showReplies, setShowReplies] = useState(false);
   const [loadingReplies, setLoadingReplies] = useState(false);
+  const [isReplyFormOpen, setIsReplyFormOpen] = useState(false);
   const isImage = /\.(jpg|jpeg|gif|png)$/i.test(file_path ?? '');
 
   const handleToggleReplies = useCallback(async () => {
@@ -40,11 +42,13 @@ const Comment = memo(function Comment({
       setShowReplies(false);
       return;
     }
+
     setShowReplies(true);
+
     if (replies.length === 0) {
       setLoadingReplies(true);
       try {
-        const data = await getReplies(id);
+        const data = await getReplies(comment_id);
         setReplies(data);
       } catch {
         // silently fail
@@ -52,15 +56,17 @@ const Comment = memo(function Comment({
         setLoadingReplies(false);
       }
     }
-  }, [showReplies, replies.length, id]);
+  }, [showReplies, replies.length, comment_id]);
 
-  useEffect(() => {
-    if (showReplies && refreshToken > 0) {
-      getReplies(id).then(setReplies).catch(() => {});
+  const handleReplySuccess = useCallback((result?: CreateCommentResponse) => {
+    setIsReplyFormOpen(false);
+    if (result?.siblings) {
+      setReplies(result.siblings);
+      setShowReplies(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [refreshToken]);
+  }, []);
 
+  const effectiveReplyCount = replies.length > 0 ? replies.length : reply_count;
   const canReply = depth < MAX_DEPTH;
 
   return (
@@ -113,12 +119,12 @@ const Comment = memo(function Comment({
           <button
             className={styles.actionBtn}
             type="button"
-            onClick={() => onReply(id)}
+            onClick={() => setIsReplyFormOpen(true)}
           >
             Reply
           </button>
         )}
-        {reply_count > 0 && (
+        {effectiveReplyCount > 0 && (
           <button
             className={styles.actionBtn}
             type="button"
@@ -126,7 +132,7 @@ const Comment = memo(function Comment({
           >
             {showReplies
               ? 'Hide replies'
-              : `Show replies (${reply_count})`}
+              : `Show replies (${effectiveReplyCount})`}
           </button>
         )}
       </div>
@@ -136,19 +142,19 @@ const Comment = memo(function Comment({
       {showReplies &&
         replies.map((reply) => (
           <Comment
-            key={reply.id}
-            id={reply.id}
-            user_name={reply.user_name}
-            home_page={reply.home_page}
-            text={reply.text}
-            file_path={reply.file_path}
-            created_at={reply.created_at}
-            reply_count={reply.reply_count}
+            key={reply.comment_id}
+            {...reply}
             depth={depth + 1}
-            onReply={onReply}
-            refreshToken={refreshToken}
           />
         ))}
+      <Modal isOpen={isReplyFormOpen} onClose={() => setIsReplyFormOpen(false)}>
+        <CommentForm
+          postId={post_id}
+          parentCommentId={comment_id}
+          onClose={() => setIsReplyFormOpen(false)}
+          onSuccess={handleReplySuccess}
+        />
+      </Modal>
     </div>
   );
 });

@@ -1,5 +1,5 @@
 export interface CommentRow {
-  id: number;
+  comment_id: number;
   post_id: number;
   parent_comment_id: number | null;
   user_name: string;
