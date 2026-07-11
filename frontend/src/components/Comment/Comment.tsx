@@ -73,7 +73,7 @@ const Comment = memo(function Comment({
   return (
     <div
       className={styles.comment}
-      style={{ paddingLeft: depth <= MAX_DEPTH ? depth * 24 : 0 }}
+      style={{ paddingLeft: depth <= MAX_DEPTH ? 24 : 0 }}
     >
       <div className={styles.header}>
         {home_page ? (
