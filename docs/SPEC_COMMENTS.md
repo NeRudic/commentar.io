@@ -13,7 +13,7 @@
 ### Comments and display
 
 - [x] **6. Nested replies** — max depth 4 levels
-- [ ] **7. Root comment sorting** — sortable table by User Name, E-mail, date (ascending/descending)
+- [x] **7. Root comment sorting** — sortable table by User Name, E-mail, date (ascending/descending)
 - [x] **8. Pagination** — 25 messages per page
 - [x] **9. XSS and SQL injection protection** — `sanitize.pipe.ts` on backend, `DOMPurify` on frontend, parameterized SQL queries
 - [x] **10. Default sort** — LIFO (latest first)

@@ -7,21 +7,43 @@ import CommentForm from '../CommentForm/CommentForm';
 import Comment from '../Comment/Comment';
 import styles from './CommentSection.module.css';
 
+type SortField = 'user_name' | 'email' | 'created_at';
+
+interface SortConfig {
+  field: SortField;
+  order: 'asc' | 'desc';
+}
+
+const SORT_LABELS: Record<SortField, string> = {
+  user_name: 'User Name',
+  email: 'E-mail',
+  created_at: 'Date',
+};
+
 interface CommentSectionProps {
   postId: number;
 }
 
 export default function CommentSection({ postId }: CommentSectionProps) {
   const [rootComments, setRootComments] = useState<CommentRow[]>([]);
-  const [showComments, setShowComments] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [sort, setSort] = useState<SortConfig>({
+    field: 'created_at',
+    order: 'desc',
+  });
 
   const fetchRootComments = useCallback(
     async (limit: number, offset: number) => {
       try {
-        const data = await getRootComments(postId, limit, offset);
+        const data = await getRootComments(
+          postId,
+          limit,
+          offset,
+          sort.field,
+          sort.order,
+        );
         if (offset === 0) {
           setRootComments(data);
         } else {
@@ -32,13 +54,26 @@ export default function CommentSection({ postId }: CommentSectionProps) {
         // silently fail
       }
     },
-    [postId],
+    [postId, sort],
   );
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchRootComments(COMMENTS_PER_PAGE, 0);
   }, [fetchRootComments]);
+
+  const handleSort = useCallback(
+    (field: SortField) => {
+      setSort((prev) => {
+        const order =
+          prev.field === field && prev.order === 'asc' ? 'desc' : 'asc';
+        return { field, order };
+      });
+      setRootComments([]);
+      setHasMore(false);
+    },
+    [],
+  );
 
   const handleShowMore = useCallback(async () => {
     setLoadingMore(true);
@@ -51,7 +86,6 @@ export default function CommentSection({ postId }: CommentSectionProps) {
       setIsFormOpen(false);
       if (result?.siblings) {
         setRootComments(result.siblings);
-        setShowComments(true);
       }
     },
     [],
@@ -61,21 +95,27 @@ export default function CommentSection({ postId }: CommentSectionProps) {
     setIsFormOpen(true);
   }, []);
 
-  const hasComments = rootComments.length > 0;
-
   return (
     <div className={styles.section}>
-      {hasComments && !showComments && (
-        <button
-          className={styles.viewComments}
-          type="button"
-          onClick={() => setShowComments(true)}
-        >
-          View all {rootComments.length} comments
-        </button>
-      )}
+      <div className={styles.sortBar}>
+        {(Object.keys(SORT_LABELS) as SortField[]).map((field) => (
+          <button
+            key={field}
+            type="button"
+            className={`${styles.sortBtn} ${sort.field === field ? styles.sortBtnActive : ''}`}
+            onClick={() => handleSort(field)}
+          >
+            {SORT_LABELS[field]}
+            {sort.field === field && (
+              <span className={styles.sortArrow}>
+                {sort.order === 'asc' ? ' ↑' : ' ↓'}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
 
-      {showComments && rootComments.length > 0 && (
+      {rootComments.length > 0 && (
         <div className={styles.commentsList}>
           {rootComments.map((comment) => (
             <Comment
