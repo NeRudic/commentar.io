@@ -63,6 +63,7 @@ Services use **axios** (`frontend/package.json`).
 - **Prettier**: single quotes, trailing commas, 80 width, 2-space tabs.
 - **ESLint prettier rule** uses `endOfLine: "auto"` (Windows-safe).
 - **No comments** in code unless explicitly requested.
+- **Branching**: work in dedicated branches from `main`. Name them `type/description` (e.g., `feat/comments-pagination`, `fix/empty-submit`).
 - After any structural change, update relevant `.md` files and `docs/DECISIONS.md`.
 
 ## Files the agent should know about
