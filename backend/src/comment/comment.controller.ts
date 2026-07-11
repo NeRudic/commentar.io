@@ -21,9 +21,11 @@ export class CommentController {
     @Param() params: RootCommentsDTO,
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
+    @Query('sort_by') sort_by?: string,
+    @Query('sort_order') sort_order?: string,
   ): Promise<CommentRowDTO[]> {
     const comments: Array<CommentRowDTO> = await this.services.getRootComments(
-      params,
+      { ...params, sort_by, sort_order },
       limit,
       offset,
     );
@@ -36,8 +38,11 @@ export class CommentController {
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
   ): Promise<CommentRowDTO[]> {
-    const comments: Array<CommentRowDTO> =
-      await this.services.getReplies(params, limit, offset);
+    const comments: Array<CommentRowDTO> = await this.services.getReplies(
+      params,
+      limit,
+      offset,
+    );
     return comments;
   }
 

@@ -43,6 +43,22 @@ Services rewritten from `fetch` to `axios` (`^1.18.1`).
 - `FormField` wrapper component removed — `register()` is self-sufficient.
 - Validation (valibot) connected via `@hookform/resolvers/valibot` or manually in `register` options.
 
+## 2026-07-11 — Root comment sorting on backend with white list
+
+**Decision:** Sorting of root comments is done on the backend via SQL `ORDER BY`, not on the frontend.
+
+**Why:**
+- Pagination (`LIMIT/OFFSET`) and sorting are coupled — sorting must happen before pagination to be correct across pages.
+- Frontend-only sorting would only order the current 25-comment page, giving wrong results after "Show more".
+
+**How:**
+- Backend accepts `sort_by` and `sort_order` query params in `GET /comments/:post_id`.
+- White list validation via `@IsIn()` decorator in the DTO. Invalid values are rejected by the ValidationPipe with 400. The service only sets defaults for missing values.
+- `user_name` and `email` use `COLLATE NOCASE` for case-insensitive ordering.
+- Frontend shows three sort buttons (User Name, E-mail, Date) above the comment list.
+- Clicking a new field sorts ascending; clicking the same field toggles direction.
+- Changing sort resets the local state (clears loaded comments) and triggers a fresh fetch from offset 0.
+
 ## 2026-07-08 — Complete removal of shared/api/types
 
 **Decision:** Removed `shared/` directory and all `@shared` aliases from tsconfig/vite.

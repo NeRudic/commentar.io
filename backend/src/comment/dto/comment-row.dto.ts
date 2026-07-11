@@ -14,7 +14,7 @@ export class CommentRowDTO extends CreateCommentDTO {
   @Type(() => Number)
   @IsInt()
   @IsPositive()
-  id: number;
+  comment_id: number;
 
   @Type(() => Date)
   @IsDate()

@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsPositive, Max, Min } from 'class-validator';
+import { IsInt, IsOptional, IsPositive, IsIn, Max, Min } from 'class-validator';
 
 export class RootCommentsDTO {
   @Type(() => Number)
@@ -19,4 +19,12 @@ export class RootCommentsDTO {
   @Min(0)
   @IsOptional()
   offset?: number;
+
+  @IsOptional()
+  @IsIn(['user_name', 'email', 'created_at'])
+  sort_by?: string;
+
+  @IsOptional()
+  @IsIn(['asc', 'desc'])
+  sort_order?: string;
 }

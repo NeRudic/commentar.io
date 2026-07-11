@@ -2,6 +2,36 @@
   margin-top: 8px;
 }
 
+.sortBar {
+  display: flex;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.sortBtn {
+  background: none;
+  border: 1px solid var(--border-color, #ccc);
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.sortBtn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+.sortBtnActive {
+  color: var(--text-primary);
+  border-color: var(--text-primary);
+}
+
+.sortArrow {
+  font-size: 11px;
+}
+
 .viewComments {
   background: none;
   border: none;
