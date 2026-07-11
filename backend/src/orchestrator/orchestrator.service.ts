@@ -53,7 +53,7 @@ export class OrchestratorService {
       await this.db.run(`COMMIT`);
 
       const comment = await this.db.get<CommentRowDTO>(
-        `SELECT comment.*, u.user_name, u.home_page,
+        `SELECT comment.id AS comment_id, comment.post_id, comment.parent_comment_id, comment.text, comment.user_email, comment.file_path, comment.created_at, u.user_name, u.home_page,
           (SELECT COUNT(*) FROM comment AS c2 WHERE c2.parent_comment_id = comment.id) AS reply_count
          FROM comment
          JOIN user AS u ON comment.user_email = u.email
@@ -70,7 +70,7 @@ export class OrchestratorService {
       const siblings: CommentRowDTO[] =
         parent_comment_id === null
           ? await this.db.all<CommentRowDTO>(
-              `SELECT comment.*, u.user_name, u.home_page,
+              `SELECT comment.id AS comment_id, comment.post_id, comment.parent_comment_id, comment.text, comment.user_email, comment.file_path, comment.created_at, u.user_name, u.home_page,
                 (SELECT COUNT(*) FROM comment AS c2 WHERE c2.parent_comment_id = comment.id) AS reply_count
              FROM comment
              JOIN user AS u ON comment.user_email = u.email
@@ -80,7 +80,7 @@ export class OrchestratorService {
               [post_id],
             )
           : await this.db.all<CommentRowDTO>(
-              `SELECT comment.*, u.user_name, u.home_page,
+              `SELECT comment.id AS comment_id, comment.post_id, comment.parent_comment_id, comment.text, comment.user_email, comment.file_path, comment.created_at, u.user_name, u.home_page,
                 (SELECT COUNT(*) FROM comment AS c2 WHERE c2.parent_comment_id = comment.id) AS reply_count
              FROM comment
              JOIN user AS u ON comment.user_email = u.email
