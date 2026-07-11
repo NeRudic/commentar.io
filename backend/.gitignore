@@ -27,6 +27,11 @@ Thumbs.db
 *.log
 npm-debug.log*
 
+# SQLite database
+db.sqlite
+db.sqlite-shm
+db.sqlite-wal
+
 # misc
 .eslintcache
 *.tsbuildinfo
