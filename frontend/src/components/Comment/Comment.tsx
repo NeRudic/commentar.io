@@ -2,6 +2,7 @@ import { memo, useState, useCallback } from 'react';
 import { BASE_URL, getReplies } from '../../services';
 import { sanitize } from '../../utils/sanitize';
 import { MAX_DEPTH } from '../../config/comment.config';
+import { useToast } from '../../context/ToastContext';
 import type { CommentRow, CreateCommentResponse } from '../../types';
 import Modal from '../Modal/Modal';
 import CommentForm from '../CommentForm/CommentForm';
@@ -35,6 +36,7 @@ const Comment = memo(function Comment({
   const [showReplies, setShowReplies] = useState(false);
   const [loadingReplies, setLoadingReplies] = useState(false);
   const [isReplyFormOpen, setIsReplyFormOpen] = useState(false);
+  const { showToast } = useToast();
   const isImage = /\.(jpg|jpeg|gif|png)$/i.test(file_path ?? '');
 
   const handleToggleReplies = useCallback(async () => {
@@ -51,12 +53,12 @@ const Comment = memo(function Comment({
         const data = await getReplies(comment_id);
         setReplies(data);
       } catch {
-        // silently fail
+        showToast('Failed to load replies');
       } finally {
         setLoadingReplies(false);
       }
     }
-  }, [showReplies, replies.length, comment_id]);
+  }, [showReplies, replies.length, comment_id, showToast]);
 
   const handleReplySuccess = useCallback((result?: CreateCommentResponse) => {
     setIsReplyFormOpen(false);
