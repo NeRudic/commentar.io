@@ -63,14 +63,16 @@ In `main.ts`: `SanitizePipe` runs first, then `ValidationPipe({ transform: true 
 - **Prettier**: single quotes, trailing commas, 80 width, 2-space tabs.
 - **ESLint prettier rule** uses `endOfLine: "auto"` (Windows-safe).
 - **No comments** in code unless explicitly requested.
-- After any structural change, update relevant `.md` files and `DECISIONS.md`.
+- After any structural change, update relevant `.md` files and `docs/DECISIONS.md`.
 
 ## Files the agent should know about
 
-- `docs/` — project documentation (architecture, api, database, deployment, development)
+- `docs/` — project documentation (architecture, api, database, deployment, development, decisions, spec, opencode)
 - `README.md` — project overview and quick start
-- `DECISIONS.md` — architectural decisions log
+- `AGENTS.md` — agent instructions (this file)
 - `CLAUDE.md` — project rules and conventions
-- `OPENCODE.md` — OpenCode tool navigation reference
+- `docs/DECISIONS.md` — architectural decisions log
+- `docs/OPENCODE.md` — OpenCode tool navigation reference
+- `docs/SPEC_COMMENTS.md` — frontend feature specification
 - `.env` — `PORT=3000` (backend only)
 - `.prettierrc` — formatting config (backend only, frontend has none)

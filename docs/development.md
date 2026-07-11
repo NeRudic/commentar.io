@@ -31,7 +31,7 @@
 - **Prettier:** single quotes, trailing commas, 80 width, 2-space tabs
 - **ESLint:** `endOfLine: "auto"` (Windows-safe)
 - **Без комментариев в коде** (если не запрошено явно)
-- После изменений структуры обновлять .md файлы и DECISIONS.md
+- После изменений структуры обновлять .md файлы и docs/DECISIONS.md
 
 ## База данных
 
@@ -48,5 +48,6 @@ SQLite файл — `backend/src/db/db.sqlite`. Всегда запускать 
 
 - `AGENTS.md` — основная инструкция для агента
 - `CLAUDE.md` — правила и конвенции проекта
-- `DECISIONS.md` — лог архитектурных решений
-- `OPENCODE.md` — шпаргалка по инструментам OpenCode
+- `docs/DECISIONS.md` — лог архитектурных решений
+- `docs/OPENCODE.md` — шпаргалка по инструментам OpenCode
+- `docs/SPEC_COMMENTS.md` — функциональные требования

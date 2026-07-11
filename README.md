@@ -22,6 +22,9 @@ cd frontend && npm install && npm run dev
 | [БД](docs/database.md) | Схема SQLite, таблицы, индексы |
 | [Деплой](docs/deployment.md) | Окружение, сборка, продакшен |
 | [Разработка](docs/development.md) | Команды, соглашения, lint, тесты |
+| [Решения](docs/DECISIONS.md) | Архитектурные решения |
+| [OpenCode](docs/OPENCODE.md) | Шпаргалка по инструментам |
+| [Спецификация](docs/SPEC_COMMENTS.md) | Функциональные требования |
 
 ## Структура репозитория
 
@@ -30,7 +33,5 @@ cd frontend && npm install && npm run dev
 ├── frontend/    # React 19 + Vite 8
 ├── docs/        # Документация
 ├── AGENTS.md    # Инструкция для ИИ-агента
-├── CLAUDE.md    # Правила и конвенции
-├── DECISIONS.md # Архитектурные решения
-└── OPENCODE.md  # Шпаргалка по инструментам
+└── CLAUDE.md    # Правила и конвенции
 ```

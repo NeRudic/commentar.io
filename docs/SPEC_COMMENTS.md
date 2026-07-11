@@ -50,10 +50,10 @@
 
 ## Примечания
 
-- Типы определяются локально в `frontend/src/types/`, `shared/api/types/` — устарели
+- Типы локально в `frontend/src/types/`, `shared/` удалена
 - Backend: `sqlite3`, без ORM, raw-запросы через `DB` service
 - Загрузка файлов: `memoryStorage` → валидация → сохранение на диск. `sharp` для ресайза
-- CAPTCHA: stateless через JWT (`expiresIn: 5m`), хук `useCaptcha` вынесен отдельно
+- CAPTCHA: stateless через JWT (`expiresIn: 5m`), капча интегрирована напрямую в `CommentForm`
 - `TextEditor`: связь с формой через колбэк `onValueChange`, без `register()` на DOM-элементе. Формат хранения — XHTML
 - `Button`: переиспользуемый враппер `<button type="button">`, стилизация в родительских CSS-модулях
 - Теги `<a>` с атрибутами `href`/`title` разрешены на бэкенде (`sanitize.pipe.ts`) и фронтенде (`utils/sanitize.ts`)

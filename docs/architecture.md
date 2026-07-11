@@ -9,7 +9,7 @@
 | Бэкенд | `backend/` | NestJS 11, TypeScript, SQLite3, class-validator | 3000 |
 | Фронтенд | `frontend/` | React 19, Vite 8, TypeScript 6, CSS Modules | 5173 |
 
-Общих типов нет — каждый пакет имеет свои DTO/типы (см. DECISIONS.md, решения от 2026-06-30 и 2026-07-08).
+Общих типов нет — каждый пакет имеет свои DTO/типы (см. docs/DECISIONS.md, решения от 2026-06-30 и 2026-07-08).
 
 ## Бэкенд (NestJS)
 
