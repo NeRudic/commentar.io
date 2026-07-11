@@ -69,12 +69,11 @@ const Comment = memo(function Comment({
   }, []);
 
   const effectiveReplyCount = replies.length > 0 ? replies.length : reply_count;
-  const canReply = depth < MAX_DEPTH;
 
   return (
     <div
       className={styles.comment}
-      style={{ paddingLeft: depth * 24 }}
+      style={{ paddingLeft: depth <= MAX_DEPTH ? depth * 24 : 0 }}
     >
       <div className={styles.header}>
         {home_page ? (
@@ -117,15 +116,13 @@ const Comment = memo(function Comment({
         </div>
       )}
       <div className={styles.actions}>
-        {canReply && (
-          <button
-            className={styles.actionBtn}
-            type="button"
-            onClick={() => setIsReplyFormOpen(true)}
-          >
-            Reply
-          </button>
-        )}
+        <button
+          className={styles.actionBtn}
+          type="button"
+          onClick={() => setIsReplyFormOpen(true)}
+        >
+          Reply
+        </button>
         {effectiveReplyCount > 0 && (
           <button
             className={styles.actionBtn}
