@@ -1,5 +1,23 @@
 # DECISIONS.md
 
+## 2026-07-11 — Seed script for test data
+
+**Decision:** Created `backend/scripts/seed.ts` — a standalone TypeScript script (no NestJS DI) that populates the database with realistic test data.
+
+**Why:**
+- Needed 315 comments across 3 posts with controlled nesting depth to test pagination, nested rendering, and depth edge-cases.
+- Raw SQL seed files are fragile (autoincrement IDs make parent references unpredictable).
+- A NestJS command module (`@nestjs/console`) would add an unnecessary dependency for a one-off script.
+- Direct `sqlite3` usage in a standalone script reuses the existing dependency and tsconfig.
+
+**How:**
+- `npm run seed` (run from `backend/`) — appends data without clearing.
+- `npm run seed -- --clear` — deletes all existing data first, then inserts fresh.
+- Distribution per post: 35 root → 15 depth-1 → 12 depth-2 → 8 depth-3 → 30 depth-4 → 5 depth-5+.
+- 5 users inserted via `INSERT OR IGNORE` (idempotent).
+- Themed root texts per post (neural networks, diffusion, RL); generic reply texts for deeper levels.
+- Timestamps spread across the last 168 hours for realistic date ordering.
+
 ## 2026-06-22 — Shared API types at root, fetch-based services (REVISED)
 
 **Decision:** Shared backend-contract types extracted to root `shared/api/types/`.

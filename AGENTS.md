@@ -17,6 +17,7 @@ No root `package.json` — each package is independent:
 npm run start:dev     # watch mode (port 3000)
 npm run lint          # eslint --fix
 npm run format        # prettier
+npm run seed          # populate DB with 315 test comments (--clear to reset)
 npm run test          # jest (no specs written yet)
 ```
 
