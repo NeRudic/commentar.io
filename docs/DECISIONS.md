@@ -1,55 +1,60 @@
 # DECISIONS.md
 
-## 2026-06-22 — Shared API types at root, fetch-based services (ПЕРЕСМОТРЕНО)
+## 2026-06-22 — Shared API types at root, fetch-based services (REVISED)
 
-**Решение:** Общие типы бэкенд-контрактов вынесены в корневой `shared/api/types/`.
-Фронтенд-сервисы созданы на нативном `fetch` (без axios или другой HTTP-библиотеки).
+**Decision:** Shared backend-contract types extracted to root `shared/api/types/`.
+Frontend services built on native `fetch` (no axios or other HTTP library).
 
-**Почему:**
-- Типы должны быть единым источником правды для обеих частей проекта.
-- Нативный `fetch` — нулевая зависимость, встроен во все современные браузеры.
-- Небольшое приложение не требует прослойки в виде axios.
+**Why:**
+- Types should be a single source of truth for both parts of the project.
+- Native `fetch` — zero dependency, built into all modern browsers.
+- A small application does not need an axios abstraction layer.
 
-**Как подключено:**
-- Алиас `@shared` настроен в `vite.config.ts` (resolve.alias) и `tsconfig.app.json` (paths).
-- Сервисы импортируют через `import type { ... } from '@shared/api/types'`.
+**How it was wired:**
+- `@shared` alias configured in `vite.config.ts` (resolve.alias) and `tsconfig.app.json` (paths).
+- Services imported via `import type { ... } from '@shared/api/types'`.
 
-## 2026-06-30 — Отказ от shared-типов, переход на axios
+## 2026-06-30 — Abandoned shared types, switched to axios
 
-**Решение:** Типы перенесены локально в `frontend/src/types/` (разделены на `comment.ts`, `user.ts`, `captcha.ts` с barrel-реэкспортом через `index.ts`).
-Сервисы переписаны с `fetch` на `axios` (`^1.18.1`).
+**Decision:** Types moved locally to `frontend/src/types/` (split into `comment.ts`, `user.ts`, `captcha.ts` with barrel re-export via `index.ts`).
+Services rewritten from `fetch` to `axios` (`^1.18.1`).
 
-**Почему:**
-- Shared-типы оказались неудобны при расхождении бэкенд/фронтенд-представлений (JOIN-поля).
-- `axios` — удобнее API, автоматический JSON-парсинг, перехватчики.
-- Локальные типы проще поддерживать итеративно, без синхронизации между пакетами.
+**Why:**
+- Shared types became inconvenient when backend/frontend representations diverged (JOIN fields).
+- `axios` — more convenient API, automatic JSON parsing, interceptors.
+- Local types are easier to maintain iteratively, without cross-package synchronization.
 
-## 2026-06-30 — Отказ от @tanstack/react-form, переход на react-hook-form
+**What changed:**
+- `@tanstack/react-form` and `@tanstack/valibot-form-adapter` removed.
+- `FormField` wrapper component removed — `register()` is self-sufficient.
+- Validation (valibot) connected via `@hookform/resolvers/valibot`.
 
-**Решение:** Замена `@tanstack/react-form` (^1.33.0) на `react-hook-form` для CommentForm.
+## 2026-06-30 — Abandoned @tanstack/react-form, switched to react-hook-form
 
-**Почему:**
-- `@tanstack/react-form` v1.33 имеет 22 generic-параметра, что делает невозможным написание переиспользуемых обёрток без `any`.
-- Бойлерплейт: `form.Field` + `form.Subscribe` создают ~15 строк на каждое поле против 1 строки `register()` в RHF.
-- RHF — зрелая библиотека, 1 дженерик (`useForm<T>()`), встроенные `isSubmitting`, `errors`, `register`.
+**Decision:** Replaced `@tanstack/react-form` (^1.33.0) with `react-hook-form` for CommentForm.
 
-**Что изменилось:**
-- `@tanstack/react-form` и `@tanstack/valibot-form-adapter` удалены.
-- `FormField` компонент-обёртка удалён — `register()` самодостаточен.
-- Валидация (valibot) будет подключаться через `@hookform/resolvers/valibot` или вручную в `register` options.
+**Why:**
+- `@tanstack/react-form` v1.33 has 22 generic parameters, making reusable wrappers impossible without `any`.
+- Boilerplate: `form.Field` + `form.Subscribe` creates ~15 lines per field vs 1 line of `register()` in RHF.
+- RHF is a mature library, 1 generic (`useForm<T>()`), built-in `isSubmitting`, `errors`, `register`.
 
-## 2026-07-08 — Полное удаление shared/api/types
+**What changed:**
+- `@tanstack/react-form` and `@tanstack/valibot-form-adapter` removed.
+- `FormField` wrapper component removed — `register()` is self-sufficient.
+- Validation (valibot) connected via `@hookform/resolvers/valibot` or manually in `register` options.
 
-**Решение:** Удалена директория `shared/` и все алиасы `@shared` из tsconfig/vite.
-`svelte/UserRow` перенесён в `backend/src/user/user.types.ts`.
+## 2026-07-08 — Complete removal of shared/api/types
 
-**Почему:**
-- Frontend давно использует локальные типы (`frontend/src/types/`).
-- Backend использует DTO с `class-validator`, единственный потребитель shared — `UserRow` в `UserService`.
-- Алиасы `@shared` в tsconfig/vite были мёртвым конфигом.
+**Decision:** Removed `shared/` directory and all `@shared` aliases from tsconfig/vite.
+`svelte/UserRow` moved to `backend/src/user/user.types.ts`.
 
-**Что изменилось:**
-- Создан `backend/src/user/user.types.ts` с `UserRow`.
-- `user.service.ts` импортирует `UserRow` локально.
-- Удалены алиасы `@shared` из `backend/tsconfig.json`, `frontend/tsconfig.app.json`, `frontend/vite.config.ts`.
-- Директория `shared/` удалена.
+**Why:**
+- Frontend has been using local types (`frontend/src/types/`) for a long time.
+- Backend uses DTOs with `class-validator`, the only shared consumer was `UserRow` in `UserService`.
+- `@shared` aliases in tsconfig/vite were dead config.
+
+**What changed:**
+- Created `backend/src/user/user.types.ts` with `UserRow`.
+- `user.service.ts` imports `UserRow` locally.
+- Removed `@shared` aliases from `backend/tsconfig.json`, `frontend/tsconfig.app.json`, `frontend/vite.config.ts`.
+- `shared/` directory deleted.

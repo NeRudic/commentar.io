@@ -4,32 +4,32 @@
 
 - **Backend:** NestJS 11 + SQLite3 + class-validator
 - **Frontend:** React 19 + Vite 8 + TypeScript 6 + CSS Modules
-- **Frontend types:** локально в `frontend/src/types/`
+- **Frontend types:** local in `frontend/src/types/`
 
 ## Project structure
 
 ```
 comentar.io/
-├── backend/              # NestJS API (порт 3000)
+├── backend/              # NestJS API (port 3000)
 │   └── src/
-│       ├── db/           # SQLite, типы строк, конфиг таблиц
+│       ├── db/           # SQLite, row types, table config
 │       ├── user/         # POST /users
-│       ├── comment/      # CRUD комментариев
-│       ├── captcha/      # Математическая капча (JWT)
-│       ├── file-upload/  # Загрузка файлов (txt/jpg/gif/png)
-│       └── orchestrator/ # Транзакция user+comment
+│       ├── comment/      # Comment CRUD
+│       ├── captcha/      # Math captcha (JWT)
+│       ├── file-upload/  # File upload (txt/jpg/gif/png)
+│       └── orchestrator/ # User+comment transaction
 ├── frontend/             # React SPA
 │   └── src/
-│       ├── components/   # React-компоненты (CSS Modules)
-│       ├── data/         # Мок-данные (заглушка)
-│       ├── services/     # Axios-сервисы для бэкенда
-│       └── types/        # Локальные типы (comment, user, captcha)
-└── docs/                 # Документация
+│       ├── components/   # React components (CSS Modules)
+│       ├── data/         # Mock data (placeholder)
+│       ├── services/     # Axios services
+│       └── types/        # Local types (comment, user, captcha)
+└── docs/                 # Documentation
 ```
 
 ## Key conventions
 
-- **Стили:** CSS Modules (`.module.css`)
-- **Формы:** react-hook-form + valibot
-- **Проверка:** ESLint (frontend), class-validator (backend)
-- **Коммиты:** Conventional Commits
+- **Styles:** CSS Modules (`.module.css`)
+- **Forms:** react-hook-form + valibot
+- **Validation:** ESLint (frontend), class-validator (backend)
+- **Commits:** Conventional Commits

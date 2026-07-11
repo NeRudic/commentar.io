@@ -1,17 +1,17 @@
 # comentar.io — frontend
 
-React 19 SPA для системы комментариев.
+React 19 SPA for the comment system.
 
-Стек: React 19, Vite 8, TypeScript 6, CSS Modules, react-hook-form + valibot, axios.
+Stack: React 19, Vite 8, TypeScript 6, CSS Modules, react-hook-form + valibot, axios.
 
-## Команды
+## Commands
 
 ```bash
-npm run dev     # Vite dev server (порт 5173)
+npm run dev     # Vite dev server (port 5173)
 npm run build   # tsc -b && vite build → dist/
 npm run lint    # ESLint
 ```
 
-## Документация проекта
+## Project docs
 
-См. `docs/` в корне репозитория.
+See `docs/` in the repository root.

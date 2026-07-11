@@ -1,59 +1,60 @@
-# SPEC: SPA-приложение «Комментарии»
+# SPEC: SPA «Comments»
 
-## Требования
+## Requirements
 
-### Форма добавления записи
+### Form fields
 
-- [x] **1. User Name** — цифры и буквы латинского алфавита, обязательное поле
-- [x] **2. E-mail** — формат email, обязательное поле
-- [x] **3. Home page** — формат URL, необязательное поле
-- [x] **4. CAPTCHA** — математическая задача, обязательное поле
-- [x] **5. Text** — текст сообщения, все HTML-теги запрещены кроме разрешённых, обязательное поле
-### Комментарии и отображение
+- [x] **1. User Name** — latin letters and digits, required
+- [x] **2. E-mail** — email format, required
+- [x] **3. Home page** — URL format, optional
+- [x] **4. CAPTCHA** — math problem, required
+- [x] **5. Text** — message text, all HTML tags forbidden except allowed ones, required
 
-- [x] **6. Ответы на комментарии** — лимит глубины 4 уровня
-- [ ] **7. Сортировка корневых комментариев** — таблица с сортировкой по User Name, E-mail, дате добавления (по возрастанию и убыванию)
-- [x] **8. Пагинация** — по 25 сообщений на странице
-- [x] **9. Защита от XSS и SQL-инъекций** — `sanitize.pipe.ts` на бэкенде, `DOMPurify` на фронтенде, параметризованные SQL-запросы
-- [x] **10. Сортировка по умолчанию** — LIFO (последние сверху)
-- [x] **11. Дизайн с CSS** — CSS Modules в каждом компоненте
+### Comments and display
 
-### Файлы
+- [x] **6. Nested replies** — max depth 4 levels
+- [ ] **7. Root comment sorting** — sortable table by User Name, E-mail, date (ascending/descending)
+- [x] **8. Pagination** — 25 messages per page
+- [x] **9. XSS and SQL injection protection** — `sanitize.pipe.ts` on backend, `DOMPurify` on frontend, parameterized SQL queries
+- [x] **10. Default sort** — LIFO (latest first)
+- [x] **11. CSS design** — CSS Modules in every component
 
-- [x] **12. Загрузка файлов** — изображение или текстовый файл к сообщению
-- [x] **13. Изображения** — ресайз до 320×240 с сохранением пропорций, форматы JPG/GIF/PNG
-- [x] **14. Текстовые файлы** — не более 100 КБ, формат TXT
-- [ ] **15. Просмотр файлов (lightbox)** — визуальные эффекты при просмотре загруженных файлов
+### Files
 
-### HTML-теги
+- [x] **12. File upload** — image or text file attached to a message
+- [x] **13. Images** — resized to 320×240 maintaining aspect ratio, JPG/GIF/PNG
+- [x] **14. Text files** — max 100 KB, TXT format
+- [ ] **15. File preview (lightbox)** — visual effects for file viewing
 
-- [x] **16. Разрешённые теги** — `<a href="" title="">`, `<code>`, `<i>`, `<strong>`
-- [ ] **17. Валидация XHTML** — проверка закрытия тегов, код должен быть валидным XHTML
-- [x] **18. Валидация на клиенте и сервере** — `valibot` (клиент), `class-validator` + `SanitizePipe` (сервер)
+### HTML tags
+
+- [x] **16. Allowed tags** — `<a href="" title="">`, `<code>`, `<i>`, `<strong>`
+- [ ] **17. XHTML validation** — closing tag check, must be valid XHTML
+- [x] **18. Client and server validation** — `valibot` (client), `class-validator` + `SanitizePipe` (server)
 
 ### UX
 
-- [x] **19. Предпросмотр сообщения** — без перезагрузки страницы (режим Preview в `TextEditor`)
-- [x] **20. Панель с кнопками** — `[i]`, `[strong]`, `[code]`, `[a]` в тулбаре `TextEditor`
-- [ ] **21. Визуальные эффекты** — анимации, переходы (частично: CSS transitions)
+- [x] **19. Message preview** — without page reload (Preview mode in `TextEditor`)
+- [x] **20. Toolbar buttons** — `[i]`, `[strong]`, `[code]`, `[a]` in `TextEditor` toolbar
+- [ ] **21. Visual effects** — animations, transitions (partially done: CSS transitions)
 
 ---
 
-## Статус
+## Status
 
-| Статус | Количество |
-|--------|------------|
-| Готово | 17 |
-| Не готово | 4 |
+| Status | Count |
+|--------|-------|
+| Done | 17 |
+| Not done | 4 |
 
 ---
 
-## Примечания
+## Notes
 
-- Типы локально в `frontend/src/types/`, `shared/` удалена
-- Backend: `sqlite3`, без ORM, raw-запросы через `DB` service
-- Загрузка файлов: `memoryStorage` → валидация → сохранение на диск. `sharp` для ресайза
-- CAPTCHA: stateless через JWT (`expiresIn: 5m`), капча интегрирована напрямую в `CommentForm`
-- `TextEditor`: связь с формой через колбэк `onValueChange`, без `register()` на DOM-элементе. Формат хранения — XHTML
-- `Button`: переиспользуемый враппер `<button type="button">`, стилизация в родительских CSS-модулях
-- Теги `<a>` с атрибутами `href`/`title` разрешены на бэкенде (`sanitize.pipe.ts`) и фронтенде (`utils/sanitize.ts`)
+- Types are local in `frontend/src/types/`, `shared/` removed
+- Backend: `sqlite3`, no ORM, raw queries via `DB` service
+- File uploads: `memoryStorage` → validation → disk save. `sharp` for resize
+- CAPTCHA: stateless via JWT (`expiresIn: 5m`), captcha integrated directly in `CommentForm`
+- `TextEditor`: communicates with form via `onValueChange` callback, without `register()` on the DOM element. Storage format — XHTML
+- `Button`: reusable wrapper `<button type="button">`, styled in parent CSS modules
+- `<a>` tags with `href`/`title` attributes allowed on backend (`sanitize.pipe.ts`) and frontend (`utils/sanitize.ts`)

@@ -1,37 +1,37 @@
-# comentar.io — система комментариев к блогу
+# comentar.io — blog comment system
 
-NestJS API + React SPA с вложенными комментариями, файловыми вложениями и математической капчей.
+NestJS API + React SPA with nested comments, file attachments, and math captcha.
 
-## Быстрый старт
+## Quick start
 
 ```bash
 git clone <repo>
 cd backend && npm install && npm run start:dev
-# в новом окне:
+# in a new terminal:
 cd frontend && npm install && npm run dev
 ```
 
-Бэкенд: http://localhost:3000, фронтенд: http://localhost:5173.
+Backend: http://localhost:3000, Frontend: http://localhost:5173.
 
-## Документация
+## Documentation
 
-| Раздел | Описание |
-|--------|----------|
-| [Архитектура](docs/architecture.md) | Модули, компоненты, поток данных |
-| [API](docs/api.md) | Эндпоинты, DTO, примеры запросов |
-| [БД](docs/database.md) | Схема SQLite, таблицы, индексы |
-| [Деплой](docs/deployment.md) | Окружение, сборка, продакшен |
-| [Разработка](docs/development.md) | Команды, соглашения, lint, тесты |
-| [Решения](docs/DECISIONS.md) | Архитектурные решения |
-| [OpenCode](docs/OPENCODE.md) | Шпаргалка по инструментам |
-| [Спецификация](docs/SPEC_COMMENTS.md) | Функциональные требования |
+| Section | Description |
+|---------|-------------|
+| [Architecture](docs/architecture.md) | Modules, components, data flow |
+| [API](docs/api.md) | Endpoints, DTOs, request examples |
+| [Database](docs/database.md) | SQLite schema, tables, indexes |
+| [Deployment](docs/deployment.md) | Env, build, production |
+| [Development](docs/development.md) | Commands, conventions, lint, tests |
+| [Decisions](docs/DECISIONS.md) | Architectural decisions log |
+| [OpenCode](docs/OPENCODE.md) | Tool reference |
+| [Spec](docs/SPEC_COMMENTS.md) | Feature requirements |
 
-## Структура репозитория
+## Repository structure
 
 ```
 ├── backend/     # NestJS 11 + SQLite3
 ├── frontend/    # React 19 + Vite 8
-├── docs/        # Документация
-├── AGENTS.md    # Инструкция для ИИ-агента
-└── CLAUDE.md    # Правила и конвенции
+├── docs/        # Documentation
+├── AGENTS.md    # AI agent instructions
+└── CLAUDE.md    # Project rules and conventions
 ```

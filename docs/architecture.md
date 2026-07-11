@@ -1,31 +1,31 @@
-# Архитектура
+# Architecture
 
-## Обзор
+## Overview
 
-Проект состоит из двух независимых пакетов без монорепозитория:
+The project consists of two independent packages without a monorepo:
 
-| Пакет | Путь | Стек | Порт |
-|-------|------|------|------|
-| Бэкенд | `backend/` | NestJS 11, TypeScript, SQLite3, class-validator | 3000 |
-| Фронтенд | `frontend/` | React 19, Vite 8, TypeScript 6, CSS Modules | 5173 |
+| Package | Path | Stack | Port |
+|---------|------|-------|------|
+| Backend | `backend/` | NestJS 11, TypeScript, SQLite3, class-validator | 3000 |
+| Frontend | `frontend/` | React 19, Vite 8, TypeScript 6, CSS Modules | 5173 |
 
-Общих типов нет — каждый пакет имеет свои DTO/типы (см. docs/DECISIONS.md, решения от 2026-06-30 и 2026-07-08).
+No shared types — each package has its own DTOs/types (see docs/DECISIONS.md, entries from 2026-06-30 and 2026-07-08).
 
-## Бэкенд (NestJS)
+## Backend (NestJS)
 
-### Модули
+### Modules
 
 ```
 AppModule
-├── DBModule          — sqlite3, автозапуск DDL
-├── UserModule        — UserService.findOrCreate (upsert по email)
-├── CommentModule     — CRUD комментариев (вложенные, пагинация)
-├── CaptchaModule     — JWT-капча (a + b = ?)
-├── FileUploadModule  — загрузка файлов (txt/jpg/gif/png)
-└── OrchestratorModule — POST /comment-and-user (транзакция, captcha-middleware)
+├── DBModule          — sqlite3, auto-initialize DDL
+├── UserModule        — UserService.findOrCreate (upsert by email)
+├── CommentModule     — Comment CRUD (nested, paginated)
+├── CaptchaModule     — JWT captcha (a + b = ?)
+├── FileUploadModule  — File upload (txt/jpg/gif/png)
+└── OrchestratorModule — POST /comment-and-user (transaction, captcha-middleware)
 ```
 
-### Graph зависимостей
+### Dependency graph
 
 ```
 DB ──> UserService ──> OrchestratorService
@@ -34,34 +34,34 @@ DB ──> FileUploadService
 CaptchaService ──> CaptchaMiddleware
 ```
 
-### Global pipes (порядок важен)
+### Global pipes (order matters)
 
-1. `SanitizePipe` — вырезает HTML, кроме `<strong>`, `<i>`, `<code>`, `<a href title>`
+1. `SanitizePipe` — strips HTML except `<strong>`, `<i>`, `<code>`, `<a href title>`
 2. `ValidationPipe({ transform: true })` — class-validator + class-transformer
 
 ### Middleware
 
-`CaptchaMiddleware` применяется к `POST /comment-and-user` — проверяет капчу, извлекает поля `captcha_token`/`captcha_answer` из тела.
+`CaptchaMiddleware` applied to `POST /comment-and-user` — verifies captcha, extracts `captcha_token`/`captcha_answer` fields from body.
 
-## Фронтенд (React SPA)
+## Frontend (React SPA)
 
-### Компоненты
+### Components
 
 ```
 App
 └── Blog
     └── Post (×N)
         └── CommentSection
-            ├── Comment (рекурсивно, до depth 4)
+            ├── Comment (recursive, up to depth 4)
             ├── Modal
             │   └── CommentForm
             │       └── TextEditor
             └── Button
 ```
 
-Маршрутизации нет — единственная страница с 3 хардкодными постами.
+No routing — single page with 3 hardcoded posts.
 
-### Сервисы (axios, BASE_URL = http://localhost:3000)
+### Services (axios, BASE_URL = http://localhost:3000)
 
 - `getComments` — GET /comments/:postId
 - `getReplies` — GET /comments/:parentId/replies
@@ -69,19 +69,19 @@ App
 - `getCaptcha` — GET /captcha
 - `uploadFile` — POST /file-upload/verify
 
-### Форма и валидация
+### Form and validation
 
 - react-hook-form + valibot (@hookform/resolvers)
-- Капча — математическая (a + b), JWT-токен с ответом
+- Captcha — math (a + b), JWT token with the answer
 
-### Поток данных
+### Data flow
 
 ```
-Пользователь → TextEditor → CommentForm → createComment() → POST /comment-and-user
-                                                              ↓
-                                               CaptchaMiddleware → OrchestratorService → DB
-                                                              ↓
-                                           user + comment (транзакция)
-                                                              ↓
-                                               { comment, siblings } → UI
+User → TextEditor → CommentForm → createComment() → POST /comment-and-user
+                                                       ↓
+                                        CaptchaMiddleware → OrchestratorService → DB
+                                                       ↓
+                                            user + comment (transaction)
+                                                       ↓
+                                            { comment, siblings } → UI
 ```

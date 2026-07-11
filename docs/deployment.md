@@ -1,20 +1,20 @@
-# Деплой
+# Deployment
 
-## Переменные окружения
+## Environment variables
 
-### Бэкенд (`backend/.env`)
+### Backend (`backend/.env`)
 
-| Переменная | Описание | Пример |
-|------------|----------|--------|
-| `PORT` | Порт сервера | `3000` |
-| `CORS_ORIGIN` | Разрешённый origin | `http://localhost:5173` |
-| `CAPTCHA_SECRET` | Секрет для JWT капчи | `random-256-bit-string` |
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `PORT` | Server port | `3000` |
+| `CORS_ORIGIN` | Allowed origin | `http://localhost:5173` |
+| `CAPTCHA_SECRET` | Secret for JWT captcha | `random-256-bit-string` |
 
 ### Frontend
 
-Переменные окружения не используются. Базовый URL бэкенда задан в `frontend/src/services/index.ts` как `http://localhost:3000`. Для продакшена изменить на продакшен-URL.
+No env vars used. Backend URL is hardcoded in `frontend/src/services/index.ts` as `http://localhost:3000`. Change to production URL for deployment.
 
-## Сборка
+## Build
 
 ### Backend
 
@@ -30,20 +30,20 @@ npm run start:prod   # node dist/main
 ```bash
 cd frontend
 npm install
-npm run build        # → dist/ (статический сайт)
+npm run build        # → dist/ (static site)
 ```
 
-## Продакшен
+## Production
 
-### Вариант: nginx + Node.js
+### Option: nginx + Node.js
 
 ```
-/              → serve frontend/dist (статику)
+/              → serve frontend/dist (static)
 /api/*         → proxy_pass http://localhost:3000
 /uploads/*     → proxy_pass http://localhost:3000
 ```
 
-Пример `location` для nginx:
+Example nginx `location` blocks:
 
 ```nginx
 location /api/ {
@@ -62,8 +62,8 @@ location / {
 }
 ```
 
-Не забудьте обновить `CORS_ORIGIN` на домен фронтенда.
+Don't forget to update `CORS_ORIGIN` to the frontend domain.
 
-## Зависимости продакшена
+## Production dependencies
 
-Бэкенд требует `sharp` (нативный модуль) — может потребоваться `libvips` на сервере.
+Backend requires `sharp` (native module) — may need `libvips` on the server.

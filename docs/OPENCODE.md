@@ -1,20 +1,20 @@
-# OPENCODE.md — шпаргалка по инструментам
+# OPENCODE.md — tool reference
 
-## Доступные инструменты
+## Available tools
 
-| Инструмент | Для чего |
-|------------|----------|
-| `bash` | Выполнить команду (npm, git, сборка) |
-| `read` | Прочитать файл |
-| `write` | Создать/перезаписать файл |
-| `edit` | Частично изменить файл (oldString → newString) |
-| `glob` | Найти файлы по маске (`**/*.ts`) |
-| `grep` | Поиск в содержимом файлов |
-| `task` | Запустить под-агента для фоновой/сложной работы |
+| Tool | Purpose |
+|------|---------|
+| `bash` | Run commands (npm, git, build) |
+| `read` | Read a file |
+| `write` | Create/overwrite a file |
+| `edit` | Partial file edit (oldString → newString) |
+| `glob` | Find files by pattern (`**/*.ts`) |
+| `grep` | Search file contents |
+| `task` | Launch a sub-agent for background/complex work |
 
-## Ограничения
+## Restrictions
 
-- Не создавать файлы без явной команды пользователя
-- Не генерировать URL-адреса без уверенности в их корректности
-- Не добавлять `Co-Authored-By` / `Signed-off-by` в коммиты
-- Не запускать `git commit` без явного запроса
+- Do not create files without explicit user instruction
+- Do not generate URLs without confidence in their correctness
+- Do not add `Co-Authored-By` / `Signed-off-by` to commits
+- Do not run `git commit` without explicit request

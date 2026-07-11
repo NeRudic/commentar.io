@@ -1,23 +1,23 @@
 # comentar.io — backend
 
-NestJS 11 API для системы комментариев.
+NestJS 11 API for the comment system.
 
-Стек: NestJS 11, SQLite3, class-validator, sharp, jsonwebtoken.
+Stack: NestJS 11, SQLite3, class-validator, sharp, jsonwebtoken.
 
-## Команды
+## Commands
 
 ```bash
-npm run start:dev   # watch mode (порт 3000)
+npm run start:dev   # watch mode (port 3000)
 npm run lint        # ESLint --fix
 npm run format      # Prettier
 npm run test        # Jest
 npm run build       # → dist/
 ```
 
-## Окружение
+## Setup
 
-Скопировать `.env.example` → `.env`, задать `CAPTCHA_SECRET`.
+Copy `.env.example` → `.env`, set `CAPTCHA_SECRET`.
 
-## Документация проекта
+## Project docs
 
-См. `docs/` в корне репозитория.
+See `docs/` in the repository root.

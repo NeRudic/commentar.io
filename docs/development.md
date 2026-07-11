@@ -1,53 +1,53 @@
-# Разработка
+# Development
 
-## Команды
+## Commands
 
-Все команды запускаются из директории пакета (`cd backend` или `cd frontend`).
+All commands run from the package directory (`cd backend` or `cd frontend`).
 
 ### Backend
 
-| Команда | Описание |
-|---------|----------|
-| `npm run start:dev` | Watch mode (порт 3000) |
-| `npm run build` | Компиляция в dist/ |
+| Command | Description |
+|---------|-------------|
+| `npm run start:dev` | Watch mode (port 3000) |
+| `npm run build` | Compile to dist/ |
 | `npm run lint` | ESLint —fix |
 | `npm run format` | Prettier |
 | `npm run test` | Jest |
 
 ### Frontend
 
-| Команда | Описание |
-|---------|----------|
-| `npm run dev` | Vite dev server (порт 5173) |
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Vite dev server (port 5173) |
 | `npm run build` | `tsc -b && vite build` |
 | `npm run lint` | ESLint |
 
-## Соглашения
+## Conventions
 
-- **Коммиты:** Conventional Commits (`feat:`, `fix:`, `refactor:`)
-- **Без Co-Authored-By / Signed-off-by**
+- **Commits:** Conventional Commits (`feat:`, `fix:`, `refactor:`)
+- **No Co-Authored-By / Signed-off-by**
 - **CSS:** CSS Modules (`*.module.css`)
-- **Формы:** react-hook-form + valibot
+- **Forms:** react-hook-form + valibot
 - **Prettier:** single quotes, trailing commas, 80 width, 2-space tabs
 - **ESLint:** `endOfLine: "auto"` (Windows-safe)
-- **Без комментариев в коде** (если не запрошено явно)
-- После изменений структуры обновлять .md файлы и docs/DECISIONS.md
+- **No comments** in code unless explicitly requested
+- Update `.md` files and `docs/DECISIONS.md` after structural changes
 
-## База данных
+## Database
 
-SQLite файл — `backend/src/db/db.sqlite`. Всегда запускать команды бэкенда из `backend/`, иначе путь будет неверным. Таблицы создаются автоматически при старте.
+SQLite file — `backend/src/db/db.sqlite`. Always run backend commands from `backend/`, otherwise the path will be wrong. Tables are created automatically on startup.
 
-## Сборка и линтинг
+## Build and lint
 
-Перед коммитом:
-1. `npm run lint` в обоих пакетах
-2. `npm run build` в frontend (проверяет tsc + vite)
-3. `npm run format` в backend
+Before commit:
+1. `npm run lint` in both packages
+2. `npm run build` in frontend (checks tsc + vite)
+3. `npm run format` in backend
 
-## OpenCode / ИИ-агенты
+## OpenCode / AI agents
 
-- `AGENTS.md` — основная инструкция для агента
-- `CLAUDE.md` — правила и конвенции проекта
-- `docs/DECISIONS.md` — лог архитектурных решений
-- `docs/OPENCODE.md` — шпаргалка по инструментам OpenCode
-- `docs/SPEC_COMMENTS.md` — функциональные требования
+- `AGENTS.md` — main agent instructions
+- `CLAUDE.md` — project rules and conventions
+- `docs/DECISIONS.md` — architectural decisions log
+- `docs/OPENCODE.md` — OpenCode tool reference
+- `docs/SPEC_COMMENTS.md` — feature specification

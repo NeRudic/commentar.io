@@ -41,18 +41,18 @@ npm run lint          # eslint
 
 In `main.ts`: `SanitizePipe` runs first, then `ValidationPipe({ transform: true })`.
 
-- `SanitizePipe` strips all HTML except `<strong>`, `<i>`, `<code>`.
+- `SanitizePipe` strips all HTML except `<strong>`, `<i>`, `<code>`, `<a>`.
 - DTOs use `class-validator` + `class-transformer` (`@Type`, `@Transform`) for coercion.
 
 ### Frontend types
 
-- Локальные типы в `frontend/src/types/` (разделены на `comment.ts`, `user.ts`, `captcha.ts`, barrel-реэкспорт через `index.ts`).
-- `CommentRow` включает JOIN-поля `user_name` и `home_page`.
-- Бэкенд импортирует свои DTO из `class-validator`.
+- Types are local in `frontend/src/types/` (split into `comment.ts`, `user.ts`, `captcha.ts`, barrel re-export via `index.ts`).
+- `CommentRow` includes JOIN fields `user_name` and `home_page`.
+- Backend imports its own DTOs from `class-validator`.
 
 ### Frontend services
 
-Сервисы используют **axios** (`frontend/package.json`).
+Services use **axios** (`frontend/package.json`).
 
 ## Conventions
 
