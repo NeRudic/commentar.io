@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useRef } from 'react';
 import {
   Heart,
   Comment as CommentIcon,
@@ -7,7 +7,9 @@ import {
   Dots,
   AIIllustration,
 } from '../icons/icons';
-import CommentSection from '../CommentSection/CommentSection';
+import CommentSection, {
+  type CommentSectionHandle,
+} from '../CommentSection/CommentSection';
 import styles from './Post.module.css';
 
 export interface PostProps {
@@ -33,7 +35,7 @@ export default function Post({
   time,
   illustration = <AIIllustration size={468} />,
 }: PostProps) {
-  const [showComments, setShowComments] = useState(false);
+  const sectionRef = useRef<CommentSectionHandle>(null);
 
   return (
     <article className={styles.card} data-post-id={postId}>
@@ -61,7 +63,7 @@ export default function Post({
         <button
           className={styles.actionBtn}
           aria-label="Comment"
-          onClick={() => setShowComments((prev) => !prev)}
+          onClick={() => sectionRef.current?.handleIconClick()}
         >
           <CommentIcon size={24} />
         </button>
@@ -84,7 +86,7 @@ export default function Post({
         </span>
       </div>
 
-      {showComments && <CommentSection postId={id} />}
+      <CommentSection ref={sectionRef} postId={id} />
 
       <div className={styles.time}>{time}</div>
     </article>

@@ -1,6 +1,14 @@
-import { useState, useEffect, useCallback } from 'react';
+import {
+  useState,
+  useEffect,
+  useCallback,
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+} from 'react';
 import { getRootComments } from '../../services';
 import { COMMENTS_PER_PAGE } from '../../config/comment.config';
+import { useToast } from '../../context/ToastContext';
 import type { CommentRow, CreateCommentResponse } from '../../types';
 import Modal from '../Modal/Modal';
 import CommentForm from '../CommentForm/CommentForm';
@@ -24,141 +32,166 @@ interface CommentSectionProps {
   postId: number;
 }
 
-export default function CommentSection({ postId }: CommentSectionProps) {
-  const [rootComments, setRootComments] = useState<CommentRow[]>([]);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [sort, setSort] = useState<SortConfig>({
-    field: 'created_at',
-    order: 'desc',
-  });
+export interface CommentSectionHandle {
+  handleIconClick: () => void;
+}
 
-  const fetchRootComments = useCallback(
-    async (limit: number, offset: number) => {
-      try {
-        const data = await getRootComments(
-          postId,
-          limit,
-          offset,
-          sort.field,
-          sort.order,
-        );
-        if (offset === 0) {
-          setRootComments(data);
-        } else {
-          setRootComments((prev) => [...prev, ...data]);
+const CommentSection = forwardRef<CommentSectionHandle, CommentSectionProps>(
+  function CommentSection({ postId }, ref) {
+    const [rootComments, setRootComments] = useState<CommentRow[]>([]);
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [hasMore, setHasMore] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [sort, setSort] = useState<SortConfig>({
+      field: 'created_at',
+      order: 'desc',
+    });
+    const { showToast } = useToast();
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        handleIconClick() {
+          if (rootComments.length === 0) {
+            setIsFormOpen(true);
+          } else {
+            containerRef.current?.scrollIntoView({ block: 'center' });
+          }
+        },
+      }),
+      [rootComments.length],
+    );
+
+    const fetchRootComments = useCallback(
+      async (limit: number, offset: number) => {
+        try {
+          const data = await getRootComments(
+            postId,
+            limit,
+            offset,
+            sort.field,
+            sort.order,
+          );
+          if (offset === 0) {
+            setRootComments(data);
+          } else {
+            setRootComments((prev) => [...prev, ...data]);
+          }
+          setHasMore(data.length === limit);
+        } catch {
+          showToast('Failed to load comments');
         }
-        setHasMore(data.length === limit);
-      } catch {
-        // silently fail
-      }
-    },
-    [postId, sort],
-  );
+      },
+      [postId, sort, showToast],
+    );
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchRootComments(COMMENTS_PER_PAGE, 0);
-  }, [fetchRootComments]);
+    useEffect(() => {
+      fetchRootComments(COMMENTS_PER_PAGE, 0);
+    }, [fetchRootComments]);
 
-  const handleSort = useCallback(
-    (field: SortField) => {
-      setSort((prev) => {
-        const order =
-          prev.field === field && prev.order === 'asc' ? 'desc' : 'asc';
-        return { field, order };
-      });
-      setRootComments([]);
-      setHasMore(false);
-    },
-    [],
-  );
+    const handleSort = useCallback(
+      (field: SortField) => {
+        setSort((prev) => {
+          const order =
+            prev.field === field && prev.order === 'asc' ? 'desc' : 'asc';
+          return { field, order };
+        });
+        setRootComments([]);
+        setHasMore(false);
+      },
+      [],
+    );
 
-  const handleShowMore = useCallback(async () => {
-    setLoadingMore(true);
-    await fetchRootComments(COMMENTS_PER_PAGE, rootComments.length);
-    setLoadingMore(false);
-  }, [fetchRootComments, rootComments.length]);
+    const handleShowMore = useCallback(async () => {
+      setLoadingMore(true);
+      await fetchRootComments(COMMENTS_PER_PAGE, rootComments.length);
+      setLoadingMore(false);
+    }, [fetchRootComments, rootComments.length]);
 
-  const handleFormSuccess = useCallback(
-    (result?: CreateCommentResponse) => {
-      setIsFormOpen(false);
-      if (result?.siblings) {
-        setRootComments(result.siblings);
-      }
-    },
-    [],
-  );
+    const handleFormSuccess = useCallback(
+      (result?: CreateCommentResponse) => {
+        setIsFormOpen(false);
+        if (result?.siblings) {
+          setRootComments(result.siblings);
+        }
+      },
+      [],
+    );
 
-  const handleNewComment = useCallback(() => {
-    setIsFormOpen(true);
-  }, []);
+    const handleNewComment = useCallback(() => {
+      setIsFormOpen(true);
+    }, []);
 
-  return (
-    <div className={styles.section}>
-      <div className={styles.sortBar}>
-        {(Object.keys(SORT_LABELS) as SortField[]).map((field) => (
-          <button
-            key={field}
-            type="button"
-            className={`${styles.sortBtn} ${sort.field === field ? styles.sortBtnActive : ''}`}
-            onClick={() => handleSort(field)}
-          >
-            {SORT_LABELS[field]}
-            {sort.field === field && (
-              <span className={styles.sortArrow}>
-                {sort.order === 'asc' ? ' ↑' : ' ↓'}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
-
-      {rootComments.length > 0 && (
-        <div className={styles.commentsList}>
-          {rootComments.map((comment) => (
-            <Comment
-              key={comment.comment_id}
-              comment_id={comment.comment_id}
-              post_id={comment.post_id}
-              user_name={comment.user_name}
-              home_page={comment.home_page}
-              text={comment.text}
-              file_path={comment.file_path}
-              created_at={comment.created_at}
-              reply_count={comment.reply_count}
-              depth={0}
-            />
-          ))}
-          {hasMore && (
+    return (
+      <div className={styles.section}>
+        <div className={styles.sortBar}>
+          {(Object.keys(SORT_LABELS) as SortField[]).map((field) => (
             <button
-              className={styles.showMore}
+              key={field}
               type="button"
-              onClick={handleShowMore}
-              disabled={loadingMore}
+              className={`${styles.sortBtn} ${sort.field === field ? styles.sortBtnActive : ''}`}
+              onClick={() => handleSort(field)}
             >
-              {loadingMore ? 'Loading...' : 'Show more'}
+              {SORT_LABELS[field]}
+              {sort.field === field && (
+                <span className={styles.sortArrow}>
+                  {sort.order === 'asc' ? ' ↑' : ' ↓'}
+                </span>
+              )}
             </button>
+          ))}
+        </div>
+
+        <div ref={containerRef}>
+          {rootComments.length > 0 && (
+            <div className={styles.commentsList}>
+              {rootComments.map((comment) => (
+                <Comment
+                  key={comment.comment_id}
+                  comment_id={comment.comment_id}
+                  post_id={comment.post_id}
+                  user_name={comment.user_name}
+                  home_page={comment.home_page}
+                  text={comment.text}
+                  file_path={comment.file_path}
+                  created_at={comment.created_at}
+                  reply_count={comment.reply_count}
+                  depth={0}
+                />
+              ))}
+              {hasMore && (
+                <button
+                  className={styles.showMore}
+                  type="button"
+                  onClick={handleShowMore}
+                  disabled={loadingMore}
+                >
+                  {loadingMore ? 'Loading...' : 'Show more'}
+                </button>
+              )}
+            </div>
           )}
         </div>
-      )}
 
-      <button
-        className={styles.addComment}
-        type="button"
-        onClick={handleNewComment}
-      >
-        Add comment
-      </button>
+        <button
+          className={styles.addComment}
+          type="button"
+          onClick={handleNewComment}
+        >
+          Add comment
+        </button>
 
-      <Modal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)}>
-        <CommentForm
-          postId={postId}
-          onClose={() => setIsFormOpen(false)}
-          onSuccess={handleFormSuccess}
-        />
-      </Modal>
-    </div>
-  );
-}
+        <Modal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)}>
+          <CommentForm
+            postId={postId}
+            onClose={() => setIsFormOpen(false)}
+            onSuccess={handleFormSuccess}
+          />
+        </Modal>
+      </div>
+    );
+  },
+);
+
+export default CommentSection;
