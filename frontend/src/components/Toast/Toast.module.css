@@ -1,0 +1,39 @@
+.toast {
+  padding: 12px 20px;
+  border-radius: 8px;
+  background: #e74c3c;
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.4;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  pointer-events: auto;
+  animation: slideIn 0.3s ease-out;
+  max-width: 360px;
+  word-break: break-word;
+}
+
+.exit {
+  animation: fadeOut 0.5s ease-out forwards;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
