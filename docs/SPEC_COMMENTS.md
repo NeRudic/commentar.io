@@ -42,10 +42,10 @@
 
 ## Status
 
-| Status | Count |
-|--------|-------|
-| Done | 18 |
-| Not done | 3 |
+| Status   | Count |
+| -------- | ----- |
+| Done     | 18    |
+| Not done | 3     |
 
 ---
 
