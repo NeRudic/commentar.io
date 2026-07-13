@@ -57,12 +57,23 @@
   max-width: 320px;
   max-height: 240px;
   border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.image:hover {
+  opacity: 0.85;
 }
 
 .fileLink {
   font-size: 12px;
   color: var(--accent);
   text-decoration: underline;
+  cursor: pointer;
+}
+
+.fileLink:hover {
+  opacity: 0.8;
 }
 
 .actions {

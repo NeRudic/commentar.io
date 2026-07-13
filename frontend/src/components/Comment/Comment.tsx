@@ -6,6 +6,7 @@ import { useToast } from '../../context/ToastContext';
 import type { CommentRow, CreateCommentResponse } from '../../types';
 import Modal from '../Modal/Modal';
 import CommentForm from '../CommentForm/CommentForm';
+import Lightbox from '../Lightbox/Lightbox';
 import styles from './Comment.module.css';
 
 interface CommentProps {
@@ -38,6 +39,7 @@ const Comment = memo(function Comment({
   const [isReplyFormOpen, setIsReplyFormOpen] = useState(false);
   const { showToast } = useToast();
   const isImage = /\.(jpg|jpeg|gif|png)$/i.test(file_path ?? '');
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   const handleToggleReplies = useCallback(async () => {
     if (showReplies) {
@@ -103,18 +105,23 @@ const Comment = memo(function Comment({
               src={BASE_URL + file_path}
               alt="attachment"
               className={styles.image}
+              onClick={() => setIsLightboxOpen(true)}
             />
           ) : (
-            <a
-              href={BASE_URL + file_path}
-              target="_blank"
+            <span
               className={styles.fileLink}
+              onClick={() => setIsLightboxOpen(true)}
             >
               {file_path}
-            </a>
+            </span>
           )}
         </div>
       )}
+      <Lightbox
+        filePath={file_path}
+        isOpen={isLightboxOpen}
+        onClose={() => setIsLightboxOpen(false)}
+      />
       <div className={styles.actions}>
         <button
           className={styles.actionBtn}
