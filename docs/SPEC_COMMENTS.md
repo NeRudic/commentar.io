@@ -44,8 +44,8 @@
 
 | Status | Count |
 |--------|-------|
-| Done | 17 |
-| Not done | 4 |
+| Done | 18 |
+| Not done | 3 |
 
 ---
 
