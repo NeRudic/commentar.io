@@ -11,7 +11,6 @@ export interface ModalProps {
 
 export default function Modal({ isOpen, onClose, children }: ModalProps) {
 
-  // Обработка нажатия "Escape"
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -19,14 +18,12 @@ export default function Modal({ isOpen, onClose, children }: ModalProps) {
     [onClose],
   );
 
-  // Прослушаваем handleKeyDown, если isOpen = true
   useEffect(() => {
     if (!isOpen) return;
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, handleKeyDown]);
 
-  // Отменяем скрол, если isOpen
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : ''
 
