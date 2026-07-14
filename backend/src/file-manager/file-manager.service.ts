@@ -12,7 +12,7 @@ import {
   MIME_TO_EXT,
   TEMP_DIR,
   UPLOADS_DIR,
-} from './file-upload.config';
+} from './file-manager.config';
 
 export interface ProcessResult {
   file_id: number;
@@ -20,7 +20,7 @@ export interface ProcessResult {
 }
 
 @Injectable()
-export class FileUploadService {
+export class FileManagerService {
   constructor(private readonly database: DB) {}
 
   async processFile(file: Express.Multer.File): Promise<ProcessResult> {

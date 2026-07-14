@@ -11,7 +11,7 @@ import {
   TEMP_DIR,
   UPLOADS_DIR,
   FILE_UPLOAD_CONFIG,
-} from './file-upload.config';
+} from './file-manager.config';
 
 const INTERVAL_MS = FILE_UPLOAD_CONFIG.CLEANUP_INTERVAL_MS;
 

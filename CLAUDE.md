@@ -16,7 +16,7 @@ comentar.io/
 │       ├── user/         # POST /users
 │       ├── comment/      # Comment CRUD
 │       ├── captcha/      # Math captcha (JWT)
-│       ├── file-upload/  # File upload (txt/jpg/gif/png)
+│       ├── file-manager/ # File upload, staging, publish, cleanup
 │       └── orchestrator/ # User+comment transaction
 ├── frontend/             # React SPA
 │   └── src/

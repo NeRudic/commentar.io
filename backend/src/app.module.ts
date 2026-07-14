@@ -3,7 +3,7 @@ import { DBModule } from './db/db.module';
 import { UserModule } from './user/user.module';
 import { CommentModule } from './comment/comment.module';
 import { CaptchaModule } from './captcha/captcha.module';
-import { FileUploadModule } from './file-upload/file-upload.module';
+import { FileManagerModule } from './file-manager/file-manager.module';
 import { OrchestratorModule } from './orchestrator/orchestrator.module';
 
 @Module({
@@ -12,7 +12,7 @@ import { OrchestratorModule } from './orchestrator/orchestrator.module';
     UserModule,
     CommentModule,
     CaptchaModule,
-    FileUploadModule,
+    FileManagerModule,
     OrchestratorModule,
   ],
 })

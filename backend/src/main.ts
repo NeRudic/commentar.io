@@ -3,7 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { SanitizePipe } from './common/sanitize.pipe';
-import { UPLOADS_DIR } from './file-upload/file-upload.config';
+import { UPLOADS_DIR } from './file-manager/file-manager.config';
 import { join } from 'path';
 import 'reflect-metadata';
 

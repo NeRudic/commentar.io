@@ -57,17 +57,17 @@ Comment creation (POST /comment-and-user, внутри BEGIN/COMMIT):
 
 - `uploads/` — раздаётся статически через `app.useStaticAssets`
 - `.tmp/` — не раздаётся, файлы хранятся до подтверждения комментария
-- `FileCleanupService` (`file-upload.cleanup.ts`) — запускается раз в час: чистит `.tmp/` по mtime, orphaned `uploads/` по `file.status='pending'`, и строки `file` с `status='pending'` старше порога
-- Пороги: `CLEANUP_THRESHOLD_MS` и `CLEANUP_INTERVAL_MS` в `file-upload.config.ts`
+- `FileCleanupService` (`file-manager.cleanup.ts`) — запускается раз в час: чистит `.tmp/` по mtime, orphaned `uploads/` по `file.status='pending'`, и строки `file` с `status='pending'` старше порога
+- Пороги: `CLEANUP_THRESHOLD_MS` и `CLEANUP_INTERVAL_MS` в `file-manager.config.ts`
 
-### File structure (backend/src/file-upload/)
+### File structure (backend/src/file-manager/)
 
 ```
-file-upload.config.ts    — UPLOADS_DIR, TEMP_DIR, FILE_UPLOAD_CONFIG
-file-upload.controller.ts — POST /file-upload/verify
-file-upload.service.ts    — валидация, запись в .tmp/, INSERT file
-file-upload.cleanup.ts    — FileCleanupService (периодическая чистка)
-file-upload.module.ts     — модуль, создаёт uploads/ + .tmp/ при старте
+file-manager.config.ts    — UPLOADS_DIR, TEMP_DIR, FILE_UPLOAD_CONFIG
+file-manager.controller.ts — POST /file-upload/verify
+file-manager.service.ts    — валидация, запись в .tmp/, INSERT file, publishFile, removeTempFile
+file-manager.cleanup.ts    — FileCleanupService (периодическая чистка)
+file-manager.module.ts     — модуль, создаёт uploads/ + .tmp/ при старте
 ```
 
 ### Global pipes (order matters)

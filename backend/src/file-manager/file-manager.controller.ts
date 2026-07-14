@@ -6,12 +6,12 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import { FileUploadService } from './file-upload.service';
-import { FILE_UPLOAD_CONFIG } from './file-upload.config';
+import { FileManagerService } from './file-manager.service';
+import { FILE_UPLOAD_CONFIG } from './file-manager.config';
 
 @Controller('file-upload')
-export class FileUploadController {
-  constructor(private readonly service: FileUploadService) {}
+export class FileManagerController {
+  constructor(private readonly service: FileManagerService) {}
 
   @Post('verify')
   @UseInterceptors(

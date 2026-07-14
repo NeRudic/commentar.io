@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { DB } from '../db/db.service';
 import { UserService } from '../user/user.service';
-import { FileUploadService } from '../file-upload/file-upload.service';
+import { FileManagerService } from '../file-manager/file-manager.service';
 import { CommentRowDTO } from '../comment/dto/comment-row.dto';
 import { CreateCommentWithUserDTO } from './dto/create-comment-with-user.dto';
 import { parseFilePaths } from '../common/parse-file-paths';
@@ -16,7 +16,7 @@ export class OrchestratorService {
   constructor(
     private readonly db: DB,
     private readonly userService: UserService,
-    private readonly fileUploadService: FileUploadService,
+    private readonly fileManagerService: FileManagerService,
   ) {}
 
   async createCommentWithUser(
@@ -51,7 +51,7 @@ export class OrchestratorService {
 
       if (filePathJson) {
         for (const fp of file_paths) {
-          await this.fileUploadService.publishFile(fp);
+          await this.fileManagerService.publishFile(fp);
         }
       }
 
@@ -59,7 +59,7 @@ export class OrchestratorService {
 
       if (filePathJson) {
         for (const fp of file_paths) {
-          void this.fileUploadService.removeTempFile(fp);
+          void this.fileManagerService.removeTempFile(fp);
         }
       }
 

@@ -71,11 +71,11 @@ Services rewritten from `fetch` to `axios` (`^1.18.1`).
 - A `FileCleanupService` runs hourly: deletes `.tmp/` files by mtime, removes orphaned `uploads/` files with `status = 'pending'` older than threshold, and purges stale `file` rows.
 
 **How:**
-- `FileUploadService.processFile()` writes to `.tmp/<filename>`, inserts `file` row with `status = 'pending'`.
+- `FileManagerService.processFile()` writes to `.tmp/<filename>`, inserts `file` row with `status = 'pending'`.
 - `OrchestratorService.createCommentWithUser()` inside `BEGIN IMMEDIATE … COMMIT`: COPY `.tmp/<f>` → `uploads/<f>` (with up to 3 retries), then `UPDATE file SET status = 'published'`.
 - After COMMIT: best-effort `unlink` of `.tmp/<f>`.
 - `FileCleanupService` (setInterval, 1h): cleans `.tmp/` (mtime > 1h), orphaned `uploads/` (file.status = 'pending', created_at > 1h), and orphaned rows.
-- Config: `TEMP_DIR = '.tmp'`, `CLEANUP_THRESHOLD_MS = 3_600_000`, `RETRY_LIMIT = 3` in `file-upload.config.ts`.
+- Config: `TEMP_DIR = '.tmp'`, `CLEANUP_THRESHOLD_MS = 3_600_000`, `RETRY_LIMIT = 3` in `file-manager.config.ts`.
 
 ## 2026-07-11 — Root comment sorting on backend with white list
 
