@@ -11,7 +11,7 @@ export const formSchema = v.object({
   ),
   home_page: v.nullable(v.pipe(v.string(), v.url())),
   text: v.pipe(v.string(), v.nonEmpty("Текст обязателен")),
-  file_path: v.nullable(v.string()),
+  file_paths: v.array(v.string()),
 });
 
 export type CommentFormValues = v.InferOutput<typeof formSchema>;

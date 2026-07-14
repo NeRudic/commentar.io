@@ -47,6 +47,22 @@ export function Bookmark({ size = 24, filled, ...props }: IconProps & { filled?:
   );
 }
 
+export function ChevronLeft({ size = 24, ...props }: IconProps) {
+  return (
+    <svg {...icon(size, props)} className={styles.stroke}>
+      <polyline points="15 18 9 12 15 6" />
+    </svg>
+  );
+}
+
+export function ChevronRight({ size = 24, ...props }: IconProps) {
+  return (
+    <svg {...icon(size, props)} className={styles.stroke}>
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+  );
+}
+
 export function Close({ size = 24, ...props }: IconProps) {
   return (
     <svg {...icon(size, props)} className={styles.illustration}>

@@ -14,7 +14,9 @@ export class CommentService {
    * Create comment
    */
   async createComment(data: CreateCommentDTO): Promise<CommentRowDTO> {
-    const { post_id, parent_comment_id, text, user_email, file_path } = data;
+    const { post_id, parent_comment_id, text, user_email, file_paths } = data;
+
+    const filePathJson = file_paths.length > 0 ? JSON.stringify(file_paths) : null;
 
     let result: { lastID: number };
 
@@ -26,13 +28,14 @@ export class CommentService {
       INSERT INTO comment (post_id, parent_comment_id, text, user_email, file_path)
       VALUES (?, ?, ?, ?, ?)
       `,
-        [post_id, parent_comment_id, text, user_email, file_path],
+        [post_id, parent_comment_id, text, user_email, filePathJson],
       );
 
-      if (file_path) {
+      if (filePathJson) {
+        const placeholders = file_paths.map(() => '?').join(', ');
         await this.database.run(
-          `UPDATE file SET status = 'published' WHERE path = ?`,
-          [file_path],
+          `UPDATE file SET status = 'published' WHERE path IN (${placeholders})`,
+          file_paths,
         );
       }
 
@@ -45,7 +48,7 @@ export class CommentService {
       );
     }
 
-    const row = await this.database.get<CommentRowDTO>(
+    const row = await this.database.get<Record<string, unknown>>(
       `
     SELECT comment.id AS comment_id, comment.post_id, comment.parent_comment_id, comment.text, comment.user_email, comment.file_path, comment.created_at, u.user_name, u.home_page
     FROM comment
@@ -61,7 +64,10 @@ export class CommentService {
       );
     }
 
-    return row;
+    return {
+      ...row,
+      file_paths: row.file_path ? JSON.parse(row.file_path as string) : [],
+    } as unknown as CommentRowDTO;
   }
 
   /*
@@ -86,7 +92,7 @@ export class CommentService {
           : `ORDER BY comment.created_at ${safeSortOrder}`;
 
     try {
-      const comments: CommentRowDTO[] = await this.database.all(
+      const rows: Record<string, unknown>[] = await this.database.all(
         `
       SELECT comment.id AS comment_id, comment.post_id, comment.parent_comment_id, comment.text, comment.user_email, comment.file_path, comment.created_at, u.user_name, u.home_page,
         (SELECT COUNT(*) FROM comment AS c2 WHERE c2.parent_comment_id = comment.id) AS reply_count
@@ -99,6 +105,10 @@ export class CommentService {
       `,
         [post_id, limitVal, offsetVal],
       );
+      const comments = rows.map((row) => ({
+        ...row,
+        file_paths: row.file_path ? JSON.parse(row.file_path as string) : [],
+      })) as unknown as CommentRowDTO[];
       return comments;
     } catch (err) {
       throw new InternalServerErrorException(
@@ -119,7 +129,7 @@ export class CommentService {
     const offsetVal = offset ? parseInt(offset, 10) : 0;
 
     try {
-      const comments: CommentRowDTO[] = await this.database.all(
+      const rows: Record<string, unknown>[] = await this.database.all(
         `
       SELECT comment.id AS comment_id, comment.post_id, comment.parent_comment_id, comment.text, comment.user_email, comment.file_path, comment.created_at, u.user_name, u.home_page,
         (SELECT COUNT(*) FROM comment AS c2 WHERE c2.parent_comment_id = comment.id) AS reply_count
@@ -130,6 +140,10 @@ export class CommentService {
       `,
         [parent_comment_id, limitVal, offsetVal],
       );
+      const comments = rows.map((row) => ({
+        ...row,
+        file_paths: row.file_path ? JSON.parse(row.file_path as string) : [],
+      })) as unknown as CommentRowDTO[];
       return comments;
     } catch (err) {
       throw new InternalServerErrorException(

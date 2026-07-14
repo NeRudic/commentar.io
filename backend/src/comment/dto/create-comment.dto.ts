@@ -1,5 +1,6 @@
 import { Type, Transform } from 'class-transformer';
 import {
+  IsArray,
   IsEmail,
   IsInt,
   IsOptional,
@@ -32,11 +33,10 @@ export class CreateCommentDTO {
   user_email: string;
 
   @Transform(({ value }) =>
-    value === null || value === 'null' || value === undefined
-      ? null
-      : String(value),
+    value === undefined || value === null ? [] : value,
   )
   @IsOptional()
-  @IsString()
-  file_path: string | null;
+  @IsArray()
+  @IsString({ each: true })
+  file_paths: string[];
 }

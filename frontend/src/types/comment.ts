@@ -6,7 +6,7 @@ export interface CommentRow {
   user_email: string;
   text: string;
   home_page: string | null;
-  file_path: string | null;
+  file_paths: string[];
   created_at: string;
   reply_count: number;
 }
@@ -18,7 +18,7 @@ export interface CreateCommentRequest {
   user_email: string;
   home_page: string | null;
   text: string;
-  file_path: string | null;
+  file_paths: string[];
   captcha_token: string;
   captcha_answer: string;
 }
