@@ -3,6 +3,7 @@ import { DB } from '../db/db.service';
 import { UserService } from '../user/user.service';
 import { CommentRowDTO } from '../comment/dto/comment-row.dto';
 import { CreateCommentWithUserDTO } from './dto/create-comment-with-user.dto';
+import { parseFilePaths } from '../common/parse-file-paths';
 
 export interface CreateCommentResult {
   comment: CommentRowDTO;
@@ -29,7 +30,8 @@ export class OrchestratorService {
       file_paths,
     } = dto;
 
-    const filePathJson = file_paths.length > 0 ? JSON.stringify(file_paths) : null;
+    const filePathJson =
+      file_paths.length > 0 ? JSON.stringify(file_paths) : null;
 
     try {
       await this.db.run(`BEGIN IMMEDIATE`);
@@ -72,7 +74,7 @@ export class OrchestratorService {
 
       const comment = {
         ...row,
-        file_paths: row.file_path ? JSON.parse(row.file_path as string) : [],
+        file_paths: parseFilePaths(row.file_path),
       } as unknown as CommentRowDTO;
 
       const siblingRows: Record<string, unknown>[] =
@@ -98,7 +100,7 @@ export class OrchestratorService {
 
       const siblings = siblingRows.map((r) => ({
         ...r,
-        file_paths: r.file_path ? JSON.parse(r.file_path as string) : [],
+        file_paths: parseFilePaths(r.file_path),
       })) as unknown as CommentRowDTO[];
 
       return { comment, siblings };

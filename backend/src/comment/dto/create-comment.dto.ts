@@ -33,7 +33,7 @@ export class CreateCommentDTO {
   user_email: string;
 
   @Transform(({ value }) =>
-    value === undefined || value === null ? [] : value,
+    value === undefined || value === null ? [] : (value as string[]),
   )
   @IsOptional()
   @IsArray()

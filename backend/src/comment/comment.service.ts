@@ -5,6 +5,7 @@ import { CreateCommentDTO } from './dto/create-comment.dto';
 import { CommentRepliesDTO } from './dto/comment-replies.dto';
 import { RootCommentsDTO } from './dto/root-comments.dto';
 import { DeleteCommentDTO } from './dto/delete-comment.dto';
+import { parseFilePaths } from '../common/parse-file-paths';
 
 @Injectable()
 export class CommentService {
@@ -16,7 +17,8 @@ export class CommentService {
   async createComment(data: CreateCommentDTO): Promise<CommentRowDTO> {
     const { post_id, parent_comment_id, text, user_email, file_paths } = data;
 
-    const filePathJson = file_paths.length > 0 ? JSON.stringify(file_paths) : null;
+    const filePathJson =
+      file_paths.length > 0 ? JSON.stringify(file_paths) : null;
 
     let result: { lastID: number };
 
@@ -66,7 +68,7 @@ export class CommentService {
 
     return {
       ...row,
-      file_paths: row.file_path ? JSON.parse(row.file_path as string) : [],
+      file_paths: parseFilePaths(row.file_path),
     } as unknown as CommentRowDTO;
   }
 
@@ -107,7 +109,7 @@ export class CommentService {
       );
       const comments = rows.map((row) => ({
         ...row,
-        file_paths: row.file_path ? JSON.parse(row.file_path as string) : [],
+        file_paths: parseFilePaths(row.file_path),
       })) as unknown as CommentRowDTO[];
       return comments;
     } catch (err) {
@@ -142,7 +144,7 @@ export class CommentService {
       );
       const comments = rows.map((row) => ({
         ...row,
-        file_paths: row.file_path ? JSON.parse(row.file_path as string) : [],
+        file_paths: parseFilePaths(row.file_path),
       })) as unknown as CommentRowDTO[];
       return comments;
     } catch (err) {
