@@ -10,7 +10,7 @@ import { DB } from '../db/db.service';
 import {
   FILE_UPLOAD_CONFIG,
   MIME_TO_EXT,
-  UPLOADS_DIR,
+  TEMP_DIR,
 } from './file-upload.config';
 
 export interface ProcessResult {
@@ -47,11 +47,11 @@ export class FileUploadService {
       '-' +
       Math.round(Math.random() * FILE_UPLOAD_CONFIG.RANDOM_RANGE) +
       ext;
-    const filePath = join(process.cwd(), UPLOADS_DIR, filename);
+    const tempFilePath = join(process.cwd(), TEMP_DIR, filename);
     const publicPath = '/uploads/' + filename;
 
     if (file.mimetype === 'text/plain') {
-      await fs.writeFile(filePath, file.buffer);
+      await fs.writeFile(tempFilePath, file.buffer);
     } else {
       try {
         const image = sharp(file.buffer);
@@ -72,9 +72,9 @@ export class FileUploadService {
                 withoutEnlargement: true,
               },
             )
-            .toFile(filePath);
+            .toFile(tempFilePath);
         } else {
-          await image.toFile(filePath);
+          await image.toFile(tempFilePath);
         }
       } catch (err) {
         throw new InternalServerErrorException(
@@ -85,13 +85,13 @@ export class FileUploadService {
 
     try {
       const result = await this.database.run(
-        `INSERT INTO file (path) VALUES (?)`,
+        `INSERT INTO file (path, status) VALUES (?, 'pending')`,
         [publicPath],
       );
 
       return { file_id: result.lastID, path: publicPath };
     } catch {
-      await fs.unlink(filePath);
+      await fs.unlink(tempFilePath);
       throw new InternalServerErrorException(
         'Не удалось сохранить запись о файле',
       );
