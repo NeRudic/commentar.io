@@ -33,14 +33,6 @@ export class CommentService {
         [post_id, parent_comment_id, text, user_email, filePathJson],
       );
 
-      if (filePathJson) {
-        const placeholders = file_paths.map(() => '?').join(', ');
-        await this.database.run(
-          `UPDATE file SET status = 'published' WHERE path IN (${placeholders})`,
-          file_paths,
-        );
-      }
-
       await this.database.run(`COMMIT`);
     } catch (err) {
       await this.database.run(`ROLLBACK`);
