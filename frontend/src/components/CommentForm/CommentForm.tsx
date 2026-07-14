@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { valibotResolver } from '@hookform/resolvers/valibot';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createComment, uploadFile, getCaptcha } from '../../services';
 import { formSchema } from '../../schemas/commentForm.schema';
 import type { CommentFormValues } from '../../schemas/commentForm.schema';
@@ -23,12 +23,12 @@ export default function CommentForm({
   onClose,
   onSuccess,
 }: CommentFormProps) {
-  const [file, setFile] = useState<File | null>(null);
-  const [fileError, setFileError] = useState<string | null>(null);
-  const [fileUploading, setFileUploading] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [fileErrors, setFileErrors] = useState<string[]>([]);
   const [captchaAnswer, setCaptchaAnswer] = useState('');
   const [captcha, setCaptcha] = useState<Captcha | null>(null);
   const [captchaError, setCaptchaError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
@@ -44,7 +44,7 @@ export default function CommentForm({
       user_name: '',
       user_email: '',
       home_page: null,
-      file_path: null,
+      file_paths: [],
     },
   });
 
@@ -56,46 +56,59 @@ export default function CommentForm({
 
   const { name: textFieldName } = register('text');
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files?.[0];
-    if (!selected) {
-      setFile(null);
-      setFileError(null);
-      return;
+  const validateFile = (file: File): string | null => {
+    if (!(ALLOWED_TYPES as readonly string[]).includes(file.type)) {
+      return 'Недопустимый тип файла. Разрешены: txt, jpg, gif, png';
+    }
+    if (file.type === 'text/plain' && file.size > TXT_MAX_SIZE) {
+      return 'Размер txt-файла не должен превышать 100 КБ';
+    }
+    return null;
+  };
+
+  const handleAddFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newFiles = Array.from(e.target.files ?? []);
+    if (newFiles.length === 0) return;
+
+    const errors: string[] = [];
+    const valid: File[] = [];
+
+    for (const f of newFiles) {
+      const err = validateFile(f);
+      if (err) {
+        errors.push(`${f.name}: ${err}`);
+      } else {
+        valid.push(f);
+      }
     }
 
-    if (!(ALLOWED_TYPES as readonly string[]).includes(selected.type)) {
-      setFileError('Недопустимый тип файла. Разрешены: txt, jpg, gif, png');
-      setFile(null);
-      return;
-    }
+    setSelectedFiles((prev) => [...prev, ...valid]);
+    setFileErrors((prev) => [...prev, ...errors]);
 
-    if (selected.type === 'text/plain' && selected.size > TXT_MAX_SIZE) {
-      setFileError('Размер txt-файла не должен превышать 100 КБ');
-      setFile(null);
-      return;
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
+  };
 
-    setFile(selected);
-    setFileError(null);
-    setFileUploading(true);
-
-    try {
-      const { path } = await uploadFile(selected);
-      setValue('file_path', path);
-    } catch {
-      setFileError('Ошибка загрузки файла');
-      setFile(null);
-      setValue('file_path', null);
-    } finally {
-      setFileUploading(false);
-    }
+  const removeFile = (index: number) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const onSubmit = async (data: CommentFormValues) => {
     if (!captcha) return;
 
     try {
+      const paths: string[] = [];
+
+      if (selectedFiles.length > 0) {
+        const results = await Promise.all(
+          selectedFiles.map((f) => uploadFile(f)),
+        );
+        paths.push(...results.map((r) => r.path));
+      }
+
+      data.file_paths = paths;
+
       const result = await createComment({
         ...data,
         captcha_token: captcha.token,
@@ -168,16 +181,43 @@ export default function CommentForm({
       </div>
 
       <div className={styles.field}>
-        <label className={styles.label}>Файл</label>
+        <label className={styles.label}>Файлы</label>
         <input
+          ref={fileInputRef}
           type="file"
           accept={ALLOWED_EXTENSIONS}
-          onChange={handleFileChange}
-          disabled={fileUploading}
+          onChange={handleAddFiles}
+          style={{ display: 'none' }}
+          multiple
         />
-        {fileUploading && <span>Загрузка...</span>}
-        {file && <span className={styles.fileName}>{file.name}</span>}
-        {fileError && <span className={styles.error}>{fileError}</span>}
+        <Button
+          type="button"
+          className={styles.addFileBtn}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          Добавить файл
+        </Button>
+        {selectedFiles.length > 0 && (
+          <ul className={styles.fileList}>
+            {selectedFiles.map((f, i) => (
+              <li key={i} className={styles.fileListItem}>
+                <span className={styles.fileName}>{f.name}</span>
+                <button
+                  type="button"
+                  className={styles.removeFileBtn}
+                  onClick={() => removeFile(i)}
+                  aria-label="Remove file"
+                >
+                  ×
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {fileErrors.length > 0 &&
+          fileErrors.map((err, i) => (
+            <span key={i} className={styles.error}>{err}</span>
+          ))}
       </div>
 
       <div className={styles.field}>

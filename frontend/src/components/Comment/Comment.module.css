@@ -49,19 +49,23 @@
   font-size: 12px;
 }
 
-.file {
+.fileGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
   margin-top: 6px;
 }
 
-.image {
-  max-width: 320px;
-  max-height: 240px;
+.fileImage {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
   border-radius: 4px;
   cursor: pointer;
   transition: opacity 0.15s;
 }
 
-.image:hover {
+.fileImage:hover {
   opacity: 0.85;
 }
 
@@ -70,6 +74,7 @@
   color: var(--accent);
   text-decoration: underline;
   cursor: pointer;
+  word-break: break-all;
 }
 
 .fileLink:hover {

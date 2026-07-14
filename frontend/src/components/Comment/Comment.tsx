@@ -15,7 +15,7 @@ interface CommentProps {
   user_name: string;
   home_page: string | null;
   text: string;
-  file_path: string | null;
+  file_paths: string[];
   created_at: string;
   reply_count: number;
   depth: number;
@@ -27,7 +27,7 @@ const Comment = memo(function Comment({
   user_name,
   home_page,
   text,
-  file_path,
+  file_paths,
   created_at,
   reply_count,
   depth,
@@ -38,8 +38,7 @@ const Comment = memo(function Comment({
   const [loadingReplies, setLoadingReplies] = useState(false);
   const [isReplyFormOpen, setIsReplyFormOpen] = useState(false);
   const { showToast } = useToast();
-  const isImage = /\.(jpg|jpeg|gif|png)$/i.test(file_path ?? '');
-  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const handleToggleReplies = useCallback(async () => {
     if (showReplies) {
@@ -72,6 +71,8 @@ const Comment = memo(function Comment({
 
   const effectiveReplyCount = replies.length > 0 ? replies.length : reply_count;
 
+  const isImageFile = (path: string) => /\.(jpg|jpeg|gif|png)$/i.test(path);
+
   return (
     <div
       className={styles.comment}
@@ -98,29 +99,34 @@ const Comment = memo(function Comment({
         className={styles.text}
         dangerouslySetInnerHTML={{ __html: sanitize(text) }}
       />
-      {file_path && (
-        <div className={styles.file}>
-          {isImage ? (
-            <img
-              src={BASE_URL + file_path}
-              alt="attachment"
-              className={styles.image}
-              onClick={() => setIsLightboxOpen(true)}
-            />
-          ) : (
-            <span
-              className={styles.fileLink}
-              onClick={() => setIsLightboxOpen(true)}
-            >
-              {file_path}
-            </span>
+      {file_paths.length > 0 && (
+        <div className={styles.fileGrid}>
+          {file_paths.map((fp, i) =>
+            isImageFile(fp) ? (
+              <img
+                key={fp}
+                src={BASE_URL + fp}
+                alt="attachment"
+                className={styles.fileImage}
+                onClick={() => setLightboxIndex(i)}
+              />
+            ) : (
+              <span
+                key={fp}
+                className={styles.fileLink}
+                onClick={() => setLightboxIndex(i)}
+              >
+                {fp}
+              </span>
+            ),
           )}
         </div>
       )}
       <Lightbox
-        filePath={file_path}
-        isOpen={isLightboxOpen}
-        onClose={() => setIsLightboxOpen(false)}
+        files={file_paths}
+        initialIndex={lightboxIndex ?? 0}
+        isOpen={lightboxIndex !== null}
+        onClose={() => setLightboxIndex(null)}
       />
       <div className={styles.actions}>
         <button
