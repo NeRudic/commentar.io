@@ -1,9 +1,16 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { promises as fs } from 'fs';
+import { join } from 'path';
 import { DB } from '../db/db.service';
 import { UserService } from '../user/user.service';
 import { CommentRowDTO } from '../comment/dto/comment-row.dto';
 import { CreateCommentWithUserDTO } from './dto/create-comment-with-user.dto';
 import { parseFilePaths } from '../common/parse-file-paths';
+import {
+  UPLOADS_DIR,
+  TEMP_DIR,
+  FILE_UPLOAD_CONFIG,
+} from '../file-upload/file-upload.config';
 
 export interface CreateCommentResult {
   comment: CommentRowDTO;
@@ -48,6 +55,13 @@ export class OrchestratorService {
       );
 
       if (filePathJson) {
+        for (const fp of file_paths) {
+          const filename = fp.replace('/uploads/', '');
+          const src = join(process.cwd(), TEMP_DIR, filename);
+          const dest = join(process.cwd(), UPLOADS_DIR, filename);
+          await copyWithRetry(src, dest, FILE_UPLOAD_CONFIG.RETRY_LIMIT);
+        }
+
         const placeholders = file_paths.map(() => '?').join(', ');
         await this.db.run(
           `UPDATE file SET status = 'published' WHERE path IN (${placeholders})`,
@@ -56,6 +70,18 @@ export class OrchestratorService {
       }
 
       await this.db.run(`COMMIT`);
+
+      if (filePathJson) {
+        for (const fp of file_paths) {
+          const filename = fp.replace('/uploads/', '');
+          const tmpPath = join(process.cwd(), TEMP_DIR, filename);
+          try {
+            await fs.unlink(tmpPath);
+          } catch {
+            /* best-effort — cleanup job will collect leftovers */
+          }
+        }
+      }
 
       const row = await this.db.get<Record<string, unknown>>(
         `SELECT comment.id AS comment_id, comment.post_id, comment.parent_comment_id, comment.text, comment.user_email, comment.file_path, comment.created_at, u.user_name, u.home_page,
@@ -112,6 +138,22 @@ export class OrchestratorService {
       throw new InternalServerErrorException(
         `Failed to create comment. Error message: ${err}`,
       );
+    }
+  }
+}
+
+async function copyWithRetry(
+  src: string,
+  dest: string,
+  retries: number,
+): Promise<void> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      await fs.copyFile(src, dest);
+      return;
+    } catch (err) {
+      if (attempt === retries) throw err;
+      await new Promise((resolve) => setTimeout(resolve, 100 * (attempt + 1)));
     }
   }
 }
