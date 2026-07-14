@@ -1,16 +1,10 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { promises as fs } from 'fs';
-import { join } from 'path';
 import { DB } from '../db/db.service';
 import { UserService } from '../user/user.service';
+import { FileUploadService } from '../file-upload/file-upload.service';
 import { CommentRowDTO } from '../comment/dto/comment-row.dto';
 import { CreateCommentWithUserDTO } from './dto/create-comment-with-user.dto';
 import { parseFilePaths } from '../common/parse-file-paths';
-import {
-  UPLOADS_DIR,
-  TEMP_DIR,
-  FILE_UPLOAD_CONFIG,
-} from '../file-upload/file-upload.config';
 
 export interface CreateCommentResult {
   comment: CommentRowDTO;
@@ -22,6 +16,7 @@ export class OrchestratorService {
   constructor(
     private readonly db: DB,
     private readonly userService: UserService,
+    private readonly fileUploadService: FileUploadService,
   ) {}
 
   async createCommentWithUser(
@@ -56,30 +51,15 @@ export class OrchestratorService {
 
       if (filePathJson) {
         for (const fp of file_paths) {
-          const filename = fp.replace('/uploads/', '');
-          const src = join(process.cwd(), TEMP_DIR, filename);
-          const dest = join(process.cwd(), UPLOADS_DIR, filename);
-          await copyWithRetry(src, dest, FILE_UPLOAD_CONFIG.RETRY_LIMIT);
+          await this.fileUploadService.publishFile(fp);
         }
-
-        const placeholders = file_paths.map(() => '?').join(', ');
-        await this.db.run(
-          `UPDATE file SET status = 'published' WHERE path IN (${placeholders})`,
-          file_paths,
-        );
       }
 
       await this.db.run(`COMMIT`);
 
       if (filePathJson) {
         for (const fp of file_paths) {
-          const filename = fp.replace('/uploads/', '');
-          const tmpPath = join(process.cwd(), TEMP_DIR, filename);
-          try {
-            await fs.unlink(tmpPath);
-          } catch {
-            /* best-effort — cleanup job will collect leftovers */
-          }
+          void this.fileUploadService.removeTempFile(fp);
         }
       }
 
@@ -138,22 +118,6 @@ export class OrchestratorService {
       throw new InternalServerErrorException(
         `Failed to create comment. Error message: ${err}`,
       );
-    }
-  }
-}
-
-async function copyWithRetry(
-  src: string,
-  dest: string,
-  retries: number,
-): Promise<void> {
-  for (let attempt = 0; attempt <= retries; attempt++) {
-    try {
-      await fs.copyFile(src, dest);
-      return;
-    } catch (err) {
-      if (attempt === retries) throw err;
-      await new Promise((resolve) => setTimeout(resolve, 100 * (attempt + 1)));
     }
   }
 }

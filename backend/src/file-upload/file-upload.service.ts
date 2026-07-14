@@ -11,6 +11,7 @@ import {
   FILE_UPLOAD_CONFIG,
   MIME_TO_EXT,
   TEMP_DIR,
+  UPLOADS_DIR,
 } from './file-upload.config';
 
 export interface ProcessResult {
@@ -95,6 +96,43 @@ export class FileUploadService {
       throw new InternalServerErrorException(
         'Не удалось сохранить запись о файле',
       );
+    }
+  }
+
+  async publishFile(path: string): Promise<void> {
+    const filename = path.replace('/uploads/', '');
+    const src = join(process.cwd(), TEMP_DIR, filename);
+    const dest = join(process.cwd(), UPLOADS_DIR, filename);
+    await copyWithRetry(src, dest, FILE_UPLOAD_CONFIG.RETRY_LIMIT);
+    await this.database.run(
+      `UPDATE file SET status = 'published' WHERE path = ?`,
+      [path],
+    );
+  }
+
+  async removeTempFile(path: string): Promise<void> {
+    const filename = path.replace('/uploads/', '');
+    const tmpPath = join(process.cwd(), TEMP_DIR, filename);
+    try {
+      await fs.unlink(tmpPath);
+    } catch {
+      /* best-effort */
+    }
+  }
+}
+
+async function copyWithRetry(
+  src: string,
+  dest: string,
+  retries: number,
+): Promise<void> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      await fs.copyFile(src, dest);
+      return;
+    } catch (err) {
+      if (attempt === retries) throw err;
+      await new Promise((resolve) => setTimeout(resolve, 100 * (attempt + 1)));
     }
   }
 }
