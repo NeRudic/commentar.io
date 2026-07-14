@@ -21,7 +21,7 @@ AppModule
 ├── UserModule        — UserService.findOrCreate (upsert by email)
 ├── CommentModule     — Comment CRUD (nested, paginated)
 ├── CaptchaModule     — JWT captcha (a + b = ?)
-├── FileUploadModule  — File upload (txt/jpg/gif/png)
+├── FileUploadModule  — File upload (txt/jpg/gif/png), orphaned file cleanup
 └── OrchestratorModule — POST /comment-and-user (transaction, captcha-middleware)
 ```
 
@@ -31,8 +31,16 @@ AppModule
 DB ──> UserService ──> OrchestratorService
 DB ──> CommentService
 DB ──> FileUploadService
+DB ──> FileCleanupService  (orphaned file cleanup, setInterval)
 CaptchaService ──> CaptchaMiddleware
 ```
+
+### Directories
+
+| Directory | Served | Purpose |
+|-----------|--------|---------|
+| `uploads/` | Static (`/uploads/*`) | Published files |
+| `.tmp/` | Not served | Pending files before comment confirmation |
 
 ### Global pipes (order matters)
 

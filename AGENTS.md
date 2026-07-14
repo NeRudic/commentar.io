@@ -38,6 +38,38 @@ npm run lint          # eslint
 - Tables auto-created via `db.config.ts:initSQL` on app bootstrap in `db.module.ts`.
 - No ORM — raw `sqlite3` queries wrapped in `DB` service (`db.service.ts`).
 
+### File upload flow (transactional)
+
+```
+Upload (POST /file-upload/verify):
+  memoryStorage → validate → write .tmp/<filename>
+  → INSERT INTO file (path, status='pending')
+  → return { file_id, path }
+
+Comment creation (POST /comment-and-user, внутри BEGIN/COMMIT):
+  → findOrCreate user
+  → INSERT comment
+  → COPY .tmp/<f> → uploads/<f>  (до 3 ретраев, copyWithRetry)
+  → UPDATE file SET status='published'
+  COMMIT
+  → DELETE .tmp/<f> (best-effort, cleanup подберёт остатки)
+```
+
+- `uploads/` — раздаётся статически через `app.useStaticAssets`
+- `.tmp/` — не раздаётся, файлы хранятся до подтверждения комментария
+- `FileCleanupService` (`file-upload.cleanup.ts`) — запускается раз в час: чистит `.tmp/` по mtime, orphaned `uploads/` по `file.status='pending'`, и строки `file` с `status='pending'` старше порога
+- Пороги: `CLEANUP_THRESHOLD_MS` и `CLEANUP_INTERVAL_MS` в `file-upload.config.ts`
+
+### File structure (backend/src/file-upload/)
+
+```
+file-upload.config.ts    — UPLOADS_DIR, TEMP_DIR, FILE_UPLOAD_CONFIG
+file-upload.controller.ts — POST /file-upload/verify
+file-upload.service.ts    — валидация, запись в .tmp/, INSERT file
+file-upload.cleanup.ts    — FileCleanupService (периодическая чистка)
+file-upload.module.ts     — модуль, создаёт uploads/ + .tmp/ при старте
+```
+
 ### Global pipes (order matters)
 
 In `main.ts`: `SanitizePipe` runs first, then `ValidationPipe({ transform: true })`.

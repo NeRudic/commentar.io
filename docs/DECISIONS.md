@@ -61,6 +61,22 @@ Services rewritten from `fetch` to `axios` (`^1.18.1`).
 - `FormField` wrapper component removed — `register()` is self-sufficient.
 - Validation (valibot) connected via `@hookform/resolvers/valibot` or manually in `register` options.
 
+## 2026-07-14 — Transactional file upload with .tmp staging
+
+**Decision:** File uploads are first written to a `.tmp/` directory with `status = 'pending'`. Files are copied to `uploads/` only inside the comment-creation transaction, after the user and comment rows are successfully inserted.
+
+**Why:**
+- Previously, files were written to `uploads/` immediately on upload, before the transaction started. If the transaction failed, orphaned files remained in `uploads/` with `status = 'pending'`.
+- New approach: files stay in `.tmp/` until the transaction confirms. COPY (not MOVE) preserves the original in `.tmp/` for retry on failure.
+- A `FileCleanupService` runs hourly: deletes `.tmp/` files by mtime, removes orphaned `uploads/` files with `status = 'pending'` older than threshold, and purges stale `file` rows.
+
+**How:**
+- `FileUploadService.processFile()` writes to `.tmp/<filename>`, inserts `file` row with `status = 'pending'`.
+- `OrchestratorService.createCommentWithUser()` inside `BEGIN IMMEDIATE … COMMIT`: COPY `.tmp/<f>` → `uploads/<f>` (with up to 3 retries), then `UPDATE file SET status = 'published'`.
+- After COMMIT: best-effort `unlink` of `.tmp/<f>`.
+- `FileCleanupService` (setInterval, 1h): cleans `.tmp/` (mtime > 1h), orphaned `uploads/` (file.status = 'pending', created_at > 1h), and orphaned rows.
+- Config: `TEMP_DIR = '.tmp'`, `CLEANUP_THRESHOLD_MS = 3_600_000`, `RETRY_LIMIT = 3` in `file-upload.config.ts`.
+
 ## 2026-07-11 — Root comment sorting on backend with white list
 
 **Decision:** Sorting of root comments is done on the backend via SQL `ORDER BY`, not on the frontend.

@@ -149,6 +149,8 @@ Delete a comment (cascades to child comments).
 
 File upload (multipart/form-data). Accepts: txt (up to 100 KB), jpg/gif/png (resized to 320×240).
 
+File is stored in `.tmp/` with `status = 'pending'` until a comment references it. On comment creation, it's copied to `uploads/` and status changes to `'published'`.
+
 **Field:** `file` (file)
 
 **Response (201):**

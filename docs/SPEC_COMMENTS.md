@@ -25,6 +25,7 @@
 - [x] **13. Images** — resized to 320×240 maintaining aspect ratio, JPG/GIF/PNG
 - [x] **14. Text files** — max 100 KB, TXT format
 - [ ] **15. File preview (lightbox)** — visual effects for file viewing
+- [ ] **16. Orphaned file cleanup** — periodic cleanup of `.tmp/` and `uploads/` files with `pending` status; uses file mtime for `.tmp/` and `created_at` for `file` table rows
 
 ### HTML tags
 
@@ -45,7 +46,7 @@
 | Status   | Count |
 | -------- | ----- |
 | Done     | 18    |
-| Not done | 3     |
+| Not done | 4     |
 
 ---
 
@@ -53,7 +54,8 @@
 
 - Types are local in `frontend/src/types/`, `shared/` removed
 - Backend: `sqlite3`, no ORM, raw queries via `DB` service
-- File uploads: `memoryStorage` → validation → disk save. `sharp` for resize
+- File uploads: `memoryStorage` → validation → write to `.tmp/`. On comment creation: COPY to `uploads/` inside transaction, then delete `.tmp/` copy. `sharp` for resize
+- Orphaned file cleanup: `FileCleanupService` runs periodically, removes `.tmp/` files by mtime threshold, cleans orphaned `uploads/` files matching `pending` status
 - CAPTCHA: stateless via JWT (`expiresIn: 5m`), captcha integrated directly in `CommentForm`
 - `TextEditor`: communicates with form via `onValueChange` callback, without `register()` on the DOM element. Storage format — XHTML
 - `Button`: reusable wrapper `<button type="button">`, styled in parent CSS modules

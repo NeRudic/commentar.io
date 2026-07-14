@@ -52,4 +52,5 @@ PRAGMA: `foreign_keys = ON`, `journal_mode = WAL`, `busy_timeout = 5000`.
 
 - `comment.parent_comment_id` → `comment.id` (self-referencing, cascade delete)
 - `comment.user_email` → `user.email` (cascade delete)
-- `file.status`: `pending` → `published` when a comment referencing the file is created (updated in `CommentService` and `OrchestratorService`)
+- `file.status`: `pending` → `published` when a comment referencing the file is created (updated in `OrchestratorService`)
+- Files are uploaded to `.tmp/` directory first, then copied to `uploads/` inside the transaction. `FileCleanupService` removes orphaned `.tmp/` and `uploads/` files with `pending` status older than threshold.
