@@ -9,7 +9,7 @@ export default async function uploadFile(
   formData.append("file", file);
 
   const { data } = await axios.post<FileUploadResponse>(
-    BASE_URL + "/file-upload/verify",
+    BASE_URL + "/file-manager/verify",
     formData,
   );
   return data;

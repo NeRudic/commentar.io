@@ -9,7 +9,7 @@ import { memoryStorage } from 'multer';
 import { FileManagerService } from './file-manager.service';
 import { FILE_UPLOAD_CONFIG } from './file-manager.config';
 
-@Controller('file-upload')
+@Controller('file-manager')
 export class FileManagerController {
   constructor(private readonly service: FileManagerService) {}
 

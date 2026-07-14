@@ -9,6 +9,7 @@ Base URL: `http://localhost:3000`
 Generates a math captcha (a + b = ?).
 
 **Response:**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIs...",
@@ -24,6 +25,7 @@ JWT token — signed with `CAPTCHA_SECRET`, expires in 5 minutes, contains the c
 Verification (not used directly — verification happens via middleware).
 
 **Body:**
+
 ```json
 {
   "captcha_token": "eyJhbGciOiJIUzI1NiIs...",
@@ -32,6 +34,7 @@ Verification (not used directly — verification happens via middleware).
 ```
 
 **On error (400):**
+
 ```json
 {
   "expired": false,
@@ -47,6 +50,7 @@ Verification (not used directly — verification happens via middleware).
 Create or find user (upsert by email).
 
 **Body:**
+
 ```json
 {
   "user_name": "John",
@@ -56,6 +60,7 @@ Create or find user (upsert by email).
 ```
 
 **Response (201):**
+
 ```json
 {
   "id": 1,
@@ -72,6 +77,7 @@ Create or find user (upsert by email).
 Creates user (findOrCreate) and comment in a single transaction. CaptchaMiddleware validates captcha before calling the controller.
 
 **Body:**
+
 ```json
 {
   "user_name": "John",
@@ -87,6 +93,7 @@ Creates user (findOrCreate) and comment in a single transaction. CaptchaMiddlewa
 ```
 
 **Response (201):**
+
 ```json
 {
   "comment": {
@@ -114,6 +121,7 @@ Root comments for a post (parent_comment_id IS NULL).
 **Parameters:** `post_id` (path), `limit`, `offset` (query, defaults 25/0).
 
 **Response (200):**
+
 ```json
 [
   {
@@ -145,7 +153,7 @@ Delete a comment (cascades to child comments).
 
 ## Files
 
-### `POST /file-upload/verify`
+### `POST /file-manager/verify`
 
 File upload (multipart/form-data). Accepts: txt (up to 100 KB), jpg/gif/png (resized to 320×240).
 
@@ -154,6 +162,7 @@ File is stored in `.tmp/` with `status = 'pending'` until a comment references i
 **Field:** `file` (file)
 
 **Response (201):**
+
 ```json
 {
   "file_id": 1,

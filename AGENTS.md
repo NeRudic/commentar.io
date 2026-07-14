@@ -4,10 +4,10 @@
 
 No root `package.json` — each package is independent:
 
-| Package      | Directory   | Tech                                                   |
-| ------------ | ----------- | ------------------------------------------------------ |
-| backend      | `backend/`  | NestJS 11, TS 5.7, sqlite3, class-validator            |
-| frontend     | `frontend/` | React 19, Vite 8, TS 6.0, CSS Modules                  |
+| Package  | Directory   | Tech                                        |
+| -------- | ----------- | ------------------------------------------- |
+| backend  | `backend/`  | NestJS 11, TS 5.7, sqlite3, class-validator |
+| frontend | `frontend/` | React 19, Vite 8, TS 6.0, CSS Modules       |
 
 ## Commands (all run from package subdirectory)
 
@@ -41,7 +41,7 @@ npm run lint          # eslint
 ### File upload flow (transactional)
 
 ```
-Upload (POST /file-upload/verify):
+Upload (POST /file-manager/verify):
   memoryStorage → validate → write .tmp/<filename>
   → INSERT INTO file (path, status='pending')
   → return { file_id, path }
@@ -64,7 +64,7 @@ Comment creation (POST /comment-and-user, внутри BEGIN/COMMIT):
 
 ```
 file-manager.config.ts    — UPLOADS_DIR, TEMP_DIR, FILE_UPLOAD_CONFIG
-file-manager.controller.ts — POST /file-upload/verify
+file-manager.controller.ts — POST /file-manager/verify
 file-manager.service.ts    — валидация, запись в .tmp/, INSERT file, publishFile, removeTempFile
 file-manager.cleanup.ts    — FileCleanupService (периодическая чистка)
 file-manager.module.ts     — модуль, создаёт uploads/ + .tmp/ при старте

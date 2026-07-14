@@ -4,10 +4,10 @@
 
 The project consists of two independent packages without a monorepo:
 
-| Package | Path | Stack | Port |
-|---------|------|-------|------|
-| Backend | `backend/` | NestJS 11, TypeScript, SQLite3, class-validator | 3000 |
-| Frontend | `frontend/` | React 19, Vite 8, TypeScript 6, CSS Modules | 5173 |
+| Package  | Path        | Stack                                           | Port |
+| -------- | ----------- | ----------------------------------------------- | ---- |
+| Backend  | `backend/`  | NestJS 11, TypeScript, SQLite3, class-validator | 3000 |
+| Frontend | `frontend/` | React 19, Vite 8, TypeScript 6, CSS Modules     | 5173 |
 
 No shared types — each package has its own DTOs/types (see docs/DECISIONS.md, entries from 2026-06-30 and 2026-07-08).
 
@@ -37,10 +37,10 @@ CaptchaService ──> CaptchaMiddleware
 
 ### Directories
 
-| Directory | Served | Purpose |
-|-----------|--------|---------|
-| `uploads/` | Static (`/uploads/*`) | Published files |
-| `.tmp/` | Not served | Pending files before comment confirmation |
+| Directory  | Served                | Purpose                                   |
+| ---------- | --------------------- | ----------------------------------------- |
+| `uploads/` | Static (`/uploads/*`) | Published files                           |
+| `.tmp/`    | Not served            | Pending files before comment confirmation |
 
 ### Global pipes (order matters)
 
@@ -75,7 +75,7 @@ No routing — single page with 3 hardcoded posts.
 - `getReplies` — GET /comments/:parentId/replies
 - `createComment` — POST /comment-and-user
 - `getCaptcha` — GET /captcha
-- `uploadFile` — POST /file-upload/verify
+- `uploadFile` — POST /file-manager/verify
 
 ### Form and validation
 
