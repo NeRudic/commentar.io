@@ -30,6 +30,7 @@ All commands run from the package directory (`cd backend` or `cd frontend`).
 - **Forms:** react-hook-form + valibot
 - **Prettier:** single quotes, trailing commas, 80 width, 2-space tabs
 - **ESLint:** `endOfLine: "auto"` (Windows-safe)
+- **React 19 `setState` in effects:** Don't call `setState` synchronously inside `useEffect`. Derive from props during render instead; for async effects, only set state in `.then()`/`.catch()` callbacks. See `Lightbox.tsx` for examples.
 - **No comments** in code unless explicitly requested
 - Update `.md` files and `docs/DECISIONS.md` after structural changes
 
