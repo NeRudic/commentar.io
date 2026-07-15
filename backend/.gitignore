@@ -27,10 +27,17 @@ Thumbs.db
 *.log
 npm-debug.log*
 
-# SQLite database
+# Prisma generated client
+generated/
+
+# SQLite databases
 db.sqlite
-db.sqlite-shm
-db.sqlite-wal
+*.db
+*.db-shm
+*.db-wal
+**/db.sqlite
+**/db.sqlite-shm
+**/db.sqlite-wal
 
 # misc
 .eslintcache

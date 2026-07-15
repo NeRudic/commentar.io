@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  userName  String    @map("user_name")
+  email     String    @unique
+  homePage  String?   @map("home_page")
+  comments  Comment[]
+
+  @@map("user")
+}
+
+model Comment {
+  id              Int       @id @default(autoincrement())
+  postId          Int       @map("post_id")
+  parentCommentId Int?      @map("parent_comment_id")
+  text            String
+  userEmail       String    @map("user_email")
+  filePath        String?   @map("file_path")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  parent   Comment?  @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies  Comment[] @relation("CommentReplies")
+  user     User      @relation(fields: [userEmail], references: [email], onDelete: Cascade)
+
+  @@index([parentCommentId])
+  @@index([userEmail])
+  @@index([postId])
+  @@map("comment")
+}
+
+model File {
+  id        Int      @id @default(autoincrement())
+  path      String   @unique
+  status    String   @default("pending")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("file")
+}

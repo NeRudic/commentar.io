@@ -102,7 +102,12 @@ function tryExtractAllowedTag(
     if (input[pos] === '>') {
       if (pos > 0 && input[pos - 1] === '/') return null;
       pos++;
-      return { tag: input.slice(start, pos), isClosing: false, tagName, end: pos };
+      return {
+        tag: input.slice(start, pos),
+        isClosing: false,
+        tagName,
+        end: pos,
+      };
     }
     if (input[pos] === '"') {
       pos++;
@@ -126,5 +131,9 @@ function tryExtractAllowedTag(
 }
 
 function escapeHtmlEntities(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
