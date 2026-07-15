@@ -2,7 +2,7 @@
 
 ## Stack
 
-- **Backend:** NestJS 11 + SQLite3 + class-validator
+- **Backend:** NestJS 11 + Prisma (SQLite) + class-validator
 - **Frontend:** React 19 + Vite 8 + TypeScript 6 + CSS Modules
 - **Frontend types:** local in `frontend/src/types/`
 
@@ -12,7 +12,7 @@
 comentar.io/
 ├── backend/              # NestJS API (port 3000)
 │   └── src/
-│       ├── db/           # SQLite, row types, table config
+│       ├── prisma/       # Prisma service, module, types
 │       ├── user/         # POST /users
 │       ├── comment/      # Comment CRUD
 │       ├── captcha/      # Math captcha (JWT)

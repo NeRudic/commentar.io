@@ -13,6 +13,9 @@ All commands run from the package directory (`cd backend` or `cd frontend`).
 | `npm run lint` | ESLint —fix |
 | `npm run format` | Prettier |
 | `npm run test` | Jest |
+| `npm run seed` | Seed DB with test data (--clear to reset) |
+| `npm run prisma:generate` | Regenerate Prisma client |
+| `npx prisma migrate dev` | Create/apply migration |
 
 ### Frontend
 
@@ -36,7 +39,7 @@ All commands run from the package directory (`cd backend` or `cd frontend`).
 
 ## Database
 
-SQLite file — `backend/src/db/db.sqlite`. Always run backend commands from `backend/`, otherwise the path will be wrong. Tables are created automatically on startup.
+SQLite file — `backend/prisma/db.sqlite` (configured via `DATABASE_URL` in `.env`). Always run backend commands from `backend/`. Schema is managed via Prisma migrations; run `npx prisma migrate dev` after schema changes. Prisma client is auto-generated on `postinstall` and can be regenerated with `npm run prisma:generate`.
 
 ## Build and lint
 

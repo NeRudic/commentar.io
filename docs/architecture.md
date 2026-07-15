@@ -6,7 +6,7 @@ The project consists of two independent packages without a monorepo:
 
 | Package  | Path        | Stack                                           | Port |
 | -------- | ----------- | ----------------------------------------------- | ---- |
-| Backend  | `backend/`  | NestJS 11, TypeScript, SQLite3, class-validator | 3000 |
+| Backend  | `backend/`  | NestJS 11, TypeScript, Prisma (SQLite), class-validator | 3000 |
 | Frontend | `frontend/` | React 19, Vite 8, TypeScript 6, CSS Modules     | 5173 |
 
 No shared types — each package has its own DTOs/types (see docs/DECISIONS.md, entries from 2026-06-30 and 2026-07-08).
@@ -17,7 +17,7 @@ No shared types — each package has its own DTOs/types (see docs/DECISIONS.md, 
 
 ```
 AppModule
-├── DBModule          — sqlite3, auto-initialize DDL
+├── PrismaModule      — Prisma ORM (SQLite), auto-migrate on startup
 ├── UserModule        — UserService.findOrCreate (upsert by email)
 ├── CommentModule     — Comment CRUD (nested, paginated)
 ├── CaptchaModule     — JWT captcha (a + b = ?)
@@ -28,10 +28,10 @@ AppModule
 ### Dependency graph
 
 ```
-DB ──> UserService ──> OrchestratorService
-DB ──> CommentService
-DB ──> FileManagerService
-DB ──> FileCleanupService  (orphaned file cleanup, setInterval)
+PrismaService ──> UserService ──> OrchestratorService
+PrismaService ──> CommentService
+PrismaService ──> FileManagerService
+PrismaService ──> FileCleanupService  (orphaned file cleanup, setInterval)
 CaptchaService ──> CaptchaMiddleware
 ```
 

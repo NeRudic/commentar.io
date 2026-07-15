@@ -7,6 +7,7 @@
 | Variable | Description | Example |
 |----------|-------------|---------|
 | `PORT` | Server port | `3000` |
+| `DATABASE_URL` | SQLite database path | `file:./prisma/db.sqlite` |
 | `CORS_ORIGIN` | Allowed origin | `http://localhost:5173` |
 | `CAPTCHA_SECRET` | Secret for JWT captcha | `random-256-bit-string` |
 
@@ -20,9 +21,10 @@ No env vars used. Backend URL is hardcoded in `frontend/src/services/index.ts` a
 
 ```bash
 cd backend
-npm install
-npm run build        # → dist/
-npm run start:prod   # node dist/main
+npm install           # also runs prisma generate
+npx prisma migrate deploy  # apply migrations
+npm run build         # → dist/
+npm run start:prod    # node dist/main
 ```
 
 ### Frontend

@@ -124,3 +124,23 @@ Services rewritten from `fetch` to `axios` (`^1.18.1`).
 - **Frontend**: Added `v.check()` + `v.transform()` to the `text` field in the valibot schema. The check validates structure; the transform escapes bare `<` characters before submission.
 - Error messages: specific on mismatch (`Ожидался закрывающий </strong>, но найден </i>`) and on unclosed tags (`Незакрытые теги: <strong>, <i>`).
 - Stray closing tags (`</i>` when no opener exists) are escaped as text rather than rejected.
+
+## 2026-07-15 — Migrated from raw sqlite3 to Prisma ORM
+
+**Decision:** Replaced the custom `DB` service (raw `sqlite3` with callback-based queries) with Prisma ORM (v7) using the `better-sqlite3` adapter.
+
+**Why:**
+- Type-safe queries without manual DTO mapping for every result.
+- Auto-generated client with full IDE autocompletion.
+- Declarative schema (`prisma/schema.prisma`) instead of raw DDL strings in `db.config.ts`.
+- Built-in migration system (`prisma migrate`) for schema versioning.
+- Transaction API (`$transaction`) with proper TypeScript types instead of manual `BEGIN/COMMIT`.
+
+**What changed:**
+- Removed `backend/src/db/` (db.service.ts, db.module.ts, db.config.ts, db.types.ts) and `sqlite3`/`@types/sqlite3` dependencies.
+- Added `@prisma/client`, `@prisma/adapter-better-sqlite3`, `better-sqlite3`, `prisma` (CLI).
+- Created `backend/prisma/schema.prisma` with `User`, `Comment`, `File` models.
+- Created `backend/prisma.config.ts` for Prisma CLI config.
+- Created `backend/src/prisma/` (prisma.service.ts, prisma.module.ts, prisma.types.ts) — `PrismaModule` is `@Global()`.
+- Rewrote `UserService`, `CommentService`, `FileManagerService`, `FileCleanupService`, `OrchestratorService`, `seed.ts` to use `PrismaClient` API.
+- DB path changed from `backend/db.sqlite` to `backend/prisma/db.sqlite`.

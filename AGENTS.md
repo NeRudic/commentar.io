@@ -6,7 +6,7 @@ No root `package.json` — each package is independent:
 
 | Package  | Directory   | Tech                                        |
 | -------- | ----------- | ------------------------------------------- |
-| backend  | `backend/`  | NestJS 11, TS 5.7, sqlite3, class-validator |
+| backend  | `backend/`  | NestJS 11, TS 5.7, Prisma (SQLite), class-validator |
 | frontend | `frontend/` | React 19, Vite 8, TS 6.0, CSS Modules       |
 
 ## Commands (all run from package subdirectory)
@@ -14,11 +14,13 @@ No root `package.json` — each package is independent:
 **Backend** (`cd backend`):
 
 ```
-npm run start:dev     # watch mode (port 3000)
-npm run lint          # eslint --fix
-npm run format        # prettier
-npm run seed          # populate DB with 315 test comments (--clear to reset)
-npm run test          # jest (no specs written yet)
+npm run start:dev         # watch mode (port 3000)
+npm run lint              # eslint --fix
+npm run format            # prettier
+npm run seed              # populate DB with 315 test comments (--clear to reset)
+npm run prisma:generate   # regenerate Prisma client
+npx prisma migrate dev    # create/apply migrations
+npm run test              # jest (no specs written yet)
 ```
 
 **Frontend** (`cd frontend`):
@@ -33,10 +35,11 @@ npm run lint          # eslint
 
 ### DB
 
-- SQLite file: `backend/src/db/db.sqlite` (auto-created on startup).
-- **The path `db.sqlite` resolves from CWD** — always run backend commands from `backend/`.
-- Tables auto-created via `db.config.ts:initSQL` on app bootstrap in `db.module.ts`.
-- No ORM — raw `sqlite3` queries wrapped in `DB` service (`db.service.ts`).
+- SQLite file: `backend/prisma/db.sqlite` (configured via `DATABASE_URL` in `.env`).
+- **Always run backend commands from `backend/`** so the `DATABASE_URL` relative path resolves correctly.
+- Schema managed via Prisma migrations in `backend/prisma/migrations/`.
+- Prisma client auto-generated on `postinstall`; regenerate manually with `npm run prisma:generate`.
+- `PrismaService` (`backend/src/prisma/prisma.service.ts`) wraps `PrismaClient` with `better-sqlite3` adapter.
 
 ### File upload flow (transactional)
 

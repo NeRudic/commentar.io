@@ -29,7 +29,7 @@ Backend: http://localhost:3000, Frontend: http://localhost:5173.
 ## Repository structure
 
 ```
-├── backend/     # NestJS 11 + SQLite3
+├── backend/     # NestJS 11 + Prisma (SQLite)
 ├── frontend/    # React 19 + Vite 8
 ├── docs/        # Documentation
 ├── AGENTS.md    # AI agent instructions

@@ -53,7 +53,7 @@
 ## Notes
 
 - Types are local in `frontend/src/types/`, `shared/` removed
-- Backend: `sqlite3`, no ORM, raw queries via `DB` service
+- Backend: Prisma ORM (SQLite)
 - File uploads: `memoryStorage` → validation → write to `.tmp/`. On comment creation: COPY to `uploads/` inside transaction, then delete `.tmp/` copy. `sharp` for resize
 - Orphaned file cleanup: `FileCleanupService` runs periodically, removes `.tmp/` files by mtime threshold, cleans orphaned `uploads/` files matching `pending` status
 - CAPTCHA: stateless via JWT (`expiresIn: 5m`), captcha integrated directly in `CommentForm`
