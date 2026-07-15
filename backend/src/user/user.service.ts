@@ -1,32 +1,31 @@
 import { Injectable } from '@nestjs/common';
-import { DB } from '../db/db.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDTO } from './dto/create-user.dto';
 import type { UserRow } from './user.types';
+import type { TxClient } from '../prisma/prisma.types';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly db: DB) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async findOrCreate(dto: CreateUserDTO): Promise<UserRow> {
-    try {
-      const existing = await this.db.get<UserRow>(
-        'SELECT * FROM user WHERE email = ?',
-        [dto.user_email],
-      );
+  async findOrCreate(dto: CreateUserDTO, tx?: TxClient): Promise<UserRow> {
+    const client = tx ?? this.prisma;
 
-      if (existing) return existing;
+    const user = await client.user.upsert({
+      where: { email: dto.user_email },
+      create: {
+        userName: dto.user_name,
+        email: dto.user_email,
+        homePage: dto.home_page ?? null,
+      },
+      update: {},
+    });
 
-      const result = await this.db.run(
-        'INSERT INTO user (user_name, email, home_page) VALUES (?, ?, ?)',
-        [dto.user_name, dto.user_email, dto.home_page ?? null],
-      );
-
-      return this.db.get<UserRow>('SELECT * FROM user WHERE id = ?', [
-        result.lastID,
-      ]);
-    } catch (error) {
-      console.error('UserService.findOrCreate error:', error);
-      throw error;
-    }
+    return {
+      id: user.id,
+      user_name: user.userName,
+      email: user.email,
+      home_page: user.homePage,
+    };
   }
 }

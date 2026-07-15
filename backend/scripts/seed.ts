@@ -1,7 +1,6 @@
-import * as _sqlite3 from 'sqlite3';
-import type { Database } from 'sqlite3';
-
-const sqlite3 = _sqlite3.verbose();
+import { PrismaClient } from '@prisma/client';
+import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
+import 'dotenv/config';
 
 // ── Config ──────────────────────────────────────────────────────────
 
@@ -270,74 +269,10 @@ function randomUserEmail(): string {
   return USERS[randInt(USERS.length)].email;
 }
 
-function randomTimestamp(earliestHours: number, latestHours: number): string {
+function randomTimestamp(earliestHours: number, latestHours: number): Date {
   const now = Date.now();
   const offset = randInt((earliestHours - latestHours) * 3600000);
-  const d = new Date(now - earliestHours * 3600000 + offset);
-  return d.toISOString().replace('T', ' ').replace(/\.\d+Z$/, '');
-}
-
-function connect(dbPath: string): Promise<Database> {
-  return new Promise((res, rej) => {
-    const db = new sqlite3.Database(dbPath, (err) => {
-      if (err) return rej(err);
-      res(db);
-    });
-    db.run('PRAGMA foreign_keys = ON;');
-    db.run('PRAGMA journal_mode = WAL;');
-    db.run('PRAGMA busy_timeout = 5000;');
-  });
-}
-
-function close(db: Database): Promise<string> {
-  return new Promise((res, rej) => {
-    db.close((err) => (err ? rej(err) : res('DB closed')));
-  });
-}
-
-function run(db: Database, sql: string, params: any[] = []): Promise<{ lastID: number; changes: number }> {
-  return new Promise((res, rej) => {
-    db.run(sql, params, function (err) {
-      if (err) return rej(err);
-      res({ lastID: this.lastID, changes: this.changes });
-    });
-  });
-}
-
-function exec(db: Database, sql: string): Promise<void> {
-  return new Promise((res, rej) => {
-    db.exec(sql, (err) => (err ? rej(err) : res()));
-  });
-}
-
-// ── Clear existing data ────────────────────────────────────────────
-
-async function clearData(db: Database): Promise<void> {
-  await exec(db, 'PRAGMA foreign_keys = OFF;');
-  await exec(db, 'DELETE FROM file;');
-  await exec(db, 'DELETE FROM comment;');
-  await exec(db, 'DELETE FROM user;');
-  await exec(db, "DELETE FROM sqlite_sequence;");
-  await exec(db, 'PRAGMA foreign_keys = ON;');
-}
-
-// ── Insert users ───────────────────────────────────────────────────
-
-async function insertUsers(db: Database): Promise<void> {
-  let count = 0;
-  for (const u of USERS) {
-    try {
-      await run(
-        db,
-        'INSERT INTO user (user_name, email, home_page) VALUES (?, ?, ?)',
-        [u.user_name, u.email, u.home_page],
-      );
-      count++;
-    } catch {
-      // user already exists — skip
-    }
-  }
-  console.log(`Inserted ${count} users (${USERS.length - count} already existed)`);
+  return new Date(now - earliestHours * 3600000 + offset);
 }
 
 // ── Insert comments for one post ───────────────────────────────────
@@ -347,84 +282,105 @@ interface CommentNode {
   depth: number;
 }
 
-async function insertCommentsForPost(db: Database, postId: number, rootTexts: string[]): Promise<void> {
+async function insertCommentsForPost(
+  prisma: PrismaClient,
+  postId: number,
+  rootTexts: string[],
+): Promise<void> {
   const comments: CommentNode[] = [];
 
   // Phase 1 — root comments (depth 0)
   for (let i = 0; i < ROOT_COUNT; i++) {
     const text = rootTexts[i % rootTexts.length];
-    const ts = randomTimestamp(168, 24);
-    const result = await run(
-      db,
-      'INSERT INTO comment (post_id, parent_comment_id, text, user_email, created_at) VALUES (?, ?, ?, ?, ?)',
-      [postId, null, text, randomUserEmail(), ts],
-    );
-    comments.push({ id: result.lastID, depth: 0 });
+    const result = await prisma.comment.create({
+      data: {
+        postId,
+        text,
+        userEmail: randomUserEmail(),
+        createdAt: randomTimestamp(168, 24),
+      },
+    });
+    comments.push({ id: result.id, depth: 0 });
   }
   console.log(`  Post ${postId}: ${ROOT_COUNT} root comments`);
 
   // Phase 2 — level 1 (depth 1)
   for (let i = 0; i < LV1_COUNT; i++) {
     const parent = pick(comments.filter((c) => c.depth === 0));
-    const ts = randomTimestamp(72, 6);
-    const result = await run(
-      db,
-      'INSERT INTO comment (post_id, parent_comment_id, text, user_email, created_at) VALUES (?, ?, ?, ?, ?)',
-      [postId, parent.id, pick(LV1_TEXTS), randomUserEmail(), ts],
-    );
-    comments.push({ id: result.lastID, depth: 1 });
+    const result = await prisma.comment.create({
+      data: {
+        postId,
+        parentCommentId: parent.id,
+        text: pick(LV1_TEXTS),
+        userEmail: randomUserEmail(),
+        createdAt: randomTimestamp(72, 6),
+      },
+    });
+    comments.push({ id: result.id, depth: 1 });
   }
   console.log(`  Post ${postId}: ${LV1_COUNT} level-1 replies`);
 
   // Phase 3 — level 2 (depth 2)
   for (let i = 0; i < LV2_COUNT; i++) {
     const parent = pick(comments.filter((c) => c.depth === 1));
-    const ts = randomTimestamp(48, 4);
-    const result = await run(
-      db,
-      'INSERT INTO comment (post_id, parent_comment_id, text, user_email, created_at) VALUES (?, ?, ?, ?, ?)',
-      [postId, parent.id, pick(LV2_TEXTS), randomUserEmail(), ts],
-    );
-    comments.push({ id: result.lastID, depth: 2 });
+    const result = await prisma.comment.create({
+      data: {
+        postId,
+        parentCommentId: parent.id,
+        text: pick(LV2_TEXTS),
+        userEmail: randomUserEmail(),
+        createdAt: randomTimestamp(48, 4),
+      },
+    });
+    comments.push({ id: result.id, depth: 2 });
   }
   console.log(`  Post ${postId}: ${LV2_COUNT} level-2 replies`);
 
   // Phase 4 — level 3 (depth 3)
   for (let i = 0; i < LV3_COUNT; i++) {
     const parent = pick(comments.filter((c) => c.depth === 2));
-    const ts = randomTimestamp(36, 2);
-    const result = await run(
-      db,
-      'INSERT INTO comment (post_id, parent_comment_id, text, user_email, created_at) VALUES (?, ?, ?, ?, ?)',
-      [postId, parent.id, pick(LV3_TEXTS), randomUserEmail(), ts],
-    );
-    comments.push({ id: result.lastID, depth: 3 });
+    const result = await prisma.comment.create({
+      data: {
+        postId,
+        parentCommentId: parent.id,
+        text: pick(LV3_TEXTS),
+        userEmail: randomUserEmail(),
+        createdAt: randomTimestamp(36, 2),
+      },
+    });
+    comments.push({ id: result.id, depth: 3 });
   }
   console.log(`  Post ${postId}: ${LV3_COUNT} level-3 replies`);
 
   // Phase 5 — level 4 (depth 4)
   for (let i = 0; i < LV4_COUNT; i++) {
     const parent = pick(comments.filter((c) => c.depth === 3));
-    const ts = randomTimestamp(24, 1);
-    const result = await run(
-      db,
-      'INSERT INTO comment (post_id, parent_comment_id, text, user_email, created_at) VALUES (?, ?, ?, ?, ?)',
-      [postId, parent.id, pick(LV4_TEXTS), randomUserEmail(), ts],
-    );
-    comments.push({ id: result.lastID, depth: 4 });
+    const result = await prisma.comment.create({
+      data: {
+        postId,
+        parentCommentId: parent.id,
+        text: pick(LV4_TEXTS),
+        userEmail: randomUserEmail(),
+        createdAt: randomTimestamp(24, 1),
+      },
+    });
+    comments.push({ id: result.id, depth: 4 });
   }
   console.log(`  Post ${postId}: ${LV4_COUNT} level-4 replies`);
 
   // Phase 6 — level 5+ (depth 5, edge case)
   for (let i = 0; i < LV5_COUNT; i++) {
     const parent = pick(comments.filter((c) => c.depth === 4));
-    const ts = randomTimestamp(6, 0);
-    const result = await run(
-      db,
-      'INSERT INTO comment (post_id, parent_comment_id, text, user_email, created_at) VALUES (?, ?, ?, ?, ?)',
-      [postId, parent.id, pick(LV5_TEXTS), randomUserEmail(), ts],
-    );
-    comments.push({ id: result.lastID, depth: 5 });
+    const result = await prisma.comment.create({
+      data: {
+        postId,
+        parentCommentId: parent.id,
+        text: pick(LV5_TEXTS),
+        userEmail: randomUserEmail(),
+        createdAt: randomTimestamp(6, 0),
+      },
+    });
+    comments.push({ id: result.id, depth: 5 });
   }
   console.log(`  Post ${postId}: ${LV5_COUNT} level-5+ edge-case replies`);
 
@@ -436,17 +392,33 @@ async function insertCommentsForPost(db: Database, postId: number, rootTexts: st
 
 async function main(): Promise<void> {
   const shouldClear = process.argv.includes('--clear');
-  const dbPath = 'db.sqlite';
 
-  console.log(`Seed script — connecting to ${dbPath}`);
-  const db = await connect(dbPath);
+  const adapter = new PrismaBetterSqlite3({
+    url: process.env.DATABASE_URL!,
+  });
+
+  const prisma = new PrismaClient({ adapter });
+  await prisma.$connect();
 
   if (shouldClear) {
-    await clearData(db);
+    await prisma.file.deleteMany();
+    await prisma.comment.deleteMany();
+    await prisma.user.deleteMany();
     console.log('Existing data cleared');
   }
 
-  await insertUsers(db);
+  for (const u of USERS) {
+    await prisma.user.upsert({
+      where: { email: u.email },
+      create: {
+        userName: u.user_name,
+        email: u.email,
+        homePage: u.home_page || null,
+      },
+      update: {},
+    });
+  }
+  console.log(`Upserted ${USERS.length} users`);
 
   const postTexts: Record<number, string[]> = {
     1: AI_ROOTS,
@@ -456,10 +428,10 @@ async function main(): Promise<void> {
 
   for (const postId of POST_IDS) {
     console.log(`\nPost ${postId} — inserting comments...`);
-    await insertCommentsForPost(db, postId, postTexts[postId]);
+    await insertCommentsForPost(prisma, postId, postTexts[postId]);
   }
 
-  await close(db);
+  await prisma.$disconnect();
   console.log('\nSeed complete');
 }
 

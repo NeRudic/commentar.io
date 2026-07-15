@@ -4,13 +4,12 @@ import { join } from 'path';
 import { FileManagerController } from './file-manager.controller';
 import { FileManagerService } from './file-manager.service';
 import { FileCleanupService } from './file-manager.cleanup';
-import { DBModule } from '../db/db.module';
 import { UPLOADS_DIR, TEMP_DIR } from './file-manager.config';
 
 @Module({
   controllers: [FileManagerController],
   providers: [FileManagerService, FileCleanupService],
-  imports: [DBModule],
+  exports: [FileManagerService],
 })
 export class FileManagerModule implements OnModuleInit {
   onModuleInit() {

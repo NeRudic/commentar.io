@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { DB } from '../db/db.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';
 import { FileManagerService } from '../file-manager/file-manager.service';
 import { CommentRowDTO } from '../comment/dto/comment-row.dto';
@@ -14,7 +14,7 @@ export interface CreateCommentResult {
 @Injectable()
 export class OrchestratorService {
   constructor(
-    private readonly db: DB,
+    private readonly prisma: PrismaService,
     private readonly userService: UserService,
     private readonly fileManagerService: FileManagerService,
   ) {}
@@ -36,26 +36,34 @@ export class OrchestratorService {
       file_paths.length > 0 ? JSON.stringify(file_paths) : null;
 
     try {
-      await this.db.run(`BEGIN IMMEDIATE`);
+      const result = await this.prisma.$transaction(async (tx) => {
+        await this.userService.findOrCreate(
+          { user_name, user_email, home_page: home_page ?? undefined },
+          tx,
+        );
 
-      await this.userService.findOrCreate({
-        user_name,
-        user_email,
-        home_page: home_page ?? undefined,
-      });
+        const comment = await tx.comment.create({
+          data: {
+            postId: post_id,
+            parentCommentId: parent_comment_id,
+            text,
+            userEmail: user_email,
+            filePath: filePathJson,
+          },
+          include: {
+            user: { select: { userName: true, homePage: true } },
+            _count: { select: { replies: true } },
+          },
+        });
 
-      const result = await this.db.run(
-        `INSERT INTO comment (post_id, parent_comment_id, text, user_email, file_path) VALUES (?, ?, ?, ?, ?)`,
-        [post_id, parent_comment_id, text, user_email, filePathJson],
-      );
-
-      if (filePathJson) {
-        for (const fp of file_paths) {
-          await this.fileManagerService.publishFile(fp);
+        if (filePathJson) {
+          for (const fp of file_paths) {
+            await this.fileManagerService.publishFile(fp, tx);
+          }
         }
-      }
 
-      await this.db.run(`COMMIT`);
+        return comment;
+      });
 
       if (filePathJson) {
         for (const fp of file_paths) {
@@ -63,56 +71,55 @@ export class OrchestratorService {
         }
       }
 
-      const row = await this.db.get<Record<string, unknown>>(
-        `SELECT comment.id AS comment_id, comment.post_id, comment.parent_comment_id, comment.text, comment.user_email, comment.file_path, comment.created_at, u.user_name, u.home_page,
-          (SELECT COUNT(*) FROM comment AS c2 WHERE c2.parent_comment_id = comment.id) AS reply_count
-         FROM comment
-         JOIN user AS u ON comment.user_email = u.email
-         WHERE comment.id = ?`,
-        [result.lastID],
-      );
-
-      if (!row) {
-        throw new InternalServerErrorException(
-          'Comment created but not found in database',
-        );
-      }
-
       const comment = {
-        ...row,
-        file_paths: parseFilePaths(row.file_path),
+        comment_id: result.id,
+        post_id: result.postId,
+        parent_comment_id: result.parentCommentId,
+        text: result.text,
+        user_email: result.userEmail,
+        file_path: result.filePath,
+        file_paths: parseFilePaths(result.filePath),
+        created_at: result.createdAt,
+        user_name: result.user.userName,
+        home_page: result.user.homePage,
+        reply_count: result._count.replies,
       } as unknown as CommentRowDTO;
 
-      const siblingRows: Record<string, unknown>[] =
+      const siblingRows =
         parent_comment_id === null
-          ? await this.db.all(
-              `SELECT comment.id AS comment_id, comment.post_id, comment.parent_comment_id, comment.text, comment.user_email, comment.file_path, comment.created_at, u.user_name, u.home_page,
-                (SELECT COUNT(*) FROM comment AS c2 WHERE c2.parent_comment_id = comment.id) AS reply_count
-             FROM comment
-             JOIN user AS u ON comment.user_email = u.email
-             WHERE post_id = ? AND parent_comment_id IS NULL
-             ORDER BY comment.created_at DESC
-             LIMIT 25`,
-              [post_id],
-            )
-          : await this.db.all(
-              `SELECT comment.id AS comment_id, comment.post_id, comment.parent_comment_id, comment.text, comment.user_email, comment.file_path, comment.created_at, u.user_name, u.home_page,
-                (SELECT COUNT(*) FROM comment AS c2 WHERE c2.parent_comment_id = comment.id) AS reply_count
-             FROM comment
-             JOIN user AS u ON comment.user_email = u.email
-             WHERE parent_comment_id = ?`,
-              [parent_comment_id],
-            );
+          ? await this.prisma.comment.findMany({
+              where: { postId: post_id, parentCommentId: null },
+              orderBy: { createdAt: 'desc' },
+              take: 25,
+              include: {
+                user: { select: { userName: true, homePage: true } },
+                _count: { select: { replies: true } },
+              },
+            })
+          : await this.prisma.comment.findMany({
+              where: { parentCommentId: parent_comment_id },
+              include: {
+                user: { select: { userName: true, homePage: true } },
+                _count: { select: { replies: true } },
+              },
+            });
 
       const siblings = siblingRows.map((r) => ({
-        ...r,
-        file_paths: parseFilePaths(r.file_path),
+        comment_id: r.id,
+        post_id: r.postId,
+        parent_comment_id: r.parentCommentId,
+        text: r.text,
+        user_email: r.userEmail,
+        file_path: r.filePath,
+        file_paths: parseFilePaths(r.filePath),
+        created_at: r.createdAt,
+        user_name: r.user.userName,
+        home_page: r.user.homePage,
+        reply_count: r._count.replies,
       })) as unknown as CommentRowDTO[];
 
       return { comment, siblings };
     } catch (err) {
-      await this.db.run(`ROLLBACK`);
-
       if (err instanceof InternalServerErrorException) throw err;
 
       throw new InternalServerErrorException(

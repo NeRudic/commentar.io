@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { promises as fs } from 'fs';
 import { join } from 'path';
-import { DB } from '../db/db.service';
+import { PrismaService } from '../prisma/prisma.service';
 import {
   TEMP_DIR,
   UPLOADS_DIR,
@@ -20,7 +20,7 @@ export class FileCleanupService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(FileCleanupService.name);
   private timer: ReturnType<typeof setInterval> | null = null;
 
-  constructor(private readonly db: DB) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   onModuleInit() {
     this.timer = setInterval(() => {
@@ -69,12 +69,15 @@ export class FileCleanupService implements OnModuleInit, OnModuleDestroy {
   private async cleanupOrphanedUploads(): Promise<void> {
     const threshold = new Date(
       Date.now() - FILE_UPLOAD_CONFIG.CLEANUP_THRESHOLD_MS,
-    ).toISOString();
-
-    const rows = await this.db.all<{ path: string }>(
-      `SELECT path FROM file WHERE status = 'pending' AND created_at < ?`,
-      [threshold],
     );
+
+    const rows = await this.prisma.file.findMany({
+      where: {
+        status: 'pending',
+        createdAt: { lt: threshold },
+      },
+      select: { path: true },
+    });
 
     const uploadsDir = join(process.cwd(), UPLOADS_DIR);
     for (const row of rows) {
@@ -92,15 +95,17 @@ export class FileCleanupService implements OnModuleInit, OnModuleDestroy {
   private async cleanupOrphanedRows(): Promise<void> {
     const threshold = new Date(
       Date.now() - FILE_UPLOAD_CONFIG.CLEANUP_THRESHOLD_MS,
-    ).toISOString();
-
-    const result = await this.db.run(
-      `DELETE FROM file WHERE status = 'pending' AND created_at < ?`,
-      [threshold],
     );
 
-    if (result.changes > 0) {
-      this.logger.log(`Removed ${result.changes} orphaned file rows`);
+    const result = await this.prisma.file.deleteMany({
+      where: {
+        status: 'pending',
+        createdAt: { lt: threshold },
+      },
+    });
+
+    if (result.count > 0) {
+      this.logger.log(`Removed ${result.count} orphaned file rows`);
     }
   }
 }

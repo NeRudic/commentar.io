@@ -6,13 +6,14 @@ import {
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import sharp from 'sharp';
-import { DB } from '../db/db.service';
+import { PrismaService } from '../prisma/prisma.service';
 import {
   FILE_UPLOAD_CONFIG,
   MIME_TO_EXT,
   TEMP_DIR,
   UPLOADS_DIR,
 } from './file-manager.config';
+import type { TxClient } from '../prisma/prisma.types';
 
 export interface ProcessResult {
   file_id: number;
@@ -21,7 +22,7 @@ export interface ProcessResult {
 
 @Injectable()
 export class FileManagerService {
-  constructor(private readonly database: DB) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async processFile(file: Express.Multer.File): Promise<ProcessResult> {
     if (
@@ -85,12 +86,11 @@ export class FileManagerService {
     }
 
     try {
-      const result = await this.database.run(
-        `INSERT INTO file (path, status) VALUES (?, 'pending')`,
-        [publicPath],
-      );
+      const result = await this.prisma.file.create({
+        data: { path: publicPath, status: 'pending' },
+      });
 
-      return { file_id: result.lastID, path: publicPath };
+      return { file_id: result.id, path: publicPath };
     } catch {
       await fs.unlink(tempFilePath);
       throw new InternalServerErrorException(
@@ -99,15 +99,17 @@ export class FileManagerService {
     }
   }
 
-  async publishFile(path: string): Promise<void> {
+  async publishFile(path: string, tx?: TxClient): Promise<void> {
     const filename = path.replace('/uploads/', '');
     const src = join(process.cwd(), TEMP_DIR, filename);
     const dest = join(process.cwd(), UPLOADS_DIR, filename);
     await copyWithRetry(src, dest, FILE_UPLOAD_CONFIG.RETRY_LIMIT);
-    await this.database.run(
-      `UPDATE file SET status = 'published' WHERE path = ?`,
-      [path],
-    );
+
+    const client = tx ?? this.prisma;
+    await client.file.update({
+      where: { path },
+      data: { status: 'published' },
+    });
   }
 
   async removeTempFile(path: string): Promise<void> {

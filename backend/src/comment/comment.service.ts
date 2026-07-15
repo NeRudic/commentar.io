@@ -1,72 +1,57 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { DB } from '../db/db.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import { CommentRowDTO } from './dto/comment-row.dto';
 import { CreateCommentDTO } from './dto/create-comment.dto';
 import { CommentRepliesDTO } from './dto/comment-replies.dto';
 import { RootCommentsDTO } from './dto/root-comments.dto';
 import { DeleteCommentDTO } from './dto/delete-comment.dto';
 import { parseFilePaths } from '../common/parse-file-paths';
+import type { TxClient } from '../prisma/prisma.types';
 
 @Injectable()
 export class CommentService {
-  constructor(private readonly database: DB) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  /*
-   * Create comment
-   */
-  async createComment(data: CreateCommentDTO): Promise<CommentRowDTO> {
+  async createComment(
+    data: CreateCommentDTO,
+    tx?: TxClient,
+  ): Promise<CommentRowDTO> {
+    const client = tx ?? this.prisma;
     const { post_id, parent_comment_id, text, user_email, file_paths } = data;
 
     const filePathJson =
       file_paths.length > 0 ? JSON.stringify(file_paths) : null;
 
-    let result: { lastID: number };
-
-    try {
-      await this.database.run(`BEGIN IMMEDIATE`);
-
-      result = await this.database.run(
-        `
-      INSERT INTO comment (post_id, parent_comment_id, text, user_email, file_path)
-      VALUES (?, ?, ?, ?, ?)
-      `,
-        [post_id, parent_comment_id, text, user_email, filePathJson],
-      );
-
-      await this.database.run(`COMMIT`);
-    } catch (err) {
-      await this.database.run(`ROLLBACK`);
-
-      throw new InternalServerErrorException(
-        `Failed to create comment. Error message: ${err}`,
-      );
-    }
-
-    const row = await this.database.get<Record<string, unknown>>(
-      `
-    SELECT comment.id AS comment_id, comment.post_id, comment.parent_comment_id, comment.text, comment.user_email, comment.file_path, comment.created_at, u.user_name, u.home_page
-    FROM comment
-    JOIN user AS u ON comment.user_email = u.email
-    WHERE comment.id = ?
-    `,
-      [result.lastID],
-    );
-
-    if (!row) {
-      throw new InternalServerErrorException(
-        'Comment created but not found in database',
-      );
-    }
+    const comment = await client.comment.create({
+      data: {
+        postId: post_id,
+        parentCommentId: parent_comment_id,
+        text,
+        userEmail: user_email,
+        filePath: filePathJson,
+      },
+      include: {
+        user: { select: { userName: true, homePage: true } },
+        _count: { select: { replies: true } },
+      },
+    });
 
     return {
-      ...row,
-      file_paths: parseFilePaths(row.file_path),
+      comment_id: comment.id,
+      post_id: comment.postId,
+      parent_comment_id: comment.parentCommentId,
+      text: comment.text,
+      user_email: comment.userEmail,
+      file_path: comment.filePath,
+      file_paths: parseFilePaths(comment.filePath),
+      created_at: comment.createdAt,
+      user_name: comment.user.userName,
+      home_page: comment.user.homePage,
+      reply_count: comment._count.replies,
     } as unknown as CommentRowDTO;
   }
 
-  /*
-   * Get root comments
-   */
   async getRootComments(
     { post_id, sort_by, sort_order }: RootCommentsDTO,
     limit?: string,
@@ -76,34 +61,40 @@ export class CommentService {
     const offsetVal = offset ? parseInt(offset, 10) : 0;
 
     const safeSortBy = sort_by ?? 'created_at';
-    const safeSortOrder = sort_order === 'asc' ? 'ASC' : 'DESC';
+    const safeSortOrder = sort_order === 'asc' ? 'asc' : 'desc';
 
-    const orderClause =
-      safeSortBy === 'user_name'
-        ? `ORDER BY u.user_name COLLATE NOCASE ${safeSortOrder}`
-        : safeSortBy === 'email'
-          ? `ORDER BY u.email COLLATE NOCASE ${safeSortOrder}`
-          : `ORDER BY comment.created_at ${safeSortOrder}`;
+    const orderByMap: Record<string, Prisma.CommentOrderByWithRelationInput> = {
+      user_name: { user: { userName: safeSortOrder } },
+      email: { user: { email: safeSortOrder } },
+      created_at: { createdAt: safeSortOrder },
+    };
+    const orderBy = orderByMap[safeSortBy] ?? orderByMap.created_at;
 
     try {
-      const rows: Record<string, unknown>[] = await this.database.all(
-        `
-      SELECT comment.id AS comment_id, comment.post_id, comment.parent_comment_id, comment.text, comment.user_email, comment.file_path, comment.created_at, u.user_name, u.home_page,
-        (SELECT COUNT(*) FROM comment AS c2 WHERE c2.parent_comment_id = comment.id) AS reply_count
-      FROM comment
-      JOIN user AS u ON comment.user_email = u.email
-      WHERE post_id = ?
-      AND parent_comment_id IS NULL
-      ${orderClause}
-      LIMIT ? OFFSET ?
-      `,
-        [post_id, limitVal, offsetVal],
-      );
-      const comments = rows.map((row) => ({
-        ...row,
-        file_paths: parseFilePaths(row.file_path),
-      })) as unknown as CommentRowDTO[];
-      return comments;
+      const rows = await this.prisma.comment.findMany({
+        where: { postId: post_id, parentCommentId: null },
+        orderBy,
+        skip: offsetVal,
+        take: limitVal,
+        include: {
+          user: { select: { userName: true, homePage: true } },
+          _count: { select: { replies: true } },
+        },
+      });
+
+      return rows.map((row) => ({
+        comment_id: row.id,
+        post_id: row.postId,
+        parent_comment_id: row.parentCommentId,
+        text: row.text,
+        user_email: row.userEmail,
+        file_path: row.filePath,
+        file_paths: parseFilePaths(row.filePath),
+        created_at: row.createdAt,
+        user_name: row.user.userName,
+        home_page: row.user.homePage,
+        reply_count: row._count.replies,
+      }));
     } catch (err) {
       throw new InternalServerErrorException(
         `Failed to get comment. Error message: ${err}`,
@@ -111,9 +102,6 @@ export class CommentService {
     }
   }
 
-  /*
-   * Get relpies comment
-   */
   async getReplies(
     { parent_comment_id }: CommentRepliesDTO,
     limit?: string,
@@ -123,22 +111,29 @@ export class CommentService {
     const offsetVal = offset ? parseInt(offset, 10) : 0;
 
     try {
-      const rows: Record<string, unknown>[] = await this.database.all(
-        `
-      SELECT comment.id AS comment_id, comment.post_id, comment.parent_comment_id, comment.text, comment.user_email, comment.file_path, comment.created_at, u.user_name, u.home_page,
-        (SELECT COUNT(*) FROM comment AS c2 WHERE c2.parent_comment_id = comment.id) AS reply_count
-      FROM comment
-      JOIN user AS u ON comment.user_email = u.email
-      WHERE parent_comment_id = ?
-      LIMIT ? OFFSET ?
-      `,
-        [parent_comment_id, limitVal, offsetVal],
-      );
-      const comments = rows.map((row) => ({
-        ...row,
-        file_paths: parseFilePaths(row.file_path),
-      })) as unknown as CommentRowDTO[];
-      return comments;
+      const rows = await this.prisma.comment.findMany({
+        where: { parentCommentId: parent_comment_id },
+        skip: offsetVal,
+        take: limitVal,
+        include: {
+          user: { select: { userName: true, homePage: true } },
+          _count: { select: { replies: true } },
+        },
+      });
+
+      return rows.map((row) => ({
+        comment_id: row.id,
+        post_id: row.postId,
+        parent_comment_id: row.parentCommentId,
+        text: row.text,
+        user_email: row.userEmail,
+        file_path: row.filePath,
+        file_paths: parseFilePaths(row.filePath),
+        created_at: row.createdAt,
+        user_name: row.user.userName,
+        home_page: row.user.homePage,
+        reply_count: row._count.replies,
+      }));
     } catch (err) {
       throw new InternalServerErrorException(
         `Failed to get comment. Error message: ${err}`,
@@ -146,20 +141,17 @@ export class CommentService {
     }
   }
 
-  /*
-   * Delete comment
-   */
   async deleteComment({ id }: DeleteCommentDTO): Promise<boolean> {
     try {
-      const result = await this.database.run(
-        `
-        DELETE FROM comment WHERE id = ?
-        `,
-        [id],
-      );
-
-      return result.changes > 0;
+      await this.prisma.comment.delete({ where: { id } });
+      return true;
     } catch (err) {
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === 'P2025'
+      ) {
+        return false;
+      }
       throw new InternalServerErrorException(
         `Failed to delete comment. Error message: ${err}`,
       );
