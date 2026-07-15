@@ -1,4 +1,5 @@
 import * as v from "valibot";
+import { validateAndEscapeXHTML } from "../utils/validateXHTML";
 
 export const formSchema = v.object({
   post_id: v.number(),
@@ -10,7 +11,15 @@ export const formSchema = v.object({
     v.email("Некорректный email"),
   ),
   home_page: v.nullable(v.pipe(v.string(), v.url())),
-  text: v.pipe(v.string(), v.nonEmpty("Текст обязателен")),
+  text: v.pipe(
+    v.string(),
+    v.nonEmpty("Текст обязателен"),
+    v.check(
+      (val) => validateAndEscapeXHTML(val).valid,
+      "Некорректный XHTML: проверьте закрытие тегов",
+    ),
+    v.transform((val) => validateAndEscapeXHTML(val).escaped),
+  ),
   file_paths: v.array(v.string()),
 });
 

@@ -24,13 +24,13 @@
 - [x] **12. File upload** — image or text file attached to a message
 - [x] **13. Images** — resized to 320×240 maintaining aspect ratio, JPG/GIF/PNG
 - [x] **14. Text files** — max 100 KB, TXT format
-- [ ] **15. File preview (lightbox)** — visual effects for file viewing
+- [x] **15. File preview (lightbox)** — visual effects for file viewing
 - [ ] **16. Orphaned file cleanup** — periodic cleanup of `.tmp/` and `uploads/` files with `pending` status; uses file mtime for `.tmp/` and `created_at` for `file` table rows
 
 ### HTML tags
 
 - [x] **16. Allowed tags** — `<a href="" title="">`, `<code>`, `<i>`, `<strong>`
-- [ ] **17. XHTML validation** — closing tag check, must be valid XHTML
+- [x] **17. XHTML validation** — closing tag check, must be valid XHTML
 - [x] **18. Client and server validation** — `valibot` (client), `class-validator` + `SanitizePipe` (server)
 
 ### UX
@@ -45,8 +45,8 @@
 
 | Status   | Count |
 | -------- | ----- |
-| Done     | 18    |
-| Not done | 4     |
+| Done     | 19    |
+| Not done | 3     |
 
 ---
 

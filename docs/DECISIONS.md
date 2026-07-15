@@ -108,3 +108,19 @@ Services rewritten from `fetch` to `axios` (`^1.18.1`).
 - `user.service.ts` imports `UserRow` locally.
 - Removed `@shared` aliases from `backend/tsconfig.json`, `frontend/tsconfig.app.json`, `frontend/vite.config.ts`.
 - `shared/` directory deleted.
+
+## 2026-07-15 — XHTML validation for comment text
+
+**Decision:** Added XHTML structure validation for the `text` field on both frontend and backend. Only whitelisted tags (`a`, `code`, `i`, `strong`) are treated as tags; everything else (unknown tags, bare `<`) is escaped to `&lt;`.
+
+**Why:**
+- SPEC пункт 17 requires "closing tag check, must be valid XHTML".
+- A separate HTML/XHTML parser library would be overkill for 4 allowed tags.
+- Custom stack-based validator avoids extra dependencies and false positives (e.g., `3 < 5` is treated as text).
+
+**How:**
+- Created `backend/src/common/xhtml.validator.ts` and `frontend/src/utils/validateXHTML.ts` — identical function: `validateAndEscapeXHTML(input)`.
+- **Backend**: Integrated into `SanitizePipe` before `sanitize-html` — validates XHTML structure, then sanitizes. Only the `text` field is validated (other fields skip the check).
+- **Frontend**: Added `v.check()` + `v.transform()` to the `text` field in the valibot schema. The check validates structure; the transform escapes bare `<` characters before submission.
+- Error messages: specific on mismatch (`Ожидался закрывающий </strong>, но найден </i>`) and on unclosed tags (`Незакрытые теги: <strong>, <i>`).
+- Stray closing tags (`</i>` when no opener exists) are escaped as text rather than rejected.
