@@ -93,6 +93,7 @@ export default function Lightbox({ files, initialIndex, onClose }: LightboxProps
           {hasPrev && (
             <button
               className={styles.navBtn}
+              style={{ left: '8px' }}
               onClick={goPrev}
               aria-label="Previous"
             >
@@ -113,6 +114,7 @@ export default function Lightbox({ files, initialIndex, onClose }: LightboxProps
           {hasNext && (
             <button
               className={styles.navBtn}
+              style={{ right: '8px' }}
               onClick={goNext}
               aria-label="Next"
             >
