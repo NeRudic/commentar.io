@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import Toast from '../components/Toast/Toast';
+import toastStyles from '../components/Toast/Toast.module.css';
 
 interface ToastItem {
   id: number;
@@ -39,27 +40,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     (message: string) => {
       const id = nextId.current++;
       setToasts((prev) => [...prev, { id, message }]);
-      setTimeout(() => removeToast(id), 5000);
     },
-    [removeToast],
+    [],
   );
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
       {createPortal(
-        <div
-          style={{
-            position: 'fixed',
-            bottom: 24,
-            right: 24,
-            zIndex: 1100,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 8,
-            pointerEvents: 'none',
-          }}
-        >
+        <div className={toastStyles.container}>
           {toasts.map((t) => (
             <Toast
               key={t.id}

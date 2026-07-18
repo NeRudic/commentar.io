@@ -5,8 +5,7 @@
   padding: 4px 12px;
   font-size: 12px;
   color: var(--text-tertiary);
-  background: color-mix(in srgb, var(--surface-color) 90%, transparent);
-  backdrop-filter: blur(4px);
+  border: 1px solid var(--border-color);
   border-top-right-radius: 6px;
   user-select: none;
 }

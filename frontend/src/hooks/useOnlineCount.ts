@@ -5,7 +5,7 @@ export default function useOnlineCount(): number {
   const [onlineCount, setOnlineCount] = useState<number>(0);
 
   useEffect(() => {
-    const HOST = import.meta.env.VITE_WS_HOST;
+    const HOST = import.meta.env.VITE_WS_HOST || 'localhost:3000';
     const BASE_DELAY = 1000;
     const MAX_DELAY = 30000;
 
