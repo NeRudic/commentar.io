@@ -88,6 +88,7 @@ export default function TextEditor({ name, onValueChange }: TextEditorProps) {
           name={name}
           className={styles.textarea}
           onChange={handleChange}
+          defaultValue={text}
         />
       )}
     </div>
