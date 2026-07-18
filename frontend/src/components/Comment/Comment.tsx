@@ -7,6 +7,7 @@ import type { CommentRow, CreateCommentResponse } from '../../types';
 import Modal from '../Modal/Modal';
 import CommentForm from '../CommentForm/CommentForm';
 import Lightbox from '../Lightbox/Lightbox';
+import { File } from '../icons/icons';
 import styles from './Comment.module.css';
 
 interface CommentProps {
@@ -111,23 +112,26 @@ const Comment = memo(function Comment({
                 onClick={() => setLightboxIndex(i)}
               />
             ) : (
-              <span
+              <a
                 key={fp}
+                href={BASE_URL + fp}
+                download
                 className={styles.fileLink}
-                onClick={() => setLightboxIndex(i)}
               >
-                {fp}
-              </span>
+                <File size={16} />
+                <span>{fp.replace(/^.*[\\/]/, '')}</span>
+              </a>
             ),
           )}
         </div>
       )}
-      <Lightbox
-        files={file_paths}
-        initialIndex={lightboxIndex ?? 0}
-        isOpen={lightboxIndex !== null}
-        onClose={() => setLightboxIndex(null)}
-      />
+      {lightboxIndex !== null && (
+        <Lightbox
+          files={file_paths}
+          initialIndex={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+        />
+      )}
       <div className={styles.actions}>
         <button
           className={styles.actionBtn}

@@ -7,17 +7,12 @@ import styles from './Lightbox.module.css';
 interface LightboxProps {
   files: string[];
   initialIndex: number;
-  isOpen: boolean;
   onClose: () => void;
 }
 
-export default function Lightbox({ files, initialIndex, isOpen, onClose }: LightboxProps) {
+export default function Lightbox({ files, initialIndex, onClose }: LightboxProps) {
   const [index, setIndex] = useState(initialIndex);
   const [textContent, setTextContent] = useState<string | null>(null);
-
-  if (index !== initialIndex && isOpen) {
-    setIndex(initialIndex);
-  }
 
   const filePath = files[index] ?? null;
   const isImage = /\.(jpg|jpeg|gif|png)$/i.test(filePath ?? '');
@@ -44,21 +39,19 @@ export default function Lightbox({ files, initialIndex, isOpen, onClose }: Light
   );
 
   useEffect(() => {
-    if (!isOpen) return;
-
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, handleKeyDown]);
+  }, [handleKeyDown]);
 
   useEffect(() => {
-    document.body.style.overflow = isOpen ? 'hidden' : '';
+    document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = '';
     };
-  }, [isOpen]);
+  }, []);
 
   useEffect(() => {
-    if (!isOpen || !filePath || isImage) return;
+    if (!filePath || isImage) return;
 
     let cancelled = false;
 
@@ -72,9 +65,9 @@ export default function Lightbox({ files, initialIndex, isOpen, onClose }: Light
       });
 
     return () => { cancelled = true; };
-  }, [isOpen, filePath, isImage, fullUrl]);
+  }, [filePath, isImage, fullUrl]);
 
-  if (!isOpen || files.length === 0) return null;
+  if (files.length === 0) return null;
 
   return createPortal(
     <div className={styles.overlay} onClick={onClose}>
