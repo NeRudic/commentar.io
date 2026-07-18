@@ -30,10 +30,9 @@
 }
 
 .viewer {
-  position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 12px;
   max-width: 90vw;
   max-height: 80vh;
 }
@@ -47,23 +46,24 @@
 }
 
 .navBtn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;
-  background: none;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: rgba(0, 0, 0, 0.55);
   border: none;
   cursor: pointer;
   color: #fff;
-  padding: 8px;
   border-radius: 50%;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s;
   line-height: 1;
 }
 
 .navBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--accent);
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
 }
 
 .image {

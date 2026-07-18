@@ -93,11 +93,10 @@ export default function Lightbox({ files, initialIndex, onClose }: LightboxProps
           {hasPrev && (
             <button
               className={styles.navBtn}
-              style={{ left: '8px' }}
               onClick={goPrev}
               aria-label="Previous"
             >
-              <ChevronLeft size={32} />
+              <ChevronLeft size={24} />
             </button>
           )}
 
@@ -114,11 +113,10 @@ export default function Lightbox({ files, initialIndex, onClose }: LightboxProps
           {hasNext && (
             <button
               className={styles.navBtn}
-              style={{ right: '8px' }}
               onClick={goNext}
               aria-label="Next"
             >
-              <ChevronRight size={32} />
+              <ChevronRight size={24} />
             </button>
           )}
         </div>
