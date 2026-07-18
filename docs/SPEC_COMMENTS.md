@@ -25,19 +25,23 @@
 - [x] **13. Images** — resized to 320×240 maintaining aspect ratio, JPG/GIF/PNG
 - [x] **14. Text files** — max 100 KB, TXT format
 - [x] **15. File preview (lightbox)** — visual effects for file viewing
-- [ ] **16. Orphaned file cleanup** — periodic cleanup of `.tmp/` and `uploads/` files with `pending` status; uses file mtime for `.tmp/` and `created_at` for `file` table rows
+- [x] **16. Orphaned file cleanup** — periodic cleanup of `.tmp/` and `uploads/` files with `pending` status; uses file mtime for `.tmp/` and `created_at` for `file` table rows
 
 ### HTML tags
 
-- [x] **16. Allowed tags** — `<a href="" title="">`, `<code>`, `<i>`, `<strong>`
-- [x] **17. XHTML validation** — closing tag check, must be valid XHTML
-- [x] **18. Client and server validation** — `valibot` (client), `class-validator` + `SanitizePipe` (server)
+- [x] **17. Allowed tags** — `<a href="" title="">`, `<code>`, `<i>`, `<strong>`
+- [x] **18. XHTML validation** — closing tag check, must be valid XHTML
+- [x] **19. Client and server validation** — `valibot` (client), `class-validator` + `SanitizePipe` (server)
 
 ### UX
 
-- [x] **19. Message preview** — without page reload (Preview mode in `TextEditor`)
-- [x] **20. Toolbar buttons** — `[i]`, `[strong]`, `[code]`, `[a]` in `TextEditor` toolbar
-- [ ] **21. Visual effects** — animations, transitions (partially done: CSS transitions)
+- [x] **20. Message preview** — without page reload (Preview mode in `TextEditor`)
+- [x] **21. Toolbar buttons** — `[i]`, `[strong]`, `[code]`, `[a]` in `TextEditor` toolbar
+- [x] **22. Visual effects** — animations, transitions (CSS transitions + `@keyframes` in Toast, Lightbox, Modal)
+
+### Real-time
+
+- [x] **23. Online counter** — live user count via WebSocket (`OnlineFooter`, `useOnlineCount`)
 
 ---
 
@@ -45,8 +49,8 @@
 
 | Status   | Count |
 | -------- | ----- |
-| Done     | 19    |
-| Not done | 3     |
+| Done     | 23    |
+| Not done | 0     |
 
 ---
 
