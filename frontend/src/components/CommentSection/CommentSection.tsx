@@ -9,7 +9,7 @@ import {
 import { getRootComments } from '../../services';
 import { COMMENTS_PER_PAGE } from '../../config/comment.config';
 import { useToast } from '../../context/ToastContext';
-import type { CommentRow, CreateCommentResponse } from '../../types';
+import type { CommentRow } from '../../types';
 import Modal from '../Modal/Modal';
 import CommentForm from '../CommentForm/CommentForm';
 import Comment from '../Comment/Comment';
@@ -109,10 +109,22 @@ const CommentSection = forwardRef<CommentSectionHandle, CommentSectionProps>(
       setLoadingMore(false);
     }, [fetchRootComments, rootComments.length]);
 
+    const handleDeleteRoot = useCallback((commentId: number) => {
+      setRootComments((prev) => prev.filter((c) => c.comment_id !== commentId));
+    }, []);
+
+    const handleUpdateRoot = useCallback((updated: CommentRow) => {
+      setRootComments((prev) =>
+        prev.map((c) =>
+          c.comment_id === updated.comment_id ? updated : c,
+        ),
+      );
+    }, []);
+
     const handleFormSuccess = useCallback(
-      (result?: CreateCommentResponse) => {
+      (result?: CommentRow | { comment: CommentRow; siblings: CommentRow[] }) => {
         setIsFormOpen(false);
-        if (result?.siblings) {
+        if (result && 'siblings' in result) {
           setRootComments(result.siblings);
         }
       },
@@ -152,12 +164,15 @@ const CommentSection = forwardRef<CommentSectionHandle, CommentSectionProps>(
                   comment_id={comment.comment_id}
                   post_id={comment.post_id}
                   user_name={comment.user_name}
+                  user_email={comment.user_email}
                   home_page={comment.home_page}
                   text={comment.text}
                   file_paths={comment.file_paths}
                   created_at={comment.created_at}
                   reply_count={comment.reply_count}
                   depth={0}
+                  onDelete={handleDeleteRoot}
+                  onUpdate={handleUpdateRoot}
                 />
               ))}
               {hasMore && (

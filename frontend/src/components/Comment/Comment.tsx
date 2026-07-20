@@ -1,5 +1,5 @@
-import { memo, useState, useCallback } from 'react';
-import { BASE_URL, getReplies } from '../../services';
+import { memo, useState, useCallback, useRef } from 'react';
+import { BASE_URL, getReplies, deleteComment } from '../../services';
 import { sanitize } from '../../utils/sanitize';
 import { MAX_DEPTH } from '../../config/comment.config';
 import { useToast } from '../../context/ToastContext';
@@ -7,6 +7,7 @@ import type { CommentRow, CreateCommentResponse } from '../../types';
 import Modal from '../Modal/Modal';
 import CommentForm from '../CommentForm/CommentForm';
 import Lightbox from '../Lightbox/Lightbox';
+import Button from '../Button/Button';
 import { File } from '../icons/icons';
 import styles from './Comment.module.css';
 
@@ -14,12 +15,15 @@ interface CommentProps {
   comment_id: number;
   post_id: number;
   user_name: string;
+  user_email: string;
   home_page: string | null;
   text: string;
   file_paths: string[];
   created_at: string;
   reply_count: number;
   depth: number;
+  onDelete?: (commentId: number) => void;
+  onUpdate?: (comment: CommentRow) => void;
 }
 
 const Comment = memo(function Comment({
@@ -32,13 +36,21 @@ const Comment = memo(function Comment({
   created_at,
   reply_count,
   depth,
+  onDelete,
+  onUpdate,
 }: CommentProps) {
 
   const [replies, setReplies] = useState<CommentRow[]>([]);
   const [showReplies, setShowReplies] = useState(false);
   const [loadingReplies, setLoadingReplies] = useState(false);
   const [isReplyFormOpen, setIsReplyFormOpen] = useState(false);
+  const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const { showToast } = useToast();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteEmail, setDeleteEmail] = useState('');
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const deleteEmailRef = useRef<HTMLInputElement>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const handleToggleReplies = useCallback(async () => {
@@ -46,9 +58,7 @@ const Comment = memo(function Comment({
       setShowReplies(false);
       return;
     }
-
     setShowReplies(true);
-
     if (replies.length === 0) {
       setLoadingReplies(true);
       try {
@@ -62,16 +72,53 @@ const Comment = memo(function Comment({
     }
   }, [showReplies, replies.length, comment_id, showToast]);
 
-  const handleReplySuccess = useCallback((result?: CreateCommentResponse) => {
+  const handleReplySuccess = useCallback((result?: CommentRow | CreateCommentResponse) => {
     setIsReplyFormOpen(false);
-    if (result?.siblings) {
+    if (result && 'siblings' in result) {
       setReplies(result.siblings);
       setShowReplies(true);
     }
   }, []);
 
-  const effectiveReplyCount = replies.length > 0 ? replies.length : reply_count;
+  const handleDeleteClick = useCallback(() => {
+    setDeleteEmail('');
+    setDeleteError(null);
+    setIsDeleteModalOpen(true);
+    setTimeout(() => deleteEmailRef.current?.focus(), 50);
+  }, []);
 
+  const handleDeleteConfirm = useCallback(async () => {
+    if (!deleteEmail.trim()) {
+      setDeleteError('Email is required');
+      return;
+    }
+
+    setDeleting(true);
+    setDeleteError(null);
+
+    try {
+      await deleteComment(comment_id, deleteEmail.trim());
+      setIsDeleteModalOpen(false);
+      onDelete?.(comment_id);
+    } catch {
+      setDeleteError('Incorrect email or server error');
+    } finally {
+      setDeleting(false);
+    }
+  }, [comment_id, deleteEmail, onDelete]);
+
+  const handleDeleteModalClose = useCallback(() => {
+    if (!deleting) setIsDeleteModalOpen(false);
+  }, [deleting]);
+
+  const handleUpdateSuccess = useCallback((result?: CommentRow | CreateCommentResponse) => {
+    setIsEditFormOpen(false);
+    if (result && 'comment_id' in result) {
+      onUpdate?.(result);
+    }
+  }, [onUpdate]);
+
+  const effectiveReplyCount = replies.length > 0 ? replies.length : reply_count;
   const isImageFile = (path: string) => /\.(jpg|jpeg|gif|png)$/i.test(path);
 
   return (
@@ -81,12 +128,7 @@ const Comment = memo(function Comment({
     >
       <div className={styles.header}>
         {home_page ? (
-          <a
-            href={home_page}
-            className={styles.username}
-            target="_blank"
-            rel="nofollow noopener"
-          >
+          <a href={home_page} className={styles.username} target="_blank" rel="nofollow noopener">
             {user_name}
           </a>
         ) : (
@@ -112,12 +154,7 @@ const Comment = memo(function Comment({
                 onClick={() => setLightboxIndex(i)}
               />
             ) : (
-              <a
-                key={fp}
-                href={BASE_URL + fp}
-                download
-                className={styles.fileLink}
-              >
+              <a key={fp} href={BASE_URL + fp} download className={styles.fileLink}>
                 <File size={16} />
                 <span>{fp.replace(/^.*[\\/]/, '')}</span>
               </a>
@@ -133,34 +170,38 @@ const Comment = memo(function Comment({
         />
       )}
       <div className={styles.actions}>
-        <button
-          className={styles.actionBtn}
-          type="button"
-          onClick={() => setIsReplyFormOpen(true)}
-        >
+        <button className={styles.actionBtn} type="button" onClick={() => setIsReplyFormOpen(true)}>
           Reply
         </button>
+        <button className={styles.actionBtn} type="button" onClick={() => setIsEditFormOpen(true)}>
+          Edit
+        </button>
+        <button className={styles.actionBtn} type="button" onClick={handleDeleteClick}>
+          Delete
+        </button>
         {effectiveReplyCount > 0 && (
-          <button
-            className={styles.actionBtn}
-            type="button"
-            onClick={handleToggleReplies}
-          >
-            {showReplies
-              ? 'Hide replies'
-              : `Show replies (${effectiveReplyCount})`}
+          <button className={styles.actionBtn} type="button" onClick={handleToggleReplies}>
+            {showReplies ? 'Hide replies' : `Show replies (${effectiveReplyCount})`}
           </button>
         )}
       </div>
-      {loadingReplies && (
-        <span className={styles.loading}>Loading...</span>
-      )}
+      {loadingReplies && <span className={styles.loading}>Loading...</span>}
       {showReplies &&
         replies.map((reply) => (
           <Comment
             key={reply.comment_id}
             {...reply}
             depth={depth + 1}
+            onDelete={(id) => {
+              setReplies((prev) => prev.filter((r) => r.comment_id !== id));
+            }}
+            onUpdate={(updated) => {
+              setReplies((prev) =>
+                prev.map((r) =>
+                  r.comment_id === updated.comment_id ? updated : r,
+                ),
+              );
+            }}
           />
         ))}
       <Modal isOpen={isReplyFormOpen} onClose={() => setIsReplyFormOpen(false)}>
@@ -170,6 +211,51 @@ const Comment = memo(function Comment({
           onClose={() => setIsReplyFormOpen(false)}
           onSuccess={handleReplySuccess}
         />
+      </Modal>
+      <Modal isOpen={isEditFormOpen} onClose={() => setIsEditFormOpen(false)}>
+        <CommentForm
+          postId={post_id}
+          onClose={() => setIsEditFormOpen(false)}
+          onSuccess={handleUpdateSuccess}
+          initialData={{ comment_id, text, file_paths }}
+        />
+      </Modal>
+      <Modal isOpen={isDeleteModalOpen} onClose={handleDeleteModalClose}>
+        <div className={styles.deleteForm}>
+          <p className={styles.deleteTitle}>Delete comment</p>
+          <p className={styles.deleteText}>
+            Enter your email to confirm deletion. This action cannot be undone.
+          </p>
+          <div className={styles.deleteField}>
+            <label className={styles.deleteLabel}>Email</label>
+            <input
+              ref={deleteEmailRef}
+              className={`${styles.deleteInput} ${deleteError ? styles.deleteInputError : ''}`}
+              type="email"
+              value={deleteEmail}
+              onChange={(e) => {
+                setDeleteEmail(e.target.value);
+                setDeleteError(null);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !deleting) handleDeleteConfirm();
+              }}
+              placeholder="your@email.com"
+              disabled={deleting}
+            />
+            {deleteError && (
+              <span className={styles.deleteError}>{deleteError}</span>
+            )}
+          </div>
+          <div className={styles.deleteActions}>
+            <Button className={styles.cancelBtn} onClick={handleDeleteModalClose} disabled={deleting}>
+              Cancel
+            </Button>
+            <Button className={styles.deleteBtn} onClick={handleDeleteConfirm} disabled={deleting}>
+              {deleting ? 'Deleting...' : 'Delete'}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
