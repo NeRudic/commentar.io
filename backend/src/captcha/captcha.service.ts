@@ -25,12 +25,11 @@ export class CaptchaService {
 
   generate(): CaptchaResponse {
     const captcha = svgCaptcha.create({
-      size: 5,
-      ignoreChars: '0o1il',
+      size: 7,
       noise: 2,
       color: true,
-      background: '#f0f0f0',
-      width: 180,
+      background: '#0b0628ff',
+      width: 200,
       height: 60,
     });
 
