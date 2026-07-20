@@ -1,6 +1,7 @@
 import { type ReactNode, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Close } from '../icons/icons';
+import useScrollLock from '../../hooks/useScrollLock';
 import styles from './Modal.module.css';
 
 export interface ModalProps {
@@ -24,13 +25,7 @@ export default function Modal({ isOpen, onClose, children }: ModalProps) {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, handleKeyDown]);
 
-  useEffect(() => {
-    document.body.style.overflow = isOpen ? 'hidden' : ''
-
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
+  useScrollLock(isOpen);
 
   if (!isOpen) return null;
 

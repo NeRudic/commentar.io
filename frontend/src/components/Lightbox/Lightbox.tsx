@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { BASE_URL } from '../../services';
 import { Close, ChevronLeft, ChevronRight } from '../icons/icons';
+import useScrollLock from '../../hooks/useScrollLock';
 import styles from './Lightbox.module.css';
 
 interface LightboxProps {
@@ -43,12 +44,7 @@ export default function Lightbox({ files, initialIndex, onClose }: LightboxProps
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, []);
+  useScrollLock(true);
 
   useEffect(() => {
     if (!filePath || isImage) return;
