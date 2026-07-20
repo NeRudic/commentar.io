@@ -14,8 +14,8 @@ export default function FileList({ items }: FileListProps) {
 
   return (
     <ul className={styles.fileList}>
-      {items.map((item, i) => (
-        <li key={i} className={styles.fileListItem}>
+      {items.map((item) => (
+        <li key={item.name} className={styles.fileListItem}>
           <span className={styles.fileName}>{item.name}</span>
           <button
             type="button"
