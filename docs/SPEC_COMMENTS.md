@@ -39,9 +39,15 @@
 - [x] **21. Toolbar buttons** — `[i]`, `[strong]`, `[code]`, `[a]` in `TextEditor` toolbar
 - [x] **22. Visual effects** — animations, transitions (CSS transitions + `@keyframes` in Toast, Lightbox, Modal)
 
+### Update / Delete
+
+- [x] **23. Edit comment** — Edit button opens CommentForm pre-filled with existing text and files; email + captcha required; files can be added/removed
+- [x] **24. Delete comment** — Delete button opens confirmation modal with email input; backend cascades to child comments
+- [x] **25. Ownership verification** — `user_email` must match comment owner for both update and delete
+
 ### Real-time
 
-- [x] **23. Online counter** — live user count via WebSocket (`OnlineFooter`, `useOnlineCount`)
+- [x] **26. Online counter** — live user count via WebSocket (`OnlineFooter`, `useOnlineCount`)
 
 ---
 
@@ -49,7 +55,7 @@
 
 | Status   | Count |
 | -------- | ----- |
-| Done     | 23    |
+| Done     | 26    |
 | Not done | 0     |
 
 ---
@@ -60,7 +66,9 @@
 - Backend: Prisma ORM (SQLite)
 - File uploads: `memoryStorage` → validation → write to `.tmp/`. On comment creation: COPY to `uploads/` inside transaction, then delete `.tmp/` copy. `sharp` for resize
 - Orphaned file cleanup: `FileCleanupService` runs periodically, removes `.tmp/` files by mtime threshold, cleans orphaned `uploads/` files matching `pending` status
-- CAPTCHA: stateless via JWT (`expiresIn: 5m`), captcha integrated directly in `CommentForm`
+- CAPTCHA: stateless via JWT (`expiresIn: 5m`), captcha integrated directly in `CommentForm` (both create and edit modes)
+- Edit mode: `CommentForm` receives `initialData` prop (`{ comment_id, text, file_paths }`); user_name/email/home_page fields hidden, email field shown for ownership verification
+- Delete: modal with email input + confirmation button; backend returns 403 if email doesn't match
 - `TextEditor`: communicates with form via `onValueChange` callback, without `register()` on the DOM element. Storage format — XHTML
 - `Button`: reusable wrapper `<button type="button">`, styled in parent CSS modules
 - `<a>` tags with `href`/`title` attributes allowed on backend (`sanitize.pipe.ts`) and frontend (`utils/sanitize.ts`)

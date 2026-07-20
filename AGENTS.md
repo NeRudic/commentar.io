@@ -87,11 +87,20 @@ In `main.ts`: `SanitizePipe` runs first, then `ValidationPipe({ transform: true 
 
 - Types are local in `frontend/src/types/` (split into `comment.ts`, `user.ts`, `captcha.ts`, barrel re-export via `index.ts`).
 - `CommentRow` includes JOIN fields `user_name` and `home_page`.
+- `UpdateCommentRequest` — type for `PATCH /comment-and-user/:id` request body.
 - Backend imports its own DTOs from `class-validator`.
 
 ### Frontend services
 
 Services use **axios** (`frontend/package.json`).
+
+- `getRootComments(postId, limit, offset, sortBy, sortOrder)` — GET /comments/:postId
+- `getReplies(parentId)` — GET /comments/:parentId/replies
+- `createComment(data)` — POST /comment-and-user (with captcha)
+- `updateComment(commentId, data)` — PATCH /comment-and-user/:id (with captcha + email)
+- `deleteComment(commentId, userEmail)` — DELETE /comments/:id?user_email=xxx
+- `getCaptcha()` — GET /captcha
+- `uploadFile(file)` — POST /file-manager/verify
 
 ## Conventions
 

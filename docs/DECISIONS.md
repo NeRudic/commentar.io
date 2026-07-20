@@ -125,6 +125,32 @@ Services rewritten from `fetch` to `axios` (`^1.18.1`).
 - Error messages: specific on mismatch (`Ожидался закрывающий </strong>, но найден </i>`) and on unclosed tags (`Незакрытые теги: <strong>, <i>`).
 - Stray closing tags (`</i>` when no opener exists) are escaped as text rather than rejected.
 
+## 2026-07-20 — Update and delete for comments
+
+**Decision:** Added `PATCH /comment-and-user/:id` for updating comments and enhanced `DELETE /comments/:id` with email verification. Frontend adds Edit/Delete buttons per comment with a modal-based UX.
+
+**Why:**
+- Project had only create/read; update and delete are standard CRUD operations needed for completeness.
+- No authentication system exists, so email ownership verification is the lightest guard.
+- Captcha on update prevents automated abuse (same as create).
+
+**How:**
+- **Update endpoint** (`PATCH /comment-and-user/:id` in `OrchestratorController`):
+  - Accepts `text`, `user_email`, `file_paths`, `captcha_token`, `captcha_answer`.
+  - `OrchestratorService.updateCommentWithUser()` verifies captcha directly (not via middleware), then runs a transaction:
+    1. Finds comment, checks `user_email` matches (`ForbiddenException` if not).
+    2. Computes file diff: publishes new `.tmp/` files, removes deleted `uploads/` files.
+    3. Updates `comment.text` and `comment.filePath`.
+  - `FileManagerService.removeFile()` — new method, deletes from `uploads/` disk and `file` table.
+- **Delete endpoint** (`DELETE /comments/:id?user_email=xxx` in `CommentController`):
+  - Optional `user_email` query param for ownership check.
+  - `CommentService.deleteComment()` finds comment, compares email if provided.
+  - Prisma cascade deletes child comments automatically (`onDelete: Cascade`).
+- **Frontend:**
+  - `CommentForm` handles both create and edit via the `initialData` prop. In edit mode: hides user fields, shows email input for ownership, pre-fills TextEditor, allows file add/remove, requires captcha.
+  - Delete uses a Modal with an email input field (no more `window.prompt`/`window.confirm`).
+  - `CommentSection` and `Comment` propagate `onDelete`/`onUpdate` callbacks to update local state without a full refetch.
+
 ## 2026-07-15 — Migrated from raw sqlite3 to Prisma ORM
 
 **Decision:** Replaced the custom `DB` service (raw `sqlite3` with callback-based queries) with Prisma ORM (v7) using the `better-sqlite3` adapter.

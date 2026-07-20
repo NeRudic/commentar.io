@@ -143,13 +143,45 @@ Root comments for a post (parent_comment_id IS NULL).
 
 Replies to a specific comment.
 
-### `DELETE /comments/:commentId`
+### `PATCH /comment-and-user/:commentId`
 
-Delete a comment (cascades to child comments).
+Update a comment (text and/or files). Requires captcha and email ownership verification.
+
+**Body:**
+
+```json
+{
+  "text": "<strong>Updated text</strong>",
+  "user_email": "john@example.com",
+  "file_paths": ["uploads/abc123.txt"],
+  "captcha_token": "eyJhbGciOiJIUzI1NiIs...",
+  "captcha_answer": "10"
+}
+```
+
+**Response (200):** `CommentRowDTO` (same shape as comment object in create response)
+
+**On error (400):** captcha error (same format as create)
+
+**On error (403):** email does not match comment owner
+
+### `DELETE /comments/:commentId?user_email=xxx`
+
+Delete a comment (cascades to child comments). Requires email verification via query param.
+
+**Query params:**
+
+| Param        | Type   | Required | Description                        |
+| ------------ | ------ | -------- | ---------------------------------- |
+| `user_email` | string | no*      | Owner's email for ownership check  |
+
+*If `user_email` is provided, the backend verifies it matches the comment owner. If omitted, the comment is deleted without verification (admin use).
 
 **Response (200):** `true`
 
 **On not found:** `404`
+
+**On error (403):** email does not match comment owner
 
 ## Files
 
