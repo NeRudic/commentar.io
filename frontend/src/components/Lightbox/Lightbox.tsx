@@ -18,17 +18,15 @@ export default function Lightbox({ files, initialIndex, onClose }: LightboxProps
   const filePath = files[index] ?? null;
   const isImage = /\.(jpg|jpeg|gif|png)$/i.test(filePath ?? '');
   const fullUrl = filePath ? BASE_URL + filePath : '';
-  const hasPrev = index > 0;
-  const hasNext = index < files.length - 1;
   const isLoading = !isImage && filePath !== null && textContent === null;
 
   const goPrev = useCallback(() => {
-    if (hasPrev) setIndex((i) => i - 1);
-  }, [hasPrev]);
+    setIndex((i) => (i - 1 + files.length) % files.length);
+  }, [files.length]);
 
   const goNext = useCallback(() => {
-    if (hasNext) setIndex((i) => i + 1);
-  }, [hasNext]);
+    setIndex((i) => (i + 1) % files.length);
+  }, [files.length]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -86,7 +84,7 @@ export default function Lightbox({ files, initialIndex, onClose }: LightboxProps
         )}
 
         <div className={styles.viewer}>
-          {hasPrev && (
+          {files.length > 1 && (
             <button
               className={styles.navBtn}
               onClick={goPrev}
@@ -98,7 +96,7 @@ export default function Lightbox({ files, initialIndex, onClose }: LightboxProps
 
           <div className={styles.mediaWrap}>
             {isImage ? (
-              <img src={fullUrl} alt="preview" className={styles.image} />
+              <img key={index} src={fullUrl} alt="preview" className={styles.image} />
             ) : isLoading ? (
               <div className={styles.loading}>Loading...</div>
             ) : (
@@ -106,7 +104,7 @@ export default function Lightbox({ files, initialIndex, onClose }: LightboxProps
             )}
           </div>
 
-          {hasNext && (
+          {files.length > 1 && (
             <button
               className={styles.navBtn}
               onClick={goNext}
