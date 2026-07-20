@@ -13,7 +13,7 @@
 
 ### Frontend
 
-No env vars used. Backend URL is hardcoded in `frontend/src/services/index.ts` as `http://localhost:3000`. Change to production URL for deployment.
+No env vars used. Backend URL is configured in `frontend/src/services/index.ts` via `VITE_API_URL` env var, falling back to `http://localhost:3000`.
 
 ## Build
 
@@ -68,4 +68,4 @@ Don't forget to update `CORS_ORIGIN` to the frontend domain.
 
 ## Production dependencies
 
-Backend requires `sharp` (native module) — may need `libvips` on the server.
+Backend requires `sharp` for image resizing — ships pre-built binaries per platform; no system `libvips` needed on most platforms.

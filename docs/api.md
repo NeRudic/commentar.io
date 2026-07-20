@@ -6,15 +6,14 @@ Base URL: `http://localhost:3000`
 
 ### `GET /captcha`
 
-Generates a math captcha (a + b = ?).
+Generates an SVG image captcha (letters + digits).
 
 **Response:**
 
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIs...",
-  "a": 7,
-  "b": 3
+  "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" ...>...</svg>"
 }
 ```
 
@@ -22,7 +21,7 @@ JWT token — signed with `CAPTCHA_SECRET`, expires in 5 minutes, contains the c
 
 ### `POST /captcha/verify`
 
-Verification (not used directly — verification happens via middleware).
+Direct verification endpoint (not used in normal flow — verification happens via middleware on POST or directly in service on PATCH).
 
 **Body:**
 
@@ -33,13 +32,23 @@ Verification (not used directly — verification happens via middleware).
 }
 ```
 
-**On error (400):**
+**Response (201):** `true`
+
+**On error (500):** standard NestJS error (throws `Error('Неправильный ответ')`)
+
+The `captcha_error` format below is used by `CaptchaMiddleware` (on create) and `OrchestratorService` (on update), returned as a `400 BadRequestException`:
 
 ```json
 {
-  "expired": false,
-  "new_captcha": { "token": "...", "a": 5, "b": 4 },
-  "error_message": "Invalid captcha answer"
+  "message": {
+    "captcha_error": {
+      "expired": false,
+      "new_captcha": { "token": "...", "svg": "<svg>...</svg>" },
+      "error_message": "Неправильный ответ"
+    }
+  },
+  "error": "Bad Request",
+  "statusCode": 400
 }
 ```
 
@@ -97,15 +106,16 @@ Creates user (findOrCreate) and comment in a single transaction. CaptchaMiddlewa
 ```json
 {
   "comment": {
-    "id": 42,
+    "comment_id": 42,
     "post_id": 1,
     "parent_comment_id": null,
     "user_name": "John",
     "user_email": "john@example.com",
     "home_page": "https://example.com",
     "text": "<strong>Hello!</strong>",
-    "file_path": "uploads/file.txt",
-    "created_at": "2026-07-11 12:00:00",
+    "file_path": "[\"uploads/file.txt\"]",
+    "file_paths": ["uploads/file.txt"],
+    "created_at": "2026-07-11T12:00:00.000Z",
     "reply_count": 0
   },
   "siblings": [...]
@@ -125,7 +135,7 @@ Root comments for a post (parent_comment_id IS NULL).
 ```json
 [
   {
-    "id": 42,
+    "comment_id": 42,
     "post_id": 1,
     "parent_comment_id": null,
     "user_name": "John",
@@ -133,7 +143,8 @@ Root comments for a post (parent_comment_id IS NULL).
     "home_page": "https://example.com",
     "text": "Comment text",
     "file_path": null,
-    "created_at": "2026-07-11 12:00:00",
+    "file_paths": [],
+    "created_at": "2026-07-11T12:00:00.000Z",
     "reply_count": 3
   }
 ]

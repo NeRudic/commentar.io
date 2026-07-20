@@ -15,7 +15,7 @@ comentar.io/
 │       ├── prisma/       # Prisma service, module, types
 │       ├── user/         # POST /users
 │       ├── comment/      # Comment CRUD
-│       ├── captcha/      # Math captcha (JWT)
+│       ├── captcha/      # SVG captcha (JWT)
 │       ├── file-manager/ # File upload, staging, publish, cleanup
 │       └── orchestrator/ # User+comment transaction
 ├── frontend/             # React SPA
@@ -23,7 +23,7 @@ comentar.io/
 │       ├── components/   # React components (CSS Modules)
 │       ├── data/         # Mock data (placeholder)
 │       ├── services/     # Axios services
-│       └── types/        # Local types (comment, user, captcha)
+│       └── types/        # Local types (comment, captcha, file)
 └── docs/                 # Documentation
 ```
 

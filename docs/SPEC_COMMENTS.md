@@ -7,14 +7,14 @@
 - [x] **1. User Name** — latin letters and digits, required
 - [x] **2. E-mail** — email format, required
 - [x] **3. Home page** — URL format, optional
-- [x] **4. CAPTCHA** — math problem, required
+- [x] **4. CAPTCHA** — SVG image (letters + digits), required
 - [x] **5. Text** — message text, all HTML tags forbidden except allowed ones, required
 
 ### Comments and display
 
 - [x] **6. Nested replies** — max depth 4 levels
 - [x] **7. Root comment sorting** — sortable table by User Name, E-mail, date (ascending/descending)
-- [x] **8. Pagination** — 25 messages per page
+- [x] **8. Pagination** — 5 messages per page
 - [x] **9. XSS and SQL injection protection** — `sanitize.pipe.ts` on backend, `DOMPurify` on frontend, parameterized SQL queries
 - [x] **10. Default sort** — LIFO (latest first)
 - [x] **11. CSS design** — CSS Modules in every component
@@ -62,7 +62,7 @@
 
 ## Notes
 
-- Types are local in `frontend/src/types/`, `shared/` removed
+- Types are local in `frontend/src/types/`; canonical tag/attribute config in `shared/tags.ts`
 - Backend: Prisma ORM (SQLite)
 - File uploads: `memoryStorage` → validation → write to `.tmp/`. On comment creation: COPY to `uploads/` inside transaction, then delete `.tmp/` copy. `sharp` for resize
 - Orphaned file cleanup: `FileCleanupService` runs periodically, removes `.tmp/` files by mtime threshold, cleans orphaned `uploads/` files matching `pending` status

@@ -49,7 +49,7 @@ npx prisma migrate deploy
 | `parentCommentId`  | `parent_comment_id`  | Int?      | FK → comment.id ON DELETE CASCADE        |
 | `text`             | `text`               | String    | NOT NULL                                 |
 | `userEmail`        | `user_email`         | String    | FK → user.email ON DELETE CASCADE        |
-| `filePath`         | `file_path`          | String?   | —                                        |
+| `filePath`         | `file_path`          | String?   | JSON array of paths (e.g. `["uploads/a.txt"]`) |
 | `createdAt`        | `created_at`         | DateTime  | DEFAULT now()                            |
 
 ### `File`

@@ -1,6 +1,6 @@
 # comentar.io — blog comment system
 
-NestJS API + React SPA with nested comments, file attachments, and math captcha.
+NestJS API + React SPA with nested comments, file attachments, and SVG captcha.
 
 ## Quick start
 
@@ -21,7 +21,6 @@ Backend: http://localhost:3000, Frontend: http://localhost:5173.
 | [API](docs/api.md) | Endpoints, DTOs, request examples |
 | [Database](docs/database.md) | SQLite schema, tables, indexes |
 | [Deployment](docs/deployment.md) | Env, build, production |
-| [Development](docs/development.md) | Commands, conventions, lint, tests |
 | [Decisions](docs/DECISIONS.md) | Architectural decisions log |
 | [OpenCode](docs/OPENCODE.md) | Tool reference |
 | [Spec](docs/SPEC_COMMENTS.md) | Feature requirements |

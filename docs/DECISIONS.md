@@ -60,7 +60,7 @@
 - Minor issues: array index as React key, duplicate `validateAndEscapeXHTML` calls, inconsistent CSS module usage.
 
 **What changed:**
-- Removed dead types: `types/user.ts`, `types/ws_online.ts`, dead exports from `captcha.ts`, `data/posts.tsx`.
+- Removed dead types: `types/user.ts`, `types/ws_online.ts`, dead exports from `captcha.ts`.
 - Replaced `as` casts with runtime type guards (`isCaptchaErrorResponse`, JSON shape check).
 - Removed dead `AbortController` from `useCaptcha` (`.signal` was never passed to fetch).
 - Added `fetchIdRef` generation counter to `CommentSection` to ignore stale fetch results.
@@ -194,7 +194,7 @@ Services rewritten from `fetch` to `axios` (`^1.18.1`).
 ## 2026-07-08 — Complete removal of shared/api/types
 
 **Decision:** Removed `shared/` directory and all `@shared` aliases from tsconfig/vite.
-`svelte/UserRow` moved to `backend/src/user/user.types.ts`.
+`shared/UserRow` moved to `backend/src/user/user.types.ts`.
 
 **Why:**
 - Frontend has been using local types (`frontend/src/types/`) for a long time.

@@ -9,7 +9,7 @@ The project consists of two independent packages without a monorepo:
 | Backend  | `backend/`  | NestJS 11, TypeScript, Prisma (SQLite), class-validator | 3000 |
 | Frontend | `frontend/` | React 19, Vite 8, TypeScript 6, CSS Modules     | 5173 |
 
-No shared types — each package has its own DTOs/types (see docs/DECISIONS.md, entries from 2026-06-30 and 2026-07-08).
+Canonical tag/attribute config in `shared/tags.ts` (imported by both packages). Backend uses DTOs with class-validator; frontend uses local types in `types/`.
 
 ## Backend (NestJS)
 
@@ -20,9 +20,10 @@ AppModule
 ├── PrismaModule      — Prisma ORM (SQLite), auto-migrate on startup
 ├── UserModule        — UserService.findOrCreate (upsert by email)
 ├── CommentModule     — Comment CRUD (nested, paginated, update, delete with email check)
-├── CaptchaModule     — JWT captcha (a + b = ?)
+├── CaptchaModule     — SVG image captcha (letters + digits, JWT-signed)
 ├── FileManagerModule  — File upload (txt/jpg/gif/png), orphaned file cleanup, removeFile
-└── OrchestratorModule — POST /comment-and-user (create), PATCH /comment-and-user/:id (update with captcha)
+├── OrchestratorModule — POST /comment-and-user (create), PATCH /comment-and-user/:id (update with captcha)
+└── OnlineModule      — WebSocket online counter (OnlineGateway)
 ```
 
 ### Dependency graph
@@ -34,6 +35,7 @@ PrismaService ──> FileManagerService
 PrismaService ──> FileCleanupService  (orphaned file cleanup, setInterval)
 CaptchaService ──> CaptchaMiddleware ──> OrchestratorService (on POST only)
 CaptchaService ──> OrchestratorService (direct verify on PATCH)
+OnlineGateway   — WebSocket (ws://localhost:3000, online counter)
 ```
 
 ### Directories
@@ -86,7 +88,7 @@ No routing — single page with 3 hardcoded posts.
 ### Form and validation
 
 - react-hook-form + valibot (@hookform/resolvers)
-- Captcha — math (a + b), JWT token with the answer
+- Captcha — SVG image (letters + digits), JWT token with the answer
 
 ### Data flow
 
