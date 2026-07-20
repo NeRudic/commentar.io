@@ -14,11 +14,13 @@ export const formSchema = v.object({
   text: v.pipe(
     v.string(),
     v.nonEmpty("Текст обязателен"),
-    v.check(
-      (val) => validateAndEscapeXHTML(val).valid,
-      "Некорректный XHTML: проверьте закрытие тегов",
-    ),
-    v.transform((val) => validateAndEscapeXHTML(val).escaped),
+    v.transform((val) => {
+      const result = validateAndEscapeXHTML(val);
+      if (!result.valid) {
+        throw new Error("Некорректный XHTML: проверьте закрытие тегов");
+      }
+      return result.escaped;
+    }),
   ),
   file_paths: v.array(v.string()),
 });
@@ -34,11 +36,13 @@ export const editFormSchema = v.object({
   text: v.pipe(
     v.string(),
     v.nonEmpty("Текст обязателен"),
-    v.check(
-      (val) => validateAndEscapeXHTML(val).valid,
-      "Некорректный XHTML: проверьте закрытие тегов",
-    ),
-    v.transform((val) => validateAndEscapeXHTML(val).escaped),
+    v.transform((val) => {
+      const result = validateAndEscapeXHTML(val);
+      if (!result.valid) {
+        throw new Error("Некорректный XHTML: проверьте закрытие тегов");
+      }
+      return result.escaped;
+    }),
   ),
 });
 
