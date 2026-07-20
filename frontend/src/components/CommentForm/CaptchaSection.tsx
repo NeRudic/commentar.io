@@ -22,17 +22,16 @@ export default function CaptchaSection({
       )}
       {captcha && (
         <div className={styles.captchaSection}>
-          <span className={styles.captchaQuestion}>
-            {captcha.a} + {captcha.b} = ?
-          </span>
+          <img
+            className={styles.captchaImage}
+            src={`data:image/svg+xml,${encodeURIComponent(captcha.svg)}`}
+            alt="Captcha"
+          />
           <input
             className={styles.captchaInput}
             type="text"
-            inputMode="numeric"
             value={captchaAnswer}
-            onChange={(e) =>
-              onAnswerChange(e.target.value.replace(/[^0-9-]/g, ''))
-            }
+            onChange={(e) => onAnswerChange(e.target.value)}
           />
         </div>
       )}

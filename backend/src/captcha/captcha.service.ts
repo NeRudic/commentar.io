@@ -1,13 +1,12 @@
 import 'dotenv/config';
 import { Injectable } from '@nestjs/common';
 import { sign, verify as verifyToken } from 'jsonwebtoken';
-import * as crypto from 'crypto';
+import * as svgCaptcha from 'svg-captcha';
 import { CaptchaVerifyDTO } from './dto/captcha.verify.dto';
 
 export interface CaptchaResponse {
   token: string;
-  a: number;
-  b: number;
+  svg: string;
 }
 
 export interface CaptchaVerifyResult {
@@ -25,14 +24,21 @@ export class CaptchaService {
   }
 
   generate(): CaptchaResponse {
-    const [a, b] = [crypto.randomInt(1, 50), crypto.randomInt(1, 50)];
+    const captcha = svgCaptcha.create({
+      size: 5,
+      ignoreChars: '0o1il',
+      noise: 2,
+      color: true,
+      background: '#f0f0f0',
+      width: 180,
+      height: 60,
+    });
 
     return {
-      token: sign({ answer: `${a + b}` }, this.secret(), {
+      token: sign({ answer: captcha.text }, this.secret(), {
         expiresIn: '5m',
       }),
-      a,
-      b,
+      svg: captcha.data,
     };
   }
 

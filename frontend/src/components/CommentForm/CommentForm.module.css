@@ -95,13 +95,16 @@
 .captchaSection {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   padding: 8px 0;
 }
 
-.captchaQuestion {
-  font-size: 14px;
-  color: var(--text-primary);
+.captchaImage {
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: #f0f0f0;
+  max-width: 180px;
+  height: auto;
 }
 
 .captchaInput {
@@ -111,9 +114,10 @@
   border-radius: 4px;
   color: var(--text-primary);
   font-size: 14px;
-  width: 60px;
+  width: 110px;
   text-align: center;
   outline: none;
+  text-transform: uppercase;
 }
 
 .captchaInput:focus {

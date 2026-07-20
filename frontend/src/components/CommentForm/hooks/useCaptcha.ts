@@ -11,7 +11,7 @@ function isCaptchaErrorResponse(
   if (typeof ce.new_captcha !== 'object' || ce.new_captcha === null)
     return false;
   const nc = ce.new_captcha as Record<string, unknown>;
-  return typeof nc.a === 'number' && typeof nc.b === 'number' && typeof nc.token === 'string';
+  return typeof nc.svg === 'string' && typeof nc.token === 'string';
 }
 
 export default function useCaptcha() {
