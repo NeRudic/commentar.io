@@ -3,11 +3,12 @@ import { valibotResolver } from '@hookform/resolvers/valibot';
 import { createComment as createCommentSvc } from '../../services';
 import { formSchema } from '../../schemas/commentForm.schema';
 import type { CommentFormValues } from '../../schemas/commentForm.schema';
-import type { CreateCommentResponse, CaptchaErrorResponse } from '../../types';
+import type { CreateCommentResponse } from '../../types';
 import { ALLOWED_EXTENSIONS } from '../../config/file.config';
 import useCaptcha from './hooks/useCaptcha';
 import useFileUpload from './hooks/useFileUpload';
 import CaptchaSection from './CaptchaSection';
+import FileList from './FileList';
 import TextEditor from '../TextEditor/TextEditor';
 import Button from '../Button/Button';
 import styles from './CommentForm.module.css';
@@ -30,8 +31,7 @@ export default function CommentFormCreate({
     captchaAnswer,
     captchaError,
     setCaptchaAnswer,
-    setCaptchaError,
-    refreshCaptcha,
+    handleSubmitError,
   } = useCaptcha();
 
   const {
@@ -75,16 +75,7 @@ export default function CommentFormCreate({
       });
       onSuccess?.(result);
     } catch (err) {
-      const captchaErr = (
-        err as { response?: { data?: { captcha_error?: CaptchaErrorResponse } } }
-      )?.response?.data?.captcha_error;
-
-      if (captchaErr) {
-        setCaptchaError(captchaErr.error_message);
-        refreshCaptcha(captchaErr.new_captcha);
-      } else {
-        setCaptchaError('Ошибка отправки комментария');
-      }
+      handleSubmitError(err);
     }
   };
 
@@ -159,23 +150,12 @@ export default function CommentFormCreate({
           Добавить файл
         </Button>
 
-        {selectedFiles.length > 0 && (
-          <ul className={styles.fileList}>
-            {selectedFiles.map((f, i) => (
-              <li key={i} className={styles.fileListItem}>
-                <span className={styles.fileName}>{f.name}</span>
-                <button
-                  type="button"
-                  className={styles.removeFileBtn}
-                  onClick={() => removeFile(i)}
-                  aria-label="Remove file"
-                >
-                  ×
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+        <FileList
+          items={selectedFiles.map((f, i) => ({
+            name: f.name,
+            onRemove: () => removeFile(i),
+          }))}
+        />
 
         {fileErrors.length > 0 &&
           fileErrors.map((err, i) => (
