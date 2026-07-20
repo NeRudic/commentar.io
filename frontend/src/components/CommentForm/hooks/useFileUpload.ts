@@ -12,7 +12,7 @@ export default function useFileUpload(initialPaths?: string[]) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateFile = (file: File): string | null => {
-    if (!(ALLOWED_TYPES as readonly string[]).includes(file.type)) {
+    if (!ALLOWED_TYPES.some((t) => t === file.type)) {
       return 'Недопустимый тип файла. Разрешены: txt, jpg, gif, png';
     }
     if (file.type === 'text/plain' && file.size > TXT_MAX_SIZE) {
@@ -55,8 +55,27 @@ export default function useFileUpload(initialPaths?: string[]) {
 
   const uploadSelected = async (): Promise<string[]> => {
     if (selectedFiles.length === 0) return [];
-    const results = await Promise.all(selectedFiles.map((f) => uploadFile(f)));
-    return results.map((r) => r.path);
+
+    const results = await Promise.allSettled(
+      selectedFiles.map((f) => uploadFile(f)),
+    );
+
+    const paths: string[] = [];
+    const uploadErrors: string[] = [];
+
+    for (const result of results) {
+      if (result.status === 'fulfilled') {
+        paths.push(result.value.path);
+      } else {
+        uploadErrors.push('Ошибка загрузки файла');
+      }
+    }
+
+    if (uploadErrors.length > 0) {
+      setFileErrors((prev) => [...prev, ...uploadErrors]);
+    }
+
+    return paths;
   };
 
   return {
