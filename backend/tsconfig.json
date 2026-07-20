@@ -20,7 +20,7 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "strictPropertyInitialization": false,
-    "baseUrl": "."
-  }
+    "strictPropertyInitialization": false
+  },
+  "include": ["src", "../shared"]
 }

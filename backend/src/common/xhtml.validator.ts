@@ -1,4 +1,4 @@
-export const ALLOWED_XHTML_TAGS = ['a', 'code', 'i', 'strong'] as const;
+import { ALLOWED_TAGS } from '../../../shared/tags';
 
 export interface XHTMLValidationResult {
   valid: boolean;
@@ -7,7 +7,7 @@ export interface XHTMLValidationResult {
 }
 
 export function validateAndEscapeXHTML(input: string): XHTMLValidationResult {
-  const allowed = new Set<string>(ALLOWED_XHTML_TAGS);
+  const allowed = new Set<string>(ALLOWED_TAGS);
   const stack: string[] = [];
   const out: string[] = [];
   let i = 0;

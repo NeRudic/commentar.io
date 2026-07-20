@@ -1,11 +1,9 @@
 import DOMPurify from 'dompurify';
-
-const ALLOWED_TAGS = ['a', 'code', 'i', 'strong'];
-const ALLOWED_ATTR = ['href', 'title'];
+import { ALLOWED_TAGS, ALLOWED_ATTRIBUTES } from '@shared/tags';
 
 export function sanitize(html: string): string {
   return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS,
-    ALLOWED_ATTR,
+    ALLOWED_TAGS: [...ALLOWED_TAGS],
+    ALLOWED_ATTR: [...ALLOWED_ATTRIBUTES],
   });
 }

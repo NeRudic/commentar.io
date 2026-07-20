@@ -1,12 +1,11 @@
 import { BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
 import sanitizeHtml from 'sanitize-html';
 import { validateAndEscapeXHTML } from './xhtml.validator';
-
-const ALLOWED_TAGS = ['strong', 'i', 'code', 'a'];
+import { ALLOWED_TAGS, ALLOWED_ATTRIBUTES } from '../../../shared/tags';
 
 const SANITIZE_OPTIONS = {
-  allowedTags: ALLOWED_TAGS,
-  allowedAttributes: { a: ['href', 'title'] },
+  allowedTags: [...ALLOWED_TAGS],
+  allowedAttributes: { a: [...ALLOWED_ATTRIBUTES] },
 };
 
 @Injectable()
