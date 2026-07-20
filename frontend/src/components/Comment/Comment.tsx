@@ -15,7 +15,6 @@ interface CommentProps {
   comment_id: number;
   post_id: number;
   user_name: string;
-  user_email: string;
   home_page: string | null;
   text: string;
   file_paths: string[];

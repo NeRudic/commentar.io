@@ -164,7 +164,6 @@ const CommentSection = forwardRef<CommentSectionHandle, CommentSectionProps>(
                   comment_id={comment.comment_id}
                   post_id={comment.post_id}
                   user_name={comment.user_name}
-                  user_email={comment.user_email}
                   home_page={comment.home_page}
                   text={comment.text}
                   file_paths={comment.file_paths}
