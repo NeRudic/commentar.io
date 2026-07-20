@@ -28,6 +28,7 @@ export default function CaptchaSection({
           <input
             className={styles.captchaInput}
             type="text"
+            inputMode="numeric"
             value={captchaAnswer}
             onChange={(e) =>
               onAnswerChange(e.target.value.replace(/[^0-9-]/g, ''))
