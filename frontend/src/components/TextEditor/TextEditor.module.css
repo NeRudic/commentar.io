@@ -11,26 +11,38 @@
 }
 
 .toolbar {
-  display: flex;
-  gap: 2px;
+  display: grid;
+  grid-template-columns: repeat(4, auto) 1fr auto;
+  gap: 6px;
   align-items: center;
   padding: 4px;
   background: var(--bg-input);
   border-bottom: 1px solid var(--border-color);
 }
 
-.spacer {
-  flex: 1;
+.toolbar:has(.active) {
+  grid-template-columns: 1fr auto;
 }
 
 .toolbarBtn {
-  padding: 4px 10px;
+  padding: 4px 4px;
   border-radius: 4px;
   color: var(--text-secondary);
   font-size: 14px;
   font-family: monospace;
   font-weight: 600;
   transition: background 0.15s, color 0.15s;
+}
+
+@media (max-width: 320px) {
+  .toolbar {
+    grid-template-columns: repeat(4, auto) 1fr;
+  }
+
+  .toolbar > :last-child {
+    grid-column: 1 / -1;
+    text-align: left;
+  }
 }
 
 .toolbarBtn:hover {
