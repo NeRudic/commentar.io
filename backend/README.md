@@ -2,7 +2,7 @@
 
 NestJS 11 API for the comment system.
 
-Stack: NestJS 11, SQLite3, class-validator, sharp, jsonwebtoken.
+Stack: NestJS 11, SQLite3, class-validator, sharp, jsonwebtoken, svg-captcha.
 
 ## Commands
 

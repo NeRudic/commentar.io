@@ -104,7 +104,7 @@ components/CommentForm/
 ├── index.ts                     # barrel: CommentFormCreate, CommentFormEdit, FileList
 ├── CommentFormCreate.tsx        # form for new comments and replies (formSchema)
 ├── CommentFormEdit.tsx          # form for editing comments (editFormSchema)
-├── CaptchaSection.tsx           # captcha question/input/error sub-component
+├── CaptchaSection.tsx           # captcha SVG image/input/error sub-component
 ├── FileList.tsx                 # shared file list component
 ├── hooks/
 │   ├── useCaptcha.ts            # captcha state + handleSubmitError
