@@ -4,13 +4,13 @@ import {
   Get,
   NotFoundException,
   Param,
+  ParseIntPipe,
   Query,
 } from '@nestjs/common';
 import { CommentService } from './comment.service';
 import { CommentRowDTO } from './dto/comment-row.dto';
 import { CommentRepliesDTO } from './dto/comment-replies.dto';
 import { RootCommentsDTO } from './dto/root-comments.dto';
-import { DeleteCommentDTO } from './dto/delete-comment.dto';
 
 @Controller('comments')
 export class CommentController {
@@ -47,11 +47,17 @@ export class CommentController {
   }
 
   @Delete(':comment_id')
-  async deleteComment(@Param() id: DeleteCommentDTO): Promise<boolean> {
-    const deleteStatus: boolean = await this.services.deleteComment(id);
+  async deleteComment(
+    @Param('comment_id', ParseIntPipe) comment_id: number,
+    @Query('user_email') user_email?: string,
+  ): Promise<boolean> {
+    const deleteStatus: boolean = await this.services.deleteComment(
+      comment_id,
+      user_email,
+    );
 
     if (!deleteStatus)
-      throw new NotFoundException(`Comment ${id.id} not found`);
+      throw new NotFoundException(`Comment ${comment_id} not found`);
 
     return deleteStatus;
   }
