@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form';
+import { useForm, type UseFormRegister, type FieldErrors } from 'react-hook-form';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useState, useEffect, useRef } from 'react';
 import { createComment, updateComment as updateCommentSvc, uploadFile, getCaptcha } from '../../services';
@@ -60,13 +60,14 @@ export default function CommentForm({
         },
   });
 
+  const createRegister = register as UseFormRegister<CommentFormValues>;
+  const createErrors = errors as FieldErrors<CommentFormValues>;
+
   useEffect(() => {
     getCaptcha()
       .then(setCaptcha)
       .catch(() => setCaptchaError('Не удалось загрузить капчу'));
   }, []);
-
-  const { name: textFieldName } = register('text');
 
   const validateFile = (file: File): string | null => {
     if (!(ALLOWED_TYPES as readonly string[]).includes(file.type)) {
@@ -165,10 +166,16 @@ export default function CommentForm({
   return (
     <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
       {!isEdit && (
-        <input
-          type="hidden"
-          {...register('post_id', { valueAsNumber: true })}
-        />
+        <>
+          <input
+            type="hidden"
+            {...register('post_id', { valueAsNumber: true })}
+          />
+          <input
+            type="hidden"
+            {...register('parent_comment_id')}
+          />
+        </>
       )}
 
       {isEdit ? (
@@ -183,17 +190,17 @@ export default function CommentForm({
         <>
           <div className={styles.field}>
             <label className={styles.label}>Имя</label>
-            <input className={styles.input} {...(register as any)('user_name')} />
-            {(errors as any).user_name && (
-              <span className={styles.error}>{(errors as any).user_name.message}</span>
+            <input className={styles.input} {...createRegister('user_name')} />
+            {createErrors.user_name && (
+              <span className={styles.error}>{createErrors.user_name.message}</span>
             )}
           </div>
 
           <div className={styles.field}>
             <label className={styles.label}>Email</label>
-            <input className={styles.input} {...(register as any)('user_email')} />
-            {(errors as any).user_email && (
-              <span className={styles.error}>{(errors as any).user_email.message}</span>
+            <input className={styles.input} {...createRegister('user_email')} />
+            {createErrors.user_email && (
+              <span className={styles.error}>{createErrors.user_email.message}</span>
             )}
           </div>
 
@@ -201,12 +208,12 @@ export default function CommentForm({
             <label className={styles.label}>Сайт</label>
             <input
               className={styles.input}
-              {...(register as any)('home_page', {
+              {...createRegister('home_page', {
                 setValueAs: (v: string) => (v === '' ? null : v),
               })}
             />
-            {(errors as any).home_page && (
-              <span className={styles.error}>{(errors as any).home_page.message}</span>
+            {createErrors.home_page && (
+              <span className={styles.error}>{createErrors.home_page.message}</span>
             )}
           </div>
         </>
@@ -215,7 +222,7 @@ export default function CommentForm({
       <div className={styles.field}>
         <label className={styles.label}>Комментарий</label>
         <TextEditor
-          name={textFieldName}
+          name="text"
           initialValue={initialData?.text}
           onValueChange={(v) =>
             setValue('text', v, { shouldValidate: true })
@@ -316,7 +323,7 @@ export default function CommentForm({
         <Button
           type="submit"
           className={styles.submitBtn}
-          disabled={isSubmitting || !captchaAnswer.trim()}
+          disabled={isSubmitting || !captcha || !captchaAnswer.trim()}
         >
           {isEdit ? 'Сохранить' : 'Отправить'}
         </Button>
