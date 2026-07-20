@@ -5,7 +5,7 @@ import { MAX_DEPTH } from '../../config/comment.config';
 import { useToast } from '../../context/ToastContext';
 import type { CommentRow, CreateCommentResponse } from '../../types';
 import Modal from '../Modal/Modal';
-import CommentForm from '../CommentForm/CommentForm';
+import { CommentFormCreate, CommentFormEdit } from '../CommentForm';
 import Lightbox from '../Lightbox/Lightbox';
 import Button from '../Button/Button';
 import { File } from '../icons/icons';
@@ -205,7 +205,7 @@ const Comment = memo(function Comment({
           />
         ))}
       <Modal isOpen={isReplyFormOpen} onClose={() => setIsReplyFormOpen(false)}>
-        <CommentForm
+        <CommentFormCreate
           postId={post_id}
           parentCommentId={comment_id}
           onClose={() => setIsReplyFormOpen(false)}
@@ -213,11 +213,12 @@ const Comment = memo(function Comment({
         />
       </Modal>
       <Modal isOpen={isEditFormOpen} onClose={() => setIsEditFormOpen(false)}>
-        <CommentForm
-          postId={post_id}
+        <CommentFormEdit
+          commentId={comment_id}
+          initialText={text}
+          initialFilePaths={file_paths}
           onClose={() => setIsEditFormOpen(false)}
           onSuccess={handleUpdateSuccess}
-          initialData={{ comment_id, text, file_paths }}
         />
       </Modal>
       <Modal isOpen={isDeleteModalOpen} onClose={handleDeleteModalClose}>

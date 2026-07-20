@@ -11,7 +11,7 @@ import { COMMENTS_PER_PAGE } from '../../config/comment.config';
 import { useToast } from '../../context/ToastContext';
 import type { CommentRow } from '../../types';
 import Modal from '../Modal/Modal';
-import CommentForm from '../CommentForm/CommentForm';
+import { CommentFormCreate } from '../CommentForm';
 import Comment from '../Comment/Comment';
 import styles from './CommentSection.module.css';
 
@@ -198,7 +198,7 @@ const CommentSection = forwardRef<CommentSectionHandle, CommentSectionProps>(
         </button>
 
         <Modal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)}>
-          <CommentForm
+          <CommentFormCreate
             postId={postId}
             onClose={() => setIsFormOpen(false)}
             onSuccess={handleFormSuccess}
