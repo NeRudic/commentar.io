@@ -1,9 +1,13 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsPositive } from 'class-validator';
+import { IsEmail, IsInt, IsOptional, IsPositive } from 'class-validator';
 
 export class DeleteCommentDTO {
   @Type(() => Number)
   @IsInt()
   @IsPositive()
   id: number;
+
+  @IsOptional()
+  @IsEmail()
+  user_email?: string;
 }

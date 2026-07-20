@@ -196,19 +196,19 @@ export class CommentService {
     } as unknown as CommentRowDTO;
   }
 
-  async deleteComment(id: number, user_email?: string): Promise<boolean> {
-    if (user_email) {
+  async deleteComment(dto: DeleteCommentDTO): Promise<boolean> {
+    if (dto.user_email) {
       const comment = await this.prisma.comment.findUnique({
-        where: { id },
+        where: { id: dto.id },
         select: { userEmail: true },
       });
       if (!comment) return false;
-      if (comment.userEmail !== user_email)
+      if (comment.userEmail !== dto.user_email)
         throw new ForbiddenException('Email does not match comment owner');
     }
 
     try {
-      await this.prisma.comment.delete({ where: { id } });
+      await this.prisma.comment.delete({ where: { id: dto.id } });
       return true;
     } catch (err) {
       if (
