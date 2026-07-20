@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { AIIllustration, DiffusionIllustration, RLIllustration } from "../components/icons/icons";
 
-export interface PostData {
+interface PostData {
   id: number;
   postId: string;
   username: string;
