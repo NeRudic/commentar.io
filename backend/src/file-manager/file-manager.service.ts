@@ -112,6 +112,22 @@ export class FileManagerService {
     });
   }
 
+  async removeFile(path: string, tx?: TxClient): Promise<void> {
+    const filename = path.replace('/uploads/', '');
+    const filePath = join(process.cwd(), UPLOADS_DIR, filename);
+    try {
+      await fs.unlink(filePath);
+    } catch {
+      /* best-effort */
+    }
+    const client = tx ?? this.prisma;
+    try {
+      await client.file.delete({ where: { path } });
+    } catch {
+      /* best-effort */
+    }
+  }
+
   async removeTempFile(path: string): Promise<void> {
     const filename = path.replace('/uploads/', '');
     const tmpPath = join(process.cwd(), TEMP_DIR, filename);
