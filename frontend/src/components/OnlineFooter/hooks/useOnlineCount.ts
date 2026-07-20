@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import type { WsOnline } from "../types";
+import type { WsOnline } from "../../../types";
 
 export default function useOnlineCount(): number {
   const [onlineCount, setOnlineCount] = useState<number>(0);
 
   useEffect(() => {
-    const HOST = import.meta.env.VITE_WS_HOST || 'localhost:3000';
+    const HOST = import.meta.env.VITE_WS_HOST || "localhost:3000";
     const BASE_DELAY = 1000;
     const MAX_DELAY = 30000;
 
