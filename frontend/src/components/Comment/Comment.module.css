@@ -116,3 +116,96 @@
   font-size: 12px;
   color: var(--text-secondary);
 }
+
+.deleteForm {
+  padding: 12px;
+}
+
+.deleteTitle {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 6px;
+  color: var(--text-primary);
+}
+
+.deleteText {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0 0 14px;
+}
+
+.deleteField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.deleteLabel {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.deleteInput {
+  padding: 6px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  font-size: 13px;
+  background: transparent;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.deleteInput:focus {
+  border-color: var(--accent);
+}
+
+.deleteInputError {
+  border-color: #e53e3e;
+}
+
+.deleteError {
+  font-size: 11px;
+  color: #e53e3e;
+}
+
+.deleteActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.cancelBtn {
+  background: none;
+  border: 1px solid var(--border-color);
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 12px;
+  border-radius: 3px;
+}
+
+.cancelBtn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+.deleteBtn {
+  background: #c53030;
+  border: none;
+  font-size: 12px;
+  color: #fff;
+  cursor: pointer;
+  padding: 4px 12px;
+  border-radius: 3px;
+}
+
+.deleteBtn:hover {
+  background: #9b2c2c;
+}
+
+.deleteBtn:disabled,
+.cancelBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

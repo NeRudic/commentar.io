@@ -5,6 +5,7 @@ import styles from './TextEditor.module.css';
 
 interface TextEditorProps {
   name?: string;
+  initialValue?: string;
   onValueChange?: (value: string) => void;
 }
 
@@ -15,9 +16,9 @@ const TAGS = [
   { title: 'Link', open: '<a href="" title="">', close: '</a>', label: 'a' },
 ];
 
-export default function TextEditor({ name, onValueChange }: TextEditorProps) {
+export default function TextEditor({ name, initialValue = '', onValueChange }: TextEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [text, setText] = useState('');
+  const [text, setText] = useState(initialValue);
   const [isPreview, setIsPreview] = useState(false);
 
   const handleChange = useCallback(() => {

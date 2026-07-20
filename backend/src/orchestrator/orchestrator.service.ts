@@ -1,9 +1,18 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { TokenExpiredError } from 'jsonwebtoken';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';
 import { FileManagerService } from '../file-manager/file-manager.service';
+import { CaptchaService } from '../captcha/captcha.service';
 import { CommentRowDTO } from '../comment/dto/comment-row.dto';
 import { CreateCommentWithUserDTO } from './dto/create-comment-with-user.dto';
+import { UpdateCommentWithUserDTO } from './dto/update-comment-with-user.dto';
 import { parseFilePaths } from '../common/parse-file-paths';
 
 export interface CreateCommentResult {
@@ -17,6 +26,7 @@ export class OrchestratorService {
     private readonly prisma: PrismaService,
     private readonly userService: UserService,
     private readonly fileManagerService: FileManagerService,
+    private readonly captchaService: CaptchaService,
   ) {}
 
   async createCommentWithUser(
@@ -124,6 +134,92 @@ export class OrchestratorService {
 
       throw new InternalServerErrorException(
         `Failed to create comment. Error message: ${err}`,
+      );
+    }
+  }
+
+  async updateCommentWithUser(
+    commentId: number,
+    dto: UpdateCommentWithUserDTO,
+  ): Promise<CommentRowDTO> {
+    const { text, user_email, file_paths, captcha_token, captcha_answer } = dto;
+
+    try {
+      this.captchaService.verify({ captcha_token, captcha_answer });
+    } catch (err) {
+      throw new BadRequestException({
+        captcha_error: {
+          expired: err instanceof TokenExpiredError,
+          new_captcha: this.captchaService.generate(),
+          error_message: err instanceof Error ? err.message : String(err),
+        },
+      });
+    }
+
+    try {
+      const result = await this.prisma.$transaction(async (tx) => {
+        const existing = await tx.comment.findUnique({
+          where: { id: commentId },
+          select: { userEmail: true, filePath: true },
+        });
+        if (!existing) throw new NotFoundException('Comment not found');
+        if (existing.userEmail !== user_email)
+          throw new ForbiddenException('Email does not match comment owner');
+
+        const oldPaths = parseFilePaths(existing.filePath);
+        const newPaths = file_paths ?? [];
+        const toAdd = newPaths.filter((p) => !oldPaths.includes(p));
+        const toRemove = oldPaths.filter((p) => !newPaths.includes(p));
+
+        for (const fp of toAdd) {
+          await this.fileManagerService.publishFile(fp, tx);
+        }
+        for (const fp of toRemove) {
+          await this.fileManagerService.removeFile(fp, tx);
+        }
+
+        return tx.comment.update({
+          where: { id: commentId },
+          data: {
+            text,
+            filePath: newPaths.length > 0 ? JSON.stringify(newPaths) : null,
+          },
+          include: {
+            user: { select: { userName: true, homePage: true } },
+            _count: { select: { replies: true } },
+          },
+        });
+      });
+
+      if (file_paths && file_paths.length > 0) {
+        for (const fp of file_paths) {
+          void this.fileManagerService.removeTempFile(fp);
+        }
+      }
+
+      return {
+        comment_id: result.id,
+        post_id: result.postId,
+        parent_comment_id: result.parentCommentId,
+        text: result.text,
+        user_email: result.userEmail,
+        file_path: result.filePath,
+        file_paths: parseFilePaths(result.filePath),
+        created_at: result.createdAt,
+        user_name: result.user.userName,
+        home_page: result.user.homePage,
+        reply_count: result._count.replies,
+      } as unknown as CommentRowDTO;
+    } catch (err) {
+      if (
+        err instanceof NotFoundException ||
+        err instanceof ForbiddenException ||
+        err instanceof BadRequestException
+      )
+        throw err;
+
+      throw new InternalServerErrorException(
+        `Failed to update comment. Error message: ${err}`,
       );
     }
   }

@@ -2,6 +2,7 @@ export type {
   CommentRow,
   CreateCommentRequest,
   CreateCommentResponse,
+  UpdateCommentRequest,
 } from "./comment";
 export type { UserRow } from "./user";
 export type { Captcha, CaptchaErrorResponse } from "./captcha";

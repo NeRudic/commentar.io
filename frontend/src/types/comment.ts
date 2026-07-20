@@ -27,3 +27,11 @@ export interface CreateCommentResponse {
   comment: CommentRow;
   siblings: CommentRow[];
 }
+
+export interface UpdateCommentRequest {
+  text: string;
+  user_email: string;
+  file_paths: string[];
+  captcha_token: string;
+  captcha_answer: string;
+}
