@@ -196,10 +196,7 @@ export class CommentService {
     } as unknown as CommentRowDTO;
   }
 
-  async deleteComment(
-    id: number,
-    user_email?: string,
-  ): Promise<boolean> {
+  async deleteComment(id: number, user_email?: string): Promise<boolean> {
     if (user_email) {
       const comment = await this.prisma.comment.findUnique({
         where: { id },
