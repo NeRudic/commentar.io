@@ -127,7 +127,7 @@ const Comment = memo(function Comment({
     >
       <div className={styles.header}>
         {home_page ? (
-          <a href={home_page} className={styles.username} target="_blank" rel="nofollow noopener">
+          <a href={home_page} className={`${styles.username} ${styles.usernameLink}`} target="_blank" rel="nofollow noopener">
             {user_name}
           </a>
         ) : (

@@ -25,6 +25,12 @@
   text-decoration: underline;
 }
 
+.usernameLink {
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .date {
   font-size: 11px;
   color: var(--text-secondary);
