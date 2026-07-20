@@ -48,6 +48,7 @@ const CommentSection = forwardRef<CommentSectionHandle, CommentSectionProps>(
     });
     const { showToast } = useToast();
     const containerRef = useRef<HTMLDivElement>(null);
+    const fetchIdRef = useRef(0);
 
     useImperativeHandle(
       ref,
@@ -65,6 +66,7 @@ const CommentSection = forwardRef<CommentSectionHandle, CommentSectionProps>(
 
     const fetchRootComments = useCallback(
       async (limit: number, offset: number) => {
+        const fetchId = ++fetchIdRef.current;
         try {
           const data = await getRootComments(
             postId,
@@ -73,6 +75,7 @@ const CommentSection = forwardRef<CommentSectionHandle, CommentSectionProps>(
             sort.field,
             sort.order,
           );
+          if (fetchId !== fetchIdRef.current) return;
           if (offset === 0) {
             setRootComments(data);
           } else {
