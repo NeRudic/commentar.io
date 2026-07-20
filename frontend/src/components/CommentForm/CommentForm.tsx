@@ -1,10 +1,10 @@
 import { useForm } from 'react-hook-form';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useState, useEffect, useRef } from 'react';
-import { createComment, uploadFile, getCaptcha } from '../../services';
-import { formSchema } from '../../schemas/commentForm.schema';
-import type { CommentFormValues } from '../../schemas/commentForm.schema';
-import type { CreateCommentResponse, Captcha, CaptchaErrorResponse } from '../../types';
+import { createComment, updateComment as updateCommentSvc, uploadFile, getCaptcha } from '../../services';
+import { formSchema, editFormSchema } from '../../schemas/commentForm.schema';
+import type { CommentFormValues, EditFormValues } from '../../schemas/commentForm.schema';
+import type { CommentRow, CreateCommentResponse, Captcha, CaptchaErrorResponse } from '../../types';
 import { ALLOWED_TYPES, ALLOWED_EXTENSIONS, TXT_MAX_SIZE } from '../../config/file.config';
 import Button from '../Button/Button';
 import TextEditor from '../TextEditor/TextEditor';
@@ -14,7 +14,12 @@ interface CommentFormProps {
   postId: number;
   parentCommentId?: number | null;
   onClose: () => void;
-  onSuccess?: (result?: CreateCommentResponse) => void;
+  onSuccess?: (result?: CreateCommentResponse | CommentRow) => void;
+  initialData?: {
+    comment_id: number;
+    text: string;
+    file_paths: string[];
+  } | null;
 }
 
 export default function CommentForm({
@@ -22,30 +27,37 @@ export default function CommentForm({
   parentCommentId = null,
   onClose,
   onSuccess,
+  initialData,
 }: CommentFormProps) {
+  const isEdit = !!initialData;
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileErrors, setFileErrors] = useState<string[]>([]);
   const [captchaAnswer, setCaptchaAnswer] = useState('');
   const [captcha, setCaptcha] = useState<Captcha | null>(null);
   const [captchaError, setCaptchaError] = useState<string | null>(null);
+  const [keptFilePaths, setKeptFilePaths] = useState<string[]>(initialData?.file_paths ?? []);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const schema = isEdit ? editFormSchema : formSchema;
 
   const {
     register,
     handleSubmit,
     setValue,
     formState: { errors, isSubmitting },
-  } = useForm<CommentFormValues>({
-    resolver: valibotResolver(formSchema),
-    defaultValues: {
-      post_id: postId,
-      parent_comment_id: parentCommentId,
-      text: '',
-      user_name: '',
-      user_email: '',
-      home_page: null,
-      file_paths: [],
-    },
+  } = useForm<CommentFormValues | EditFormValues>({
+    resolver: valibotResolver(schema),
+    defaultValues: isEdit
+      ? { user_email: '', text: initialData!.text }
+      : {
+          post_id: postId,
+          parent_comment_id: parentCommentId,
+          text: '',
+          user_name: '',
+          user_email: '',
+          home_page: null,
+          file_paths: [],
+        },
   });
 
   useEffect(() => {
@@ -94,28 +106,47 @@ export default function CommentForm({
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const onSubmit = async (data: CommentFormValues) => {
+  const removeKeptFile = (path: string) => {
+    setKeptFilePaths((prev) => prev.filter((p) => p !== path));
+  };
+
+  const onSubmit = async (data: CommentFormValues | EditFormValues) => {
     if (!captcha) return;
 
     try {
-      const paths: string[] = [];
+      const uploadPaths: string[] = [];
 
       if (selectedFiles.length > 0) {
         const results = await Promise.all(
           selectedFiles.map((f) => uploadFile(f)),
         );
-        paths.push(...results.map((r) => r.path));
+        uploadPaths.push(...results.map((r) => r.path));
       }
 
-      data.file_paths = paths;
+      const allPaths = isEdit
+        ? [...keptFilePaths, ...uploadPaths]
+        : uploadPaths;
 
-      const result = await createComment({
-        ...data,
-        captcha_token: captcha.token,
-        captcha_answer: captchaAnswer,
-      });
-
-      onSuccess?.(result);
+      if (isEdit) {
+        const editData = data as EditFormValues;
+        const result = await updateCommentSvc(initialData!.comment_id, {
+          text: editData.text,
+          user_email: editData.user_email,
+          file_paths: allPaths,
+          captcha_token: captcha.token,
+          captcha_answer: captchaAnswer,
+        });
+        onSuccess?.(result);
+      } else {
+        const createData = data as CommentFormValues;
+        createData.file_paths = allPaths;
+        const result = await createComment({
+          ...createData,
+          captcha_token: captcha.token,
+          captcha_answer: captchaAnswer,
+        });
+        onSuccess?.(result);
+      }
     } catch (err) {
       const captchaErr = (
         err as { response?: { data?: { captcha_error?: CaptchaErrorResponse } } }
@@ -133,44 +164,59 @@ export default function CommentForm({
 
   return (
     <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
-      <input
-        type="hidden"
-        {...register('post_id', { valueAsNumber: true })}
-      />
-
-      <div className={styles.field}>
-        <label className={styles.label}>Имя</label>
-        <input className={styles.input} {...register('user_name')} />
-        {errors.user_name && (
-          <span className={styles.error}>{errors.user_name.message}</span>
-        )}
-      </div>
-
-      <div className={styles.field}>
-        <label className={styles.label}>Email</label>
-        <input className={styles.input} {...register('user_email')} />
-        {errors.user_email && (
-          <span className={styles.error}>{errors.user_email.message}</span>
-        )}
-      </div>
-
-      <div className={styles.field}>
-        <label className={styles.label}>Сайт</label>
+      {!isEdit && (
         <input
-          className={styles.input}
-          {...register('home_page', {
-            setValueAs: (v: string) => (v === '' ? null : v),
-          })}
+          type="hidden"
+          {...register('post_id', { valueAsNumber: true })}
         />
-        {errors.home_page && (
-          <span className={styles.error}>{errors.home_page.message}</span>
-        )}
-      </div>
+      )}
+
+      {isEdit ? (
+        <div className={styles.field}>
+          <label className={styles.label}>Email (подтверждение владельца)</label>
+          <input className={styles.input} {...register('user_email')} />
+          {errors.user_email && (
+            <span className={styles.error}>{errors.user_email.message}</span>
+          )}
+        </div>
+      ) : (
+        <>
+          <div className={styles.field}>
+            <label className={styles.label}>Имя</label>
+            <input className={styles.input} {...(register as any)('user_name')} />
+            {(errors as any).user_name && (
+              <span className={styles.error}>{(errors as any).user_name.message}</span>
+            )}
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label}>Email</label>
+            <input className={styles.input} {...(register as any)('user_email')} />
+            {(errors as any).user_email && (
+              <span className={styles.error}>{(errors as any).user_email.message}</span>
+            )}
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label}>Сайт</label>
+            <input
+              className={styles.input}
+              {...(register as any)('home_page', {
+                setValueAs: (v: string) => (v === '' ? null : v),
+              })}
+            />
+            {(errors as any).home_page && (
+              <span className={styles.error}>{(errors as any).home_page.message}</span>
+            )}
+          </div>
+        </>
+      )}
 
       <div className={styles.field}>
         <label className={styles.label}>Комментарий</label>
         <TextEditor
           name={textFieldName}
+          initialValue={initialData?.text}
           onValueChange={(v) =>
             setValue('text', v, { shouldValidate: true })
           }
@@ -197,6 +243,25 @@ export default function CommentForm({
         >
           Добавить файл
         </Button>
+
+        {isEdit && keptFilePaths.length > 0 && (
+          <ul className={styles.fileList}>
+            {keptFilePaths.map((fp) => (
+              <li key={fp} className={styles.fileListItem}>
+                <span className={styles.fileName}>{fp.replace(/^.*[/\\]/, '')}</span>
+                <button
+                  type="button"
+                  className={styles.removeFileBtn}
+                  onClick={() => removeKeptFile(fp)}
+                  aria-label="Remove file"
+                >
+                  ×
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
         {selectedFiles.length > 0 && (
           <ul className={styles.fileList}>
             {selectedFiles.map((f, i) => (
@@ -214,6 +279,7 @@ export default function CommentForm({
             ))}
           </ul>
         )}
+
         {fileErrors.length > 0 &&
           fileErrors.map((err, i) => (
             <span key={i} className={styles.error}>{err}</span>
@@ -252,7 +318,7 @@ export default function CommentForm({
           className={styles.submitBtn}
           disabled={isSubmitting || !captchaAnswer.trim()}
         >
-          Отправить
+          {isEdit ? 'Сохранить' : 'Отправить'}
         </Button>
       </div>
     </form>
