@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import type { WsOnline } from "../../../types";
 
 export default function useOnlineCount(): number {
   const [onlineCount, setOnlineCount] = useState<number>(0);
@@ -22,8 +21,18 @@ export default function useOnlineCount(): number {
       };
 
       ws.onmessage = (event) => {
-        const data = JSON.parse(event.data) as WsOnline;
-        setOnlineCount(data.count);
+        try {
+          const raw = JSON.parse(event.data);
+          if (
+            typeof raw === 'object' &&
+            raw !== null &&
+            typeof (raw as Record<string, unknown>).count === 'number'
+          ) {
+            setOnlineCount((raw as { count: number }).count);
+          }
+        } catch {
+          // ignore malformed WS messages
+        }
       };
 
       ws.onclose = () => {
