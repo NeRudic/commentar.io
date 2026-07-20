@@ -1,5 +1,30 @@
 # DECISIONS.md
 
+## 2026-07-20 — Frontend hygiene refactoring
+
+**Decision:** Systematic cleanup of dead code, unsafe type assertions, and duplicated logic across the frontend.
+
+**Why:**
+- Dead types (`UserRow`, `CreateUserRequest`, `PostData`, `WsOnline`, `CaptchaErrorResponse`) accumulated from earlier architectures — `CommentRow` now includes JOIN fields, no separate user entity exists.
+- `useCaptcha` and `useOnlineCount` used `as` casts on external data (axios errors, WebSocket messages) without runtime validation — brittle.
+- `CommentSection` had a race condition: stale fetch from previous sort could overwrite new sort's data.
+- `Modal` and `Lightbox` directly manipulated `document.body.style.overflow` with no stacking — if both were open, closing one restored scroll.
+- Minor issues: array index as React key, duplicate `validateAndEscapeXHTML` calls, inconsistent CSS module usage.
+
+**What changed:**
+- Removed dead types: `types/user.ts`, `types/ws_online.ts`, dead exports from `captcha.ts`, `data/posts.tsx`.
+- Replaced `as` casts with runtime type guards (`isCaptchaErrorResponse`, JSON shape check).
+- Removed dead `AbortController` from `useCaptcha` (`.signal` was never passed to fetch).
+- Added `fetchIdRef` generation counter to `CommentSection` to ignore stale fetch results.
+- Extracted `useScrollLock` hook with reference counting (handles stacked Modal + Lightbox).
+- Replaced `key={i}` with `key={item.name}` in `FileList`.
+- Merged `v.check()` + `v.transform()` into single `v.transform()` in valibot schemas.
+- Added CSS module classes to `ChevronLeft`/`ChevronRight` icons.
+- Removed unused `user_email` prop from `Comment` component.
+
+**Files touched:**
+- 16 files across `frontend/src/`.
+
 ## 2026-07-20 — Refine CommentForm: extract FileList, add handleSubmitError, Promise.allSettled
 
 **Decision:** Cleaned up CommentForm internals without changing component boundaries:

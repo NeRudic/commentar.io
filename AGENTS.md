@@ -85,10 +85,15 @@ In `main.ts`: `SanitizePipe` runs first, then `ValidationPipe({ transform: true 
 
 ### Frontend types
 
-- Types are local in `frontend/src/types/` (split into `comment.ts`, `user.ts`, `captcha.ts`, barrel re-export via `index.ts`).
+- Types are local in `frontend/src/types/` (split into `comment.ts`, `captcha.ts`, `file.ts`, barrel re-export via `index.ts`).
 - `CommentRow` includes JOIN fields `user_name` and `home_page`.
 - `UpdateCommentRequest` — type for `PATCH /comment-and-user/:id` request body.
 - Backend imports its own DTOs from `class-validator`.
+
+### Frontend hooks
+
+- `frontend/src/hooks/useScrollLock.ts` — shared lock with reference counting for `document.body.style.overflow` (used by Modal and Lightbox simultaneously without conflicts).
+- Component-level hooks live in their own `hooks/` subdirectories (e.g., `components/CommentForm/hooks/`, `components/OnlineFooter/hooks/`).
 
 ### Frontend CommentForm structure
 
