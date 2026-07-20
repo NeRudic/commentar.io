@@ -8,6 +8,7 @@ No root `package.json` — each package is independent:
 | -------- | ----------- | ------------------------------------------- |
 | backend  | `backend/`  | NestJS 11, TS 5.7, Prisma (SQLite), class-validator |
 | frontend | `frontend/` | React 19, Vite 8, TS 6.0, CSS Modules       |
+| shared   | `shared/`    | canonical tag/attribute config (imported by both) |
 
 ## Commands (all run from package subdirectory)
 
@@ -89,6 +90,7 @@ In `main.ts`: `SanitizePipe` runs first, then `ValidationPipe({ transform: true 
 - `CommentRow` includes JOIN fields `user_name` and `home_page`.
 - `UpdateCommentRequest` — type for `PATCH /comment-and-user/:id` request body.
 - Backend imports its own DTOs from `class-validator`.
+- Allowed HTML tags/attributes: canonical config in `shared/tags.ts` — imported by both frontend (`@shared/tags`) and backend (relative import).
 
 ### Frontend hooks
 

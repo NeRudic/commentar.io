@@ -1,5 +1,21 @@
 # DECISIONS.md
 
+## 2026-07-20 — Shared tag/attribute config
+
+**Decision:** Extracted `ALLOWED_TAGS` and `ALLOWED_ATTRIBUTES` to `shared/tags.ts` at the project root — single canonical source imported by both frontend (`@shared/tags` alias) and backend (relative import).
+
+**Why:**
+- The allowed tags list (`a`, `code`, `i`, `strong`) was duplicated in 4 places: `frontend/src/utils/validateXHTML.ts`, `frontend/src/utils/sanitize.ts`, `backend/src/common/xhtml.validator.ts`, `backend/src/common/sanitize.pipe.ts`.
+- Allowed attributes (`href`, `title`) were duplicated in 2 places.
+- Manual sync risk — adding a 5th tag could miss one file, causing client/server validation drift.
+
+**What changed:**
+- Created `shared/tags.ts` with `ALLOWED_TAGS` and `ALLOWED_ATTRIBUTES` (`as const`).
+- Updated all 4 consumers to import from `shared/tags.ts`.
+- Frontend: `@shared` alias in `vite.config.ts` and `tsconfig.app.json` paths.
+- Backend: relative import, `tsconfig.json` `include` extended to `../shared`.
+- Consumers spread readonly arrays where libraries expect mutable (`[...ALLOWED_TAGS]`).
+
 ## 2026-07-20 — Frontend hygiene refactoring
 
 **Decision:** Systematic cleanup of dead code, unsafe type assertions, and duplicated logic across the frontend.
