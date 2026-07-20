@@ -151,6 +151,26 @@ Services rewritten from `fetch` to `axios` (`^1.18.1`).
   - Delete uses a Modal with an email input field (no more `window.prompt`/`window.confirm`).
   - `CommentSection` and `Comment` propagate `onDelete`/`onUpdate` callbacks to update local state without a full refetch.
 
+## 2026-07-20 — Split CommentForm into Create/Edit + extracted hooks
+
+**Decision:** The monolithic `CommentForm.tsx` (333 lines, single component handling both create and edit) was split into:
+- `CommentFormCreate.tsx` and `CommentFormEdit.tsx` — separate typed forms with their own schema
+- `useCaptcha.ts` and `useFileUpload.ts` — extracted state management hooks
+- `CaptchaSection.tsx` — extracted captcha UI sub-component
+
+**Why:**
+- Union type `CommentFormValues | EditFormValues` forced `as any` casts on `register()` and `errors` — splitting eliminates the union entirely.
+- The old component had two distinct modes (create/edit) with different fields, rules, and submit logic. A single component with `isEdit` branching violated SRP.
+- Captcha and file management logic was tightly coupled to the form; extracting hooks makes them reusable and testable.
+
+**How:**
+- Created `hooks/useCaptcha.ts` — `{ captcha, captchaAnswer, captchaError, setCaptchaAnswer, refreshCaptcha }`
+- Created `hooks/useFileUpload.ts` — `{ selectedFiles, fileErrors, keptFilePaths, fileInputRef, addFiles, removeFile, removeKeptFile, uploadSelected }`
+- Created `CaptchaSection.tsx` — presentational component for captcha question/input/error
+- Created `index.ts` — barrel re-exporting `CommentFormCreate` and `CommentFormEdit`
+- Updated `Comment.tsx` and `CommentSection.tsx` callers to import from new barrel
+- Deleted old `CommentForm.tsx`
+
 ## 2026-07-15 — Migrated from raw sqlite3 to Prisma ORM
 
 **Decision:** Replaced the custom `DB` service (raw `sqlite3` with callback-based queries) with Prisma ORM (v7) using the `better-sqlite3` adapter.

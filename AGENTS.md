@@ -90,6 +90,20 @@ In `main.ts`: `SanitizePipe` runs first, then `ValidationPipe({ transform: true 
 - `UpdateCommentRequest` — type for `PATCH /comment-and-user/:id` request body.
 - Backend imports its own DTOs from `class-validator`.
 
+### Frontend CommentForm structure
+
+```
+components/CommentForm/
+├── index.ts                     # barrel: CommentFormCreate, CommentFormEdit
+├── CommentFormCreate.tsx        # form for new comments and replies (formSchema)
+├── CommentFormEdit.tsx          # form for editing comments (editFormSchema)
+├── CaptchaSection.tsx           # captcha question/input/error sub-component
+├── hooks/
+│   ├── useCaptcha.ts            # captcha state: load, answer, error, refresh
+│   └── useFileUpload.ts         # file state: select, validate, upload API
+└── CommentForm.module.css       # shared styles
+```
+
 ### Frontend services
 
 Services use **axios** (`frontend/package.json`).
