@@ -1,5 +1,30 @@
 # DECISIONS.md
 
+## 2026-07-20 — Refine CommentForm: extract FileList, add handleSubmitError, Promise.allSettled
+
+**Decision:** Cleaned up CommentForm internals without changing component boundaries:
+
+- Added `FileList.tsx` — shared component for rendering file lists with remove buttons
+- Added `AbortController` to `useCaptcha()` — cancels pending fetch on unmount
+- Added `handleSubmitError(err)` to `useCaptcha()` — encapsulates the `captcha_error` cast+check pattern that was duplicated in both forms
+- `useFileUpload()`: replaced `ALLOWED_TYPES as readonly string[]` cast with `.some()`; switched `Promise.all` to `Promise.allSettled` for partial upload success
+- `CaptchaSection.tsx`: added `inputMode="numeric"` for mobile UX
+
+**Why:**
+- The catch-block casting + captcha_error check was identical in `CommentFormCreate` and `CommentFormEdit` — DRY violation
+- `Promise.all` rejected all files if one failed, losing successful uploads
+- No `AbortController` meant potential state-update-after-unmount on a slow captcha fetch
+- File list JSX was duplicated across both forms
+
+**Files touched:**
+- `frontend/src/components/CommentForm/hooks/useCaptcha.ts`
+- `frontend/src/components/CommentForm/hooks/useFileUpload.ts`
+- `frontend/src/components/CommentForm/CaptchaSection.tsx`
+- `frontend/src/components/CommentForm/FileList.tsx` (new)
+- `frontend/src/components/CommentForm/CommentFormCreate.tsx`
+- `frontend/src/components/CommentForm/CommentFormEdit.tsx`
+- `frontend/src/components/CommentForm/index.ts`
+
 ## 2026-07-11 — Seed script for test data
 
 **Decision:** Created `backend/scripts/seed.ts` — a standalone TypeScript script (no NestJS DI) that populates the database with realistic test data.
