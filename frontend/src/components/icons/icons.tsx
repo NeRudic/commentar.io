@@ -49,16 +49,16 @@ export function Bookmark({ size = 24, filled, ...props }: IconProps & { filled?:
 
 export function ChevronLeft({ size = 24, ...props }: IconProps) {
   return (
-    <svg {...icon(size, props)}>
-      <path d="M15 6 L7 12 L15 18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <svg {...icon(size, props)} className={styles.illustration}>
+      <path d="M15 6 L7 12 L15 18" stroke="currentColor" strokeWidth="2.5" className={styles.stroke} />
     </svg>
   );
 }
 
 export function ChevronRight({ size = 24, ...props }: IconProps) {
   return (
-    <svg {...icon(size, props)}>
-      <path d="M9 6 L17 12 L9 18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <svg {...icon(size, props)} className={styles.illustration}>
+      <path d="M9 6 L17 12 L9 18" stroke="currentColor" strokeWidth="2.5" className={styles.stroke} />
     </svg>
   );
 }
