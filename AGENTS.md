@@ -80,8 +80,8 @@ In `main.ts`: `SanitizePipe` runs first, then `ValidationPipe({ transform: true 
 
 - `SanitizePipe` strips all HTML except `<strong>`, `<i>`, `<code>`, `<a>`.
   - **XHTML validation** for the `text` field runs before sanitization (inside `SanitizePipe`): validates tag nesting via a stack parser, escapes bare `<` to `&lt;`.
-  - Core logic in `backend/src/common/xhtml.validator.ts` (identical copy on frontend: `frontend/src/utils/validateXHTML.ts`).
-- Frontend valibot schema (`frontend/src/schemas/commentForm.schema.ts`) validates XHTML on submit via `v.check()` + `v.transform()` — same logic, immediate feedback.
+  - Core logic in `backend/src/common/xhtml.validator.ts` and `frontend/src/utils/validateXHTML.ts` — both import canonical `ALLOWED_TAGS` from `shared/tags.ts`.
+- Frontend valibot schema (`frontend/src/schemas/commentForm.schema.ts`) validates XHTML on submit via `v.transform()` — same logic, immediate feedback.
 - DTOs use `class-validator` + `class-transformer` (`@Type`, `@Transform`) for coercion.
 
 ### Frontend types

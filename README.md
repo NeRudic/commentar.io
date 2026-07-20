@@ -31,6 +31,7 @@ Backend: http://localhost:3000, Frontend: http://localhost:5173.
 ```
 ├── backend/     # NestJS 11 + Prisma (SQLite)
 ├── frontend/    # React 19 + Vite 8
+├── shared/      # canonical tag/attribute config
 ├── docs/        # Documentation
 ├── AGENTS.md    # AI agent instructions
 └── CLAUDE.md    # Project rules and conventions

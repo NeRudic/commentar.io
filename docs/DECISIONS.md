@@ -1,5 +1,18 @@
 # DECISIONS.md
 
+## 2026-07-20 — Use DeleteCommentDTO in service and controller
+
+**Decision:** Refactored `DELETE /comments/:id` to use `DeleteCommentDTO` instead of raw `(id, user_email)` parameters throughout the controller and service.
+
+**Why:**
+- `DeleteCommentDTO` existed with `@IsInt()`/`@IsPositive()` validators but was never used — the import sat unused in `comment.service.ts`.
+- Controller and service both used raw parameters, bypassing the DTO entirely.
+
+**What changed:**
+- Added `user_email?: string` with `@IsOptional()` `@IsEmail()` to `DeleteCommentDTO`.
+- Controller constructs DTO from `@Param('comment_id', ParseIntPipe)` and `@Query('user_email')`, passes to service.
+- Service signature changed from `deleteComment(id, user_email)` to `deleteComment(dto: DeleteCommentDTO)` — all internal references use `dto.id` / `dto.user_email`.
+
 ## 2026-07-20 — Shared tag/attribute config
 
 **Decision:** Extracted `ALLOWED_TAGS` and `ALLOWED_ATTRIBUTES` to `shared/tags.ts` at the project root — single canonical source imported by both frontend (`@shared/tags` alias) and backend (relative import).
