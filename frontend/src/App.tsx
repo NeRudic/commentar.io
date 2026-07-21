@@ -1,13 +1,12 @@
 import { ToastProvider } from './context/ToastContext';
 import Blog from './components/Blog/Blog';
-import OnlineFooter from './components/OnlineFooter/OnlineFooter';
-import './App.module.css';
+import OnlineCount from './components/OnlineCount/OnlineCount';
 
 export default function App() {
   return (
     <ToastProvider>
       <Blog />
-      <OnlineFooter />
+      <OnlineCount />
     </ToastProvider>
   );
 }

@@ -1,4 +1,4 @@
-import 'dotenv/config';
+// import 'dotenv/config'; // commented for Docker: Prisma auto-loads .env
 import { defineConfig, env } from 'prisma/config';
 
 export default defineConfig({

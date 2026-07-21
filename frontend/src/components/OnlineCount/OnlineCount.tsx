@@ -1,7 +1,7 @@
-import styles from './OnlineFooter.module.css';
+import styles from './OnlineCount.module.css';
 import useOnlineCount from './hooks/useOnlineCount';
 
-export default function OnlineFooter() {
+export default function OnlineCount() {
   const count = useOnlineCount();
 
   return (

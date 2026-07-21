@@ -4,11 +4,11 @@
 
 No root `package.json` — each package is independent:
 
-| Package  | Directory   | Tech                                        |
-| -------- | ----------- | ------------------------------------------- |
+| Package  | Directory   | Tech                                                |
+| -------- | ----------- | --------------------------------------------------- |
 | backend  | `backend/`  | NestJS 11, TS 5.7, Prisma (SQLite), class-validator |
-| frontend | `frontend/` | React 19, Vite 8, TS 6.0, CSS Modules       |
-| shared   | `shared/`    | canonical tag/attribute config (imported by both) |
+| frontend | `frontend/` | React 19, Vite 8, TS 6.0, CSS Modules               |
+| shared   | `shared/`   | canonical tag/attribute config (imported by both)   |
 
 ## Commands (all run from package subdirectory)
 
@@ -95,7 +95,7 @@ In `main.ts`: `SanitizePipe` runs first, then `ValidationPipe({ transform: true 
 ### Frontend hooks
 
 - `frontend/src/hooks/useScrollLock.ts` — shared lock with reference counting for `document.body.style.overflow` (used by Modal and Lightbox simultaneously without conflicts).
-- Component-level hooks live in their own `hooks/` subdirectories (e.g., `components/CommentForm/hooks/`, `components/OnlineFooter/hooks/`).
+- Component-level hooks live in their own `hooks/` subdirectories (e.g., `components/CommentForm/hooks/`, `components/OnlineCount/hooks/`).
 
 ### Frontend CommentForm structure
 
