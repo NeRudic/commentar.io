@@ -1,4 +1,3 @@
-/* === Reset browser styles === */
 *,
 *::before,
 *::after {
@@ -47,7 +46,6 @@ ol {
   list-style: none;
 }
 
-/* === Dark theme === */
 :root {
   --bg-primary: #000000;
   --bg-secondary: #121212;
