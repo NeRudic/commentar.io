@@ -2,12 +2,21 @@
 
 NestJS API + React SPA with nested comments, file attachments, and SVG captcha.
 
-## Quick start
+## Quick start (Docker)
 
 ```bash
 git clone <repo>
+docker compose up --build
+```
+
+Open http://localhost:3000. The frontend is served by NestJS from the same origin.
+
+## Development (without Docker)
+
+```bash
+# terminal 1:
 cd backend && npm install && npm run start:dev
-# in a new terminal:
+# terminal 2:
 cd frontend && npm install && npm run dev
 ```
 

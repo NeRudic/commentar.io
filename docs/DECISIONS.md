@@ -1,5 +1,26 @@
 # DECISIONS.md
 
+## 2026-07-21 — Docker multi-stage build
+
+**Decision:** Added 3-stage Docker build (`dockerfile`), `docker-compose.yml`, `.dockerignore`, and `backend/entrypoint.sh` for containerised deployment.
+
+**Why:**
+- Single command to build and run the entire stack (`docker compose up --build`).
+- Multi-stage build keeps the final image small: only `npm install --omit=dev` is run in the final stage — devDependencies (TypeScript, ESLint, Prettier, test runners) are excluded.
+- `better-sqlite3` requires native compilation against Alpine; `apk add python3 make g++` in build stage, rebuilt in final stage, then packages uninstalled.
+- Frontend is pre-built (`npx vite build`) in a separate stage, and the output (`frontend/dist/`) is copied into the final image. NestJS serves it statically (SPA fallback in `main.ts`) — no separate frontend server or nginx needed.
+- `prisma.config.ts`: `import 'dotenv/config'` commented out because Prisma CLI auto-loads `.env` files. In Docker there is no `.env` in the container (all env vars come from `dockerfile` ENV or `docker-compose.yml` `environment`).
+- `entrypoint.sh` runs `prisma migrate deploy` before `node main.js` — ensures the database schema is always up to date on container start.
+
+**What changed:**
+- `dockerfile` — 3 stages: `backend-build`, `frontend-build`, final
+- `docker-compose.yml` — single `app` service with named volumes for `sqlite_data`, `uploads_data`, `tmp_data`
+- `.dockerignore` — excludes `**/node_modules`, `**/dist`, `.tmp`, `uploads`, `.git`, `.env`, `*.md`, sqlite DB files
+- `backend/entrypoint.sh` — `prisma migrate deploy` then `exec node dist/backend/src/main.js`
+- `prisma.config.ts` — commented out `dotenv` import (Prisma CLI auto-loads `.env`)
+- `backend/package.json` — `prisma` moved from `devDependencies` to `dependencies` so it's available after `npm install --omit=dev`
+- `frontend/.env` — `VITE_WS_HOST=localhost:3000` (WebSocket host for online counter; unrelated to Docker but committed alongside)
+
 ## 2026-06-22 — Shared API types at root, fetch-based services (REVISED)
 
 **Decision:** Shared backend-contract types extracted to root `shared/api/types/`.

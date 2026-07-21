@@ -37,6 +37,34 @@ npm run build        # → dist/ (static site)
 
 ## Production
 
+### Option: Docker
+
+```bash
+# build and start
+docker compose up --build -d
+```
+
+Container serves both the API and the pre-built frontend SPA on port 3000.
+
+**Volumes:**
+
+| Volume | Mount point | Purpose |
+|--------|-------------|---------|
+| `sqlite_data` | `/app/backend/prisma` | SQLite database file (persists across restarts) |
+| `uploads_data` | `/app/backend/uploads` | Published file attachments |
+| `tmp_data` | `/app/backend/.tmp` | Pending files before comment confirmation |
+
+**Environment variables:**
+
+| Variable | Set in | Notes |
+|----------|--------|-------|
+| `PORT` | `dockerfile` | `3000` |
+| `DATABASE_URL` | `dockerfile` | `file:./prisma/db.sqlite` |
+| `CORS_ORIGIN` | `dockerfile` | `*` (frontend served from same origin) |
+| `CAPTCHA_SECRET` | `docker-compose.yml` | Change in production (`dev-secret-change-me-in-production`) |
+
+**Entrypoint:** `backend/entrypoint.sh` runs `prisma migrate deploy` before starting the Node.js server, so migrations are applied automatically on startup.
+
 ### Option: nginx + Node.js
 
 ```

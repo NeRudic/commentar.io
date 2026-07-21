@@ -32,6 +32,14 @@ npm run build         # tsc -b && vite build
 npm run lint          # eslint
 ```
 
+**Root** (from project root):
+
+```
+docker compose up --build   # build and start (http://localhost:3000)
+docker compose up --build -d  # detached mode
+docker compose down          # stop and remove containers
+```
+
 ## Key architecture notes
 
 ### DB
@@ -41,6 +49,7 @@ npm run lint          # eslint
 - Schema managed via Prisma migrations in `backend/prisma/migrations/`.
 - Prisma client auto-generated on `postinstall`; regenerate manually with `npm run prisma:generate`.
 - `PrismaService` (`backend/src/prisma/prisma.service.ts`) wraps `PrismaClient` with `better-sqlite3` adapter.
+- In Docker, migrations run automatically via `entrypoint.sh` (`prisma migrate deploy`) on container start.
 
 ### File upload flow (transactional)
 
@@ -147,3 +156,7 @@ Services use **axios** (`frontend/package.json`).
 - `docs/SPEC_COMMENTS.md` — frontend feature specification
 - `.env` — `PORT=3000` (backend only)
 - `.prettierrc` — formatting config (backend only, frontend has none)
+- `dockerfile` — 3-stage Docker build
+- `docker-compose.yml` — container orchestration
+- `.dockerignore` — Docker build context exclusions
+- `backend/entrypoint.sh` — container startup (migrations + app)

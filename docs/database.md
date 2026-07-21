@@ -29,6 +29,16 @@ cd backend
 npx prisma migrate deploy
 ```
 
+When running via Docker, migrations are applied automatically on container startup by `backend/entrypoint.sh`:
+
+```bash
+# backend/entrypoint.sh
+npx prisma migrate deploy   # applies all pending migrations
+exec node dist/backend/src/main.js
+```
+
+No manual step is needed — the entrypoint runs before the Node.js server starts.
+
 ## Models
 
 ### `User`

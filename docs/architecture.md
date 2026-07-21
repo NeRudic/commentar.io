@@ -11,6 +11,8 @@ The project consists of two independent packages without a monorepo:
 
 Canonical tag/attribute config in `shared/tags.ts` (imported by both packages). Backend uses DTOs with class-validator; frontend uses local types in `types/`.
 
+For production or unified deployment, the project can be built with Docker (3-stage multi-stage build). The final image contains a NestJS server that statically serves the pre-built frontend SPA (see `main.ts:25-43` SPA fallback). No separate frontend server is needed.
+
 ## Backend (NestJS)
 
 ### Modules
@@ -44,6 +46,7 @@ OnlineGateway   — WebSocket (ws://localhost:3000, online counter)
 | ---------- | --------------------- | ----------------------------------------- |
 | `uploads/` | Static (`/uploads/*`) | Published files                           |
 | `.tmp/`    | Not served            | Pending files before comment confirmation |
+| `frontend/dist/` | Static (`/`)     | Pre-built React SPA (served by NestJS when present) |
 
 ### Global pipes (order matters)
 

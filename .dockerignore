@@ -5,7 +5,6 @@ uploads
 *.log
 .git
 .env
-!.env.example
 .claude
 .vscode
 *.md
