@@ -1,0 +1,16 @@
+services:
+  app:
+    build: .
+    environment:
+      - CAPTCHA_SECRET=dev-secret-change-me-in-production
+    ports:
+      - "3000:3000"
+    volumes:
+      - sqlite_data:/app/backend/prisma
+      - uploads_data:/app/backend/uploads
+      - tmp_data:/app/backend/.tmp
+
+volumes:
+  sqlite_data:
+  uploads_data:
+  tmp_data:

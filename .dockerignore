@@ -1,0 +1,14 @@
+node_modules
+dist
+.tmp
+uploads
+*.log
+.git
+.env
+!.env.example
+.claude
+.vscode
+*.md
+current_sprint.md
+backend/prisma/db.sqlite
+backend/prisma/*.db*
