@@ -5,7 +5,7 @@ NestJS API + React SPA with nested comments, file attachments, and SVG captcha.
 ## Quick start (Docker)
 
 ```bash
-git clone <repo>
+git clone https://github.com/NeRudic/commentar.io
 docker compose up --build
 ```
 
