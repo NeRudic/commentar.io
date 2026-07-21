@@ -47,7 +47,7 @@
 
 ### Real-time
 
-- [x] **26. Online counter** — live user count via WebSocket (`OnlineFooter`, `useOnlineCount`)
+- [x] **26. Online counter** — live user count via WebSocket (`OnlineCount`, `useOnlineCount`)
 
 ---
 
