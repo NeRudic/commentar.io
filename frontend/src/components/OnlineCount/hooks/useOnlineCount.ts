@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
+import { BASE_DELAY, MAX_DELAY } from "./config";
 
 export default function useOnlineCount(): number {
   const [onlineCount, setOnlineCount] = useState<number>(0);
 
   useEffect(() => {
-    const HOST = import.meta.env.VITE_WS_HOST || "localhost:3000";
-    const BASE_DELAY = 1000;
-    const MAX_DELAY = 30000;
+    const HOST = import.meta.env.VITE_WS_HOST || window.location.host;
 
     let ws: WebSocket | null = null;
     let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
@@ -24,9 +23,9 @@ export default function useOnlineCount(): number {
         try {
           const raw = JSON.parse(event.data);
           if (
-            typeof raw === 'object' &&
+            typeof raw === "object" &&
             raw !== null &&
-            typeof (raw as Record<string, unknown>).count === 'number'
+            typeof (raw as Record<string, unknown>).count === "number"
           ) {
             setOnlineCount((raw as { count: number }).count);
           }
