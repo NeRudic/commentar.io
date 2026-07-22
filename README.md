@@ -5,7 +5,7 @@ NestJS API + React SPA with nested comments, file attachments, and SVG captcha.
 ## Quick start (Docker)
 
 ```bash
-git clone https://github.com/NeRudic/commentar.io
+git clone https://github.com/NeRudic/commentar.io.git
 docker compose up --build
 ```
 
@@ -24,15 +24,15 @@ Backend: http://localhost:3000, Frontend: http://localhost:5173.
 
 ## Documentation
 
-| Section | Description |
-|---------|-------------|
-| [Architecture](docs/architecture.md) | Modules, components, data flow |
-| [API](docs/api.md) | Endpoints, DTOs, request examples |
-| [Database](docs/database.md) | SQLite schema, tables, indexes |
-| [Deployment](docs/deployment.md) | Env, build, production |
-| [Decisions](docs/DECISIONS.md) | Architectural decisions log |
-| [OpenCode](docs/OPENCODE.md) | Tool reference |
-| [Spec](docs/SPEC_COMMENTS.md) | Feature requirements |
+| Section                              | Description                       |
+| ------------------------------------ | --------------------------------- |
+| [Architecture](docs/architecture.md) | Modules, components, data flow    |
+| [API](docs/api.md)                   | Endpoints, DTOs, request examples |
+| [Database](docs/database.md)         | SQLite schema, tables, indexes    |
+| [Deployment](docs/deployment.md)     | Env, build, production            |
+| [Decisions](docs/DECISIONS.md)       | Architectural decisions log       |
+| [OpenCode](docs/OPENCODE.md)         | Tool reference                    |
+| [Spec](docs/SPEC_COMMENTS.md)        | Feature requirements              |
 
 ## Repository structure
 
